@@ -29,32 +29,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class AbstractCollector
-{
+public abstract class AbstractCollector {
     private final Map<Integer, Communication> taskCommunicationMap = new ConcurrentHashMap<>();
-    public Map<Integer, Communication> getTaskCommunicationMap()
-    {
+
+    public Map<Integer, Communication> getTaskCommunicationMap() {
         return taskCommunicationMap;
     }
 
-    public void registerTGCommunication(List<Configuration> taskGroupConfigurationList)
-    {
+    public void registerTGCommunication(List<Configuration> taskGroupConfigurationList) {
         for (Configuration config : taskGroupConfigurationList) {
             int taskGroupId = config.getInt(CoreConstant.CORE_CONTAINER_TASK_GROUP_ID);
             LocalTGCommunicationManager.registerTaskGroupCommunication(taskGroupId, new Communication());
         }
     }
 
-    public void registerTaskCommunication(List<Configuration> taskConfigurationList)
-    {
+    public void registerTaskCommunication(List<Configuration> taskConfigurationList) {
         for (Configuration taskConfig : taskConfigurationList) {
             int taskId = taskConfig.getInt(CoreConstant.TASK_ID);
             this.taskCommunicationMap.put(taskId, new Communication());
         }
     }
 
-    public Communication collectFromTask()
-    {
+    public Communication collectFromTask() {
         Communication communication = new Communication();
         communication.setState(State.SUCCEEDED);
 
@@ -67,18 +63,15 @@ public abstract class AbstractCollector
 
     public abstract Communication collectFromTaskGroup();
 
-    public Map<Integer, Communication> getTGCommunicationMap()
-    {
+    public Map<Integer, Communication> getTGCommunicationMap() {
         return LocalTGCommunicationManager.getTaskGroupCommunicationMap();
     }
 
-    public Communication getTGCommunication(Integer taskGroupId)
-    {
+    public Communication getTGCommunication(Integer taskGroupId) {
         return LocalTGCommunicationManager.getTaskGroupCommunication(taskGroupId);
     }
 
-    public Communication getTaskCommunication(Integer taskId)
-    {
+    public Communication getTaskCommunication(Integer taskId) {
         return this.taskCommunicationMap.get(taskId);
     }
 }

@@ -33,25 +33,21 @@ import java.sql.Types;
 import java.util.List;
 
 public class MysqlWriter
-        extends Writer
-{
+        extends Writer {
     private static final DataBaseType DATABASE_TYPE = DataBaseType.MySql;
 
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
         private Configuration originalConfig = null;
         private CommonRdbmsWriter.Job commonRdbmsWriterJob;
 
         @Override
-        public void preCheck()
-        {
+        public void preCheck() {
             this.commonRdbmsWriterJob.writerPreCheck(this.originalConfig, DATABASE_TYPE);
         }
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = super.getPluginJobConf();
             this.commonRdbmsWriterJob = new CommonRdbmsWriter.Job(DATABASE_TYPE);
             this.commonRdbmsWriterJob.init(this.originalConfig);
@@ -59,51 +55,43 @@ public class MysqlWriter
 
         // 一般来说，是需要推迟到 task 中进行pre 的执行（单表情况例外）
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             //实跑先不支持 权限 检验
 //            this.commonRdbmsWriterJob.privilegeValid(this.originalConfig, DATABASE_TYPE)
             this.commonRdbmsWriterJob.prepare(this.originalConfig);
         }
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             return this.commonRdbmsWriterJob.split(this.originalConfig, mandatoryNumber);
         }
 
         // 一般来说，是需要推迟到 task 中进行post 的执行（单表情况例外）
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsWriterJob.post(this.originalConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsWriterJob.destroy(this.originalConfig);
         }
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
         private Configuration writerSliceConfig;
         private CommonRdbmsWriter.Task commonRdbmsWriterTask;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.writerSliceConfig = super.getPluginJobConf();
-            this.commonRdbmsWriterTask = new CommonRdbmsWriter.Task(DATABASE_TYPE)
-            {
+            this.commonRdbmsWriterTask = new CommonRdbmsWriter.Task(DATABASE_TYPE) {
 
                 @Override
                 protected PreparedStatement fillPreparedStatementColumnType(PreparedStatement preparedStatement, int columnIndex,
-                        int columnSqlType, Column column)
-                        throws SQLException
-                {
+                                                                            int columnSqlType, Column column)
+                        throws SQLException {
                     if (column == null || column.getRawData() == null) {
                         preparedStatement.setObject(columnIndex, null);
                         return preparedStatement;
@@ -112,8 +100,7 @@ public class MysqlWriter
                         // BIT(1) -> java.lang.Boolean
                         if (column.getType() == Column.Type.BOOL) {
                             preparedStatement.setBoolean(columnIndex, column.asBoolean());
-                        }
-                        else {
+                        } else {
                             // BIT ( > 1) -> byte[]
                             preparedStatement.setObject(columnIndex, Integer.valueOf(column.asString(), 2));
                         }
@@ -130,33 +117,28 @@ public class MysqlWriter
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             this.commonRdbmsWriterTask.prepare(this.writerSliceConfig);
         }
 
         //TODO 改用连接池，确保每次获取的连接都是可用的（注意：连接可能需要每次都初始化其 session）
-        public void startWrite(RecordReceiver recordReceiver)
-        {
+        public void startWrite(RecordReceiver recordReceiver) {
             this.commonRdbmsWriterTask.startWrite(recordReceiver, this.writerSliceConfig,
                     super.getTaskPluginCollector());
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsWriterTask.post(this.writerSliceConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsWriterTask.destroy(this.writerSliceConfig);
         }
 
         @Override
-        public boolean supportFailOver()
-        {
+        public boolean supportFailOver() {
             String writeMode = writerSliceConfig.getString(Key.WRITE_MODE);
             return "replace".equalsIgnoreCase(writeMode);
         }

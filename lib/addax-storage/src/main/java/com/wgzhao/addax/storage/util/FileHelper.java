@@ -173,7 +173,7 @@ public class FileHelper {
                 File file = new File(eachPath);
                 if (file.isDirectory()) {
                     // list all files in current directory
-                    toBeReadFiles.addAll(listFilesWithWildcard(eachPath+"/*.*"));
+                    toBeReadFiles.addAll(listFilesWithWildcard(eachPath + "/*.*"));
                 } else {
                     toBeReadFiles.add(eachPath);
                 }

@@ -39,9 +39,18 @@
             "truncate": false,
             "writeMode": "upsert",
             "column": [
-              {"name":"user_id","type":"int"},
-              {"name":"user_name", "type":"long"},
-              {"name":"salary", "type":"double"}
+              {
+                "name": "user_id",
+                "type": "int"
+              },
+              {
+                "name": "user_name",
+                "type": "long"
+              },
+              {
+                "name": "salary",
+                "type": "double"
+              }
             ],
             "batchSize": 1024,
             "bufferSize": 2048,

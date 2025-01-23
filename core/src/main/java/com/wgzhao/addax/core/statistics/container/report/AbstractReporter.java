@@ -21,8 +21,7 @@ package com.wgzhao.addax.core.statistics.container.report;
 
 import com.wgzhao.addax.core.statistics.communication.Communication;
 
-public abstract class AbstractReporter
-{
+public abstract class AbstractReporter {
 
     public abstract void reportJobCommunication(Communication communication);
 

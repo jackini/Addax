@@ -36,19 +36,16 @@ import static com.wgzhao.addax.common.spi.ErrorCode.CONFIG_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class RdbmsWriter
-        extends Writer
-{
+        extends Writer {
     private static final DataBaseType DATABASE_TYPE = DataBaseType.RDBMS;
 
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
         private Configuration originalConfig = null;
         private CommonRdbmsWriter.Job commonRdbmsWriterJob;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = super.getPluginJobConf();
 
             // warn：not like mysql, only support insert mode, don't use
@@ -69,64 +66,54 @@ public class RdbmsWriter
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             commonRdbmsWriterJob.prepare(originalConfig);
         }
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             return commonRdbmsWriterJob.split(originalConfig, mandatoryNumber);
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             commonRdbmsWriterJob.post(originalConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             commonRdbmsWriterJob.destroy(originalConfig);
         }
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
         private Configuration writerSliceConfig;
         private CommonRdbmsWriter.Task commonRdbmsWriterTask;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.writerSliceConfig = super.getPluginJobConf();
             this.commonRdbmsWriterTask = new CommonRdbmsWriter.Task(DATABASE_TYPE);
             commonRdbmsWriterTask.init(writerSliceConfig);
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             commonRdbmsWriterTask.prepare(writerSliceConfig);
         }
 
-        public void startWrite(RecordReceiver recordReceiver)
-        {
+        public void startWrite(RecordReceiver recordReceiver) {
             this.commonRdbmsWriterTask.startWrite(recordReceiver, writerSliceConfig, super.getTaskPluginCollector());
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             commonRdbmsWriterTask.post(writerSliceConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             commonRdbmsWriterTask.destroy(writerSliceConfig);
         }
     }

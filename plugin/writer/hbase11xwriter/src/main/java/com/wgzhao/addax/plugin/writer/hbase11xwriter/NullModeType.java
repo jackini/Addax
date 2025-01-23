@@ -25,20 +25,17 @@ import java.util.Arrays;
 
 import static com.wgzhao.addax.common.spi.ErrorCode.NOT_SUPPORT_TYPE;
 
-public enum NullModeType
-{
+public enum NullModeType {
     SKIP("skip"),
     EMPTY("empty");
 
     private final String mode;
 
-    NullModeType(String mode)
-    {
+    NullModeType(String mode) {
         this.mode = mode.toLowerCase();
     }
 
-    public static NullModeType getByTypeName(String modeName)
-    {
+    public static NullModeType getByTypeName(String modeName) {
         for (NullModeType modeType : values()) {
             if (modeType.mode.equalsIgnoreCase(modeName)) {
                 return modeType;

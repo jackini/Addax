@@ -14,8 +14,7 @@
 
 package com.wgzhao.addax.plugin.writer.tdenginewriter;
 
-public class ColumnMeta
-{
+public class ColumnMeta {
     String field;
     String type;
     int length;
@@ -25,8 +24,7 @@ public class ColumnMeta
     Object value;
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "ColumnMeta{" +
                 "field='" + field + '\'' +
                 ", type='" + type + '\'' +

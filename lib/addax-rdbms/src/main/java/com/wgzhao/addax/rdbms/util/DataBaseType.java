@@ -24,13 +24,13 @@ package com.wgzhao.addax.rdbms.util;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import static com.wgzhao.addax.common.base.Constant.SQL_RESERVED_WORDS;
 
 /**
  * refer:<a href="http://blog.csdn.net/ring0hx/article/details/6152528">...</a>
  */
-public enum DataBaseType
-{
+public enum DataBaseType {
     MySql("mysql", "com.mysql.cj.jdbc.Driver"),
     Hive("hive2", "org.apache.hive.jdbc.HiveDriver"),
     Oracle("oracle", "oracle.jdbc.OracleDriver"),
@@ -49,7 +49,7 @@ public enum DataBaseType
     Trino("trino", "io.trino.jdbc.TrinoDriver"),
     Sybase("sybase", "com.sybase.jdbc4.jdbc.SybDriver"),
     Databend("databend", "com.databend.jdbc.DatabendDriver"),
-    Access("access","net.ucanaccess.jdbc.UcanaccessDriver"),
+    Access("access", "net.ucanaccess.jdbc.UcanaccessDriver"),
     HANA("hana", "com.sap.db.jdbc.Driver");
 
     private static final Pattern jdbcUrlPattern = Pattern.compile("jdbc:\\w+:(?:thin:url=|//|thin:@|)([\\w\\d.,]+).*");
@@ -57,8 +57,7 @@ public enum DataBaseType
     private String driverClassName;
     private final String typeName;
 
-    DataBaseType(String typeName, String driverClassName)
-    {
+    DataBaseType(String typeName, String driverClassName) {
         this.typeName = typeName;
         this.driverClassName = driverClassName;
     }
@@ -77,8 +76,7 @@ public enum DataBaseType
      * @param jdbcUrl java jdbc url
      * @return ip address
      */
-    public static String parseIpFromJdbcUrl(String jdbcUrl)
-    {
+    public static String parseIpFromJdbcUrl(String jdbcUrl) {
         Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
         if (matcher.matches()) {
             return matcher.group(1);
@@ -86,13 +84,11 @@ public enum DataBaseType
         return null;
     }
 
-    public String getDriverClassName()
-    {
+    public String getDriverClassName() {
         return driverClassName;
     }
 
-    public String appendJDBCSuffixForReader(String jdbc)
-    {
+    public String appendJDBCSuffixForReader(String jdbc) {
         if (this == MySql) {
             String suffix = "yearIsDateType=false&zeroDateTimeBehavior=convertToNull&tinyInt1isBit=false&rewriteBatchedStatements=true";
             // take timezone
@@ -106,64 +102,56 @@ public enum DataBaseType
 
             if (jdbc.contains("?")) {
                 return jdbc + "&" + suffix;
-            }
-            else {
+            } else {
                 return jdbc + "?" + suffix;
             }
         }
         return jdbc;
     }
 
-    public String appendJDBCSuffixForWriter(String jdbc)
-    {
+    public String appendJDBCSuffixForWriter(String jdbc) {
         if (this == MySql) {
             String suffix;
             if ("com.mysql.jdbc.Driver".equals(this.driverClassName) || "com.mysql.cj.jdbc.Driver".equals(this.driverClassName)) {
                 suffix = "yearIsDateType=false&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true&tinyInt1isBit=false";
-            }
-            else {
+            } else {
                 suffix = "yearIsDateType=false&zeroDateTimeBehavior=CONVERT_TO_NULL&rewriteBatchedStatements=true&tinyInt1isBit=false&useSSL=false";
             }
             if (jdbc.contains("?")) {
                 return jdbc + "&" + suffix;
-            }
-            else {
+            } else {
                 return jdbc + "?" + suffix;
             }
         }
         return jdbc;
     }
 
-    public String quoteColumnName(String columnName)
-    {
+    public String quoteColumnName(String columnName) {
         // if the column is not reserved words , it's constant value
-        if (! SQL_RESERVED_WORDS.contains(columnName.toUpperCase())) {
+        if (!SQL_RESERVED_WORDS.contains(columnName.toUpperCase())) {
             return columnName;
         }
         if (this == MySql || this == Hive) {
             return "`" + columnName.replace("`", "``") + "`";
         }
         if (this == Presto || this == Trino || this == Oracle) {
-            return columnName.startsWith("\"") ? columnName: "\"" + columnName + "\"";
+            return columnName.startsWith("\"") ? columnName : "\"" + columnName + "\"";
         }
         if (this == SQLServer) {
-            return columnName.startsWith("[") ? columnName: "[" + columnName + "]";
+            return columnName.startsWith("[") ? columnName : "[" + columnName + "]";
         }
         return columnName;
     }
 
-    public String quoteTableName(String tableName)
-    {
+    public String quoteTableName(String tableName) {
         return quoteColumnName(tableName);
     }
 
-    public String getTypeName()
-    {
+    public String getTypeName() {
         return typeName;
     }
 
-    public void setDriverClassName(String driverClassName)
-    {
+    public void setDriverClassName(String driverClassName) {
         this.driverClassName = driverClassName;
     }
 }

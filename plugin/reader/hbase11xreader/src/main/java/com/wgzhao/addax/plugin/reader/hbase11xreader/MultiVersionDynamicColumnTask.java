@@ -27,20 +27,17 @@ import org.apache.hadoop.hbase.util.Bytes;
 import java.util.List;
 
 public class MultiVersionDynamicColumnTask
-        extends MultiVersionTask
-{
+        extends MultiVersionTask {
     private List<String> columnFamilies;
 
-    public MultiVersionDynamicColumnTask(Configuration configuration)
-    {
+    public MultiVersionDynamicColumnTask(Configuration configuration) {
         super(configuration);
 
         this.columnFamilies = configuration.getList(HBaseKey.COLUMN_FAMILY, String.class);
     }
 
     @Override
-    public void initScan(Scan scan)
-    {
+    public void initScan(Scan scan) {
         for (String columnFamily : columnFamilies) {
             scan.addFamily(Bytes.toBytes(columnFamily.trim()));
         }

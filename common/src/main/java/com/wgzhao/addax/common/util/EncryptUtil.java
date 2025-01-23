@@ -49,8 +49,7 @@ import java.util.Base64;
 
 import static com.wgzhao.addax.common.base.Constant.ENC_PASSWORD_PREFIX;
 
-public class EncryptUtil
-{
+public class EncryptUtil {
     private static final String SECRET_KEY = "F3M0PxSWod6cyCejYUkpccU9gMsWwgrM";
     private static final byte[] SALT = "G2PuhRinJqKKFcBUT4eMaK3FKMx9iGmx".getBytes();
 
@@ -60,8 +59,7 @@ public class EncryptUtil
     private static final Logger logger = LoggerFactory.getLogger(EncryptUtil.class);
 
 
-    public static String encrypt(String password)
-    {
+    public static String encrypt(String password) {
         try {
             SecretKeySpec secSpec = getSecSpec();
             GCMParameterSpec params = new GCMParameterSpec(128, SECRET_KEY.getBytes(), 0, 12);
@@ -69,19 +67,16 @@ public class EncryptUtil
             cipher.init(Cipher.ENCRYPT_MODE, secSpec, params);
             byte[] cryptoText = cipher.doFinal(password.getBytes());
             return base64Encode(cryptoText);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static String base64Encode(byte[] bytes)
-    {
+    private static String base64Encode(byte[] bytes) {
         return Base64.getEncoder().encodeToString(bytes);
     }
 
-    public static String decrypt(String encrypted)
-    {
+    public static String decrypt(String encrypted) {
         try {
             SecretKeySpec secSpec = getSecSpec();
             GCMParameterSpec params = new GCMParameterSpec(128, SECRET_KEY.getBytes(), 0, 12);
@@ -95,8 +90,7 @@ public class EncryptUtil
 
     }
 
-    private static byte[] base64Decode(String property)
-    {
+    private static byte[] base64Decode(String property) {
         return Base64.getDecoder().decode(property);
     }
 
@@ -108,12 +102,11 @@ public class EncryptUtil
         SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
         PBEKeySpec keySpec = new PBEKeySpec(SECRET_KEY.toCharArray(), SALT, iterationCount, keyLength);
         SecretKey keyTmp = keyFactory.generateSecret(keySpec);
-        return  new SecretKeySpec(keyTmp.getEncoded(), ALGORITHM);
+        return new SecretKeySpec(keyTmp.getEncoded(), ALGORITHM);
     }
 
     // generate encrypt password string which paste to json file
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         if (args.length != 1) {
             System.out.println("Usage: java -jar addax-common.jar <password>");
             System.exit(1);

@@ -41,16 +41,14 @@ import static com.wgzhao.addax.common.spi.ErrorCode.CONFIG_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class DorisKey
-        extends Key
-{
+        extends Key {
 
     private static final int MAX_RETRIES = 3;
     private static final long DEFAULT_FLUSH_INTERVAL = 3_000;
 
     private static final String LOAD_PROPS_FORMAT = "format";
 
-    public enum StreamLoadFormat
-    {
+    public enum StreamLoadFormat {
         CSV, JSON
     }
 
@@ -72,8 +70,7 @@ public class DorisKey
     private final String jdbcUrl;
     private final String table;
 
-    public DorisKey(Configuration options)
-    {
+    public DorisKey(Configuration options) {
         this.options = options;
         Configuration conn = options.getConfiguration(CONNECTION);
         this.database = conn.getNecessaryValue(DATABASE, REQUIRED_VALUE);
@@ -81,8 +78,7 @@ public class DorisKey
         this.table = conn.getList(TABLE, String.class).get(0);
         if (options.getString(LOAD_PROPS, null) == null) {
             this.loadProps = Configuration.newDefault();
-        }
-        else if (options.getString(LOAD_PROPS).startsWith("{")) {
+        } else if (options.getString(LOAD_PROPS).startsWith("{")) {
             this.loadProps = options.getConfiguration(LOAD_PROPS);
         } else {
             throw AddaxException.asAddaxException(CONFIG_ERROR, "The format of loadProps should be a map");
@@ -96,8 +92,7 @@ public class DorisKey
         }
     }
 
-    public List<String> getDorisTableColumns()
-    {
+    public List<String> getDorisTableColumns() {
         String currentSql = "SELECT COLUMN_NAME FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = '" +
                 database + "' AND `TABLE_NAME` = '" + table + "' ORDER BY `ORDINAL_POSITION` ASC;";
         List<String> columns = new ArrayList<>();
@@ -110,107 +105,86 @@ public class DorisKey
                 columns.add(colName);
             }
             return columns;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw RdbmsException.asQueryException(e, currentSql);
-        }
-        finally {
+        } finally {
             DBUtil.closeDBResources(rs, null, null);
         }
     }
 
-    public void doPretreatment()
-    {
+    public void doPretreatment() {
         validateStreamLoadUrl();
     }
 
-    public String getJdbcUrl()
-    {
+    public String getJdbcUrl() {
         return this.jdbcUrl;
     }
 
-    public String getDatabase()
-    {
+    public String getDatabase() {
         return this.database;
     }
 
-    public String getTable()
-    {
+    public String getTable() {
         return this.table;
     }
 
-    public String getUsername()
-    {
+    public String getUsername() {
         return options.getString(USERNAME);
     }
 
-    public String getPassword()
-    {
+    public String getPassword() {
         return options.getString(PASSWORD);
     }
 
-    public String getLabelPrefix()
-    {
+    public String getLabelPrefix() {
         return DEFAULT_LABEL_PREFIX;
     }
 
-    public List<String> getLoadUrlList()
-    {
+    public List<String> getLoadUrlList() {
         return options.getList(LOAD_URL, String.class);
     }
 
-    public List<String> getColumns()
-    {
+    public List<String> getColumns() {
         return this.infoSchemaColumns;
     }
 
-    public List<String> getPreSqlList()
-    {
+    public List<String> getPreSqlList() {
         return options.getList(PRE_SQL, String.class);
     }
 
-    public List<String> getPostSqlList()
-    {
+    public List<String> getPostSqlList() {
         return options.getList(POST_SQL, String.class);
     }
 
-    public int getMaxRetries()
-    {
+    public int getMaxRetries() {
         return MAX_RETRIES;
     }
 
-    public long getBatchSize()
-    {
+    public long getBatchSize() {
         return options.getLong(BATCH_SIZE, DEFAULT_BATCH_SIZE);
     }
 
-    public long getFlushInterval()
-    {
+    public long getFlushInterval() {
         return options.getLong(FLUSH_INTERVAL, DEFAULT_FLUSH_INTERVAL);
     }
 
-    public int getFlushQueueLength()
-    {
+    public int getFlushQueueLength() {
         return options.getInt(FLUSH_QUEUE_LENGTH, 1);
     }
 
-    public StreamLoadFormat getStreamLoadFormat()
-    {
+    public StreamLoadFormat getStreamLoadFormat() {
         return streamLoadFormat;
     }
 
-    public boolean isJsonFormat()
-    {
+    public boolean isJsonFormat() {
         return StreamLoadFormat.JSON.equals(streamLoadFormat);
     }
 
-    public boolean isCsvFormat()
-    {
+    public boolean isCsvFormat() {
         return StreamLoadFormat.CSV.equals(streamLoadFormat);
     }
 
-    private void validateStreamLoadUrl()
-    {
+    private void validateStreamLoadUrl() {
         List<String> urlList = getLoadUrlList();
         for (String host : urlList) {
             if (host.split(":").length < 2) {
@@ -220,18 +194,15 @@ public class DorisKey
         }
     }
 
-    public String getLineDelimiter()
-    {
+    public String getLineDelimiter() {
         return loadProps.getString(LINE_SEPARATOR, "\n");
     }
 
-    public String getColumnSeparator()
-    {
+    public String getColumnSeparator() {
         return loadProps.getString(COLUMN_SEPARATOR, "\t");
     }
 
-    public Map<String, String> loadProps2Map()
-    {
+    public Map<String, String> loadProps2Map() {
         Map<String, String> result = new HashMap<>();
         loadProps.getKeys().forEach(key -> {
             result.put(key, loadProps.getString(key));

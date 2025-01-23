@@ -23,14 +23,12 @@ import com.google.common.base.Strings;
 
 import java.io.StringWriter;
 
-public class DelimiterParser
-{
+public class DelimiterParser {
 
     private static final String HEX_STRING = "0123456789ABCDEF";
 
     public static String parse(String sp, String dSp)
-            throws RuntimeException
-    {
+            throws RuntimeException {
         if (Strings.isNullOrEmpty(sp)) {
             return dSp;
         }
@@ -46,8 +44,7 @@ public class DelimiterParser
         return writer.toString();
     }
 
-    private static String getHexStr(String sp)
-    {
+    private static String getHexStr(String sp) {
         String hexStr = sp.substring(2);
         // check hex str
         if (hexStr.isEmpty()) {
@@ -64,8 +61,7 @@ public class DelimiterParser
         return hexStr;
     }
 
-    private static byte[] hexStrToBytes(String hexStr)
-    {
+    private static byte[] hexStrToBytes(String hexStr) {
         String upperHexStr = hexStr.toUpperCase();
         int length = upperHexStr.length() / 2;
         char[] hexChars = upperHexStr.toCharArray();
@@ -77,8 +73,7 @@ public class DelimiterParser
         return bytes;
     }
 
-    private static byte charToByte(char c)
-    {
+    private static byte charToByte(char c) {
         return (byte) HEX_STRING.indexOf(c);
     }
 }

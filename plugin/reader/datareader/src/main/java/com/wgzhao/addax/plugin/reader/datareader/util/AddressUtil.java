@@ -26,8 +26,7 @@ import org.apache.commons.rng.simple.RandomSource;
 /**
  * generate a faker address
  */
-public class AddressUtil
-{
+public class AddressUtil {
     private static final String[] COUNTRIES = {
             "阿富汗", "阿拉斯加", "阿尔巴尼亚", "阿尔及利亚", "安道尔", "安哥拉", "安圭拉岛英", "安提瓜和巴布达",
             "阿根廷", "亚美尼亚", "阿鲁巴岛", "阿森松", "澳大利亚", "奥地利", "阿塞拜疆", "巴林", "孟加拉国",
@@ -92,8 +91,7 @@ public class AddressUtil
     private static final String[] CITY_SUFFIXES = {"市", "县"};
     private static final String[] STREET_SUFFIXES = {"街", "路"};
 
-    public static String nextAddress()
-    {
+    public static String nextAddress() {
         return String.format("%s%s%s%s区%s%s%d号", CommonUtil.randChoose(PROVINCES),
                 CommonUtil.randChoose(CITIES),
                 CommonUtil.randChoose(CITY_SUFFIXES),
@@ -104,8 +102,7 @@ public class AddressUtil
         );
     }
 
-    public static String nextCountry()
-    {
+    public static String nextCountry() {
         return CommonUtil.randChoose(COUNTRIES);
     }
 }

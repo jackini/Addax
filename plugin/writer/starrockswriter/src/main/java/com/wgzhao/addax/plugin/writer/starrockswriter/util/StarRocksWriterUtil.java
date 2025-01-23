@@ -16,14 +16,13 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class StarRocksWriterUtil
-{
+public final class StarRocksWriterUtil {
     private static final Logger LOG = LoggerFactory.getLogger(StarRocksWriterUtil.class);
 
-    private StarRocksWriterUtil() {}
+    private StarRocksWriterUtil() {
+    }
 
-    public static List<String> getStarRocksColumns(Connection conn, String databaseName, String tableName)
-    {
+    public static List<String> getStarRocksColumns(Connection conn, String databaseName, String tableName) {
         String currentSql = String.format("SELECT COLUMN_NAME FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = '%s' " +
                 "AND `TABLE_NAME` = '%s' ORDER BY `ORDINAL_POSITION` ASC;", databaseName, tableName);
         List<String> columns = new ArrayList<>();
@@ -35,19 +34,16 @@ public final class StarRocksWriterUtil
                 columns.add(colName);
             }
             return columns;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw RdbmsException.asQueryException(e, currentSql);
-        }
-        finally {
+        } finally {
             DBUtil.closeDBResources(rs, null, null);
         }
     }
 
-    public static List<String> renderPreOrPostSqls(List<String> preOrPostSqls, String tableName)
-    {
+    public static List<String> renderPreOrPostSqls(List<String> preOrPostSqls, String tableName) {
         List<String> renderedSqls = new ArrayList<>();
-        if ( null == preOrPostSqls ) {
+        if (null == preOrPostSqls) {
             return renderedSqls;
         }
         for (String sql : preOrPostSqls) {
@@ -58,8 +54,7 @@ public final class StarRocksWriterUtil
         return renderedSqls;
     }
 
-    public static void executeSqls(Connection conn, List<String> sqls)
-    {
+    public static void executeSqls(Connection conn, List<String> sqls) {
         Statement stmt = null;
         String currentSql = null;
         try {
@@ -68,17 +63,14 @@ public final class StarRocksWriterUtil
                 currentSql = sql;
                 stmt.execute(sql);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw RdbmsException.asQueryException(e, currentSql);
-        }
-        finally {
+        } finally {
             DBUtil.closeDBResources(null, stmt, null);
         }
     }
 
-    public static void preCheckPrePareSQL(StarRocksWriterOptions options)
-    {
+    public static void preCheckPrePareSQL(StarRocksWriterOptions options) {
         String table = options.getTable();
         List<String> preSqls = options.getPreSqlList();
         List<String> renderedPreSqls = StarRocksWriterUtil.renderPreOrPostSqls(preSqls, table);
@@ -87,16 +79,14 @@ public final class StarRocksWriterUtil
             for (String sql : renderedPreSqls) {
                 try {
                     DBUtil.sqlValid(sql, DataBaseType.MySql);
-                }
-                catch (ParserException e) {
+                } catch (ParserException e) {
                     throw RdbmsException.asPreSQLParserException(e, sql);
                 }
             }
         }
     }
 
-    public static void preCheckPostSQL(StarRocksWriterOptions options)
-    {
+    public static void preCheckPostSQL(StarRocksWriterOptions options) {
         String table = options.getTable();
         List<String> postSqls = options.getPostSqlList();
         List<String> renderedPostSqls = StarRocksWriterUtil.renderPreOrPostSqls(postSqls, table);
@@ -105,8 +95,7 @@ public final class StarRocksWriterUtil
             for (String sql : renderedPostSqls) {
                 try {
                     DBUtil.sqlValid(sql, DataBaseType.MySql);
-                }
-                catch (ParserException e) {
+                } catch (ParserException e) {
                     throw RdbmsException.asPostSQLParserException(e, sql);
                 }
             }

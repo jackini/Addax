@@ -42,19 +42,16 @@ import static com.wgzhao.addax.common.spi.ErrorCode.CONFIG_ERROR;
  * doris data writer
  */
 public class DorisWriter
-        extends Writer
-{
+        extends Writer {
 
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
         private static final Logger LOG = LoggerFactory.getLogger(Job.class);
         private Configuration originalConfig = null;
         private DorisKey options;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = super.getPluginJobConf();
             options = new DorisKey(this.originalConfig);
             options.doPretreatment();
@@ -62,15 +59,13 @@ public class DorisWriter
         }
 
         @Override
-        public void preCheck()
-        {
+        public void preCheck() {
             DorisUtil.preCheckPrePareSQL(options);
             DorisUtil.preCheckPostSQL(options);
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             String username = options.getUsername();
             String password = options.getPassword();
             String jdbcUrl = options.getJdbcUrl();
@@ -85,8 +80,7 @@ public class DorisWriter
         }
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             List<Configuration> configurations = new ArrayList<>(mandatoryNumber);
             for (int i = 0; i < mandatoryNumber; i++) {
                 configurations.add(originalConfig);
@@ -95,8 +89,7 @@ public class DorisWriter
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             String username = options.getUsername();
             String password = options.getPassword();
             String jdbcUrl = options.getJdbcUrl();
@@ -110,29 +103,25 @@ public class DorisWriter
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
         private DorisWriterManager writerManager;
         private DorisKey options;
         private DorisCodec rowCodec;
 
         @Override
-        public void init()
-        {
+        public void init() {
             options = new DorisKey(super.getPluginJobConf());
             writerManager = new DorisWriterManager(options);
             rowCodec = DorisCodecFactory.createCodec(options);
         }
 
-        public void startWrite(RecordReceiver recordReceiver)
-        {
+        public void startWrite(RecordReceiver recordReceiver) {
             Record record;
             while ((record = recordReceiver.getFromReader()) != null) {
                 if (record.getColumnNumber() != options.getColumns().size()) {
@@ -147,8 +136,7 @@ public class DorisWriter
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             writerManager.close();
         }
     }

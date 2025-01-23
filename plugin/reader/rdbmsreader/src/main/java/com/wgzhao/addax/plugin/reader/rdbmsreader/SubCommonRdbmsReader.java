@@ -24,23 +24,18 @@ import com.wgzhao.addax.rdbms.util.DBUtil;
 import com.wgzhao.addax.rdbms.util.DataBaseType;
 
 public class SubCommonRdbmsReader
-        extends CommonRdbmsReader
-{
+        extends CommonRdbmsReader {
     public static class Job
-            extends CommonRdbmsReader.Job
-    {
-        public Job(DataBaseType dataBaseType)
-        {
+            extends CommonRdbmsReader.Job {
+        public Job(DataBaseType dataBaseType) {
             super(dataBaseType);
         }
     }
 
     public static class Task
-            extends CommonRdbmsReader.Task
-    {
+            extends CommonRdbmsReader.Task {
 
-        public Task(DataBaseType dataBaseType)
-        {
+        public Task(DataBaseType dataBaseType) {
             super(dataBaseType);
         }
     }

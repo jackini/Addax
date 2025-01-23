@@ -33,26 +33,22 @@ import static com.wgzhao.addax.common.spi.ErrorCode.PERMISSION_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class ExcelWriter
-    extends Writer
-{
+        extends Writer {
     public static class Job
-        extends Writer.Job
-    {
+            extends Writer.Job {
         private Configuration conf;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.conf = this.getPluginJobConf();
             this.validateParameter();
         }
 
-        private void validateParameter()
-        {
+        private void validateParameter() {
             this.conf.getNecessaryValue(PATH, REQUIRED_VALUE);
             String path = this.conf.getNecessaryValue(PATH, REQUIRED_VALUE);
             String fileName = this.conf.getNecessaryValue(FILE_NAME, REQUIRED_VALUE);
-            if (fileName.endsWith(".xls")){
+            if (fileName.endsWith(".xls")) {
                 throw AddaxException.asAddaxException(NOT_SUPPORT_TYPE, "Only support new excel format file(.xlsx)");
             }
             if (fileName.split("\\.").length == 1) {
@@ -69,54 +65,47 @@ public class ExcelWriter
                     boolean createdOk = dir.mkdirs();
                     if (!createdOk) {
                         throw AddaxException.asAddaxException(EXECUTE_FAIL,
-                               "can not create directory '" + dir + "' failure");
+                                "can not create directory '" + dir + "' failure");
                     }
                 }
-            }
-            catch (SecurityException se) {
+            } catch (SecurityException se) {
                 throw AddaxException.asAddaxException(PERMISSION_ERROR,
                         "Create directory '" + path + "' failure: permission deny: ", se);
             }
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
 
         }
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             // only ONE thread
             return Collections.singletonList(this.conf);
         }
     }
 
     public static class Task
-        extends Writer.Task
-    {
+            extends Writer.Task {
 
         private String filePath;
         private List<String> header;
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration conf = this.getPluginJobConf();
             this.filePath = conf.get(PATH) + "/" + conf.get(FILE_NAME);
             this.header = conf.getList(HEADER, String.class);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
 
         }
 
         @Override
-        public void startWrite(RecordReceiver lineReceiver)
-        {
+        public void startWrite(RecordReceiver lineReceiver) {
             Record record;
             XSSFWorkbook workbook = new XSSFWorkbook();
             XSSFSheet sheet = workbook.createSheet();
@@ -126,7 +115,7 @@ public class ExcelWriter
             // set header ?
             if (!header.isEmpty()) {
                 row = sheet.createRow(rowNum++);
-                for(int i =0 ;i< header.size();i++) {
+                for (int i = 0; i < header.size(); i++) {
                     cell = row.createCell(i);
                     cell.setCellValue(header.get(i));
                 }
@@ -136,12 +125,11 @@ public class ExcelWriter
             CreationHelper createHelper = workbook.getCreationHelper();
             dateStyle.setDataFormat(createHelper.createDataFormat().getFormat(DEFAULT_DATE_FORMAT));
 
-            while ( (record = lineReceiver.getFromReader()) != null)
-            {
+            while ((record = lineReceiver.getFromReader()) != null) {
                 int recordLength = record.getColumnNumber();
                 row = sheet.createRow(rowNum++);
                 Column column;
-                for(int i=0; i< recordLength; i++) {
+                for (int i = 0; i < recordLength; i++) {
                     cell = row.createCell(i);
                     column = record.getColumn(i);
                     if (column == null || column.getRawData() == null) {
@@ -169,14 +157,12 @@ public class ExcelWriter
                 }
             }
             // write to file
-            try(FileOutputStream out = new FileOutputStream(filePath)) {
+            try (FileOutputStream out = new FileOutputStream(filePath)) {
                 workbook.write(out);
                 workbook.close();
-            }
-            catch (FileNotFoundException e) {
+            } catch (FileNotFoundException e) {
                 throw AddaxException.asAddaxException(CONFIG_ERROR, "No such file: " + filePath);
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 throw AddaxException.asAddaxException(IO_ERROR, "IOException occurred while writing to " + filePath);
             }
         }

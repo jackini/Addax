@@ -34,26 +34,22 @@ import org.slf4j.LoggerFactory;
  */
 public class ReaderRunner
         extends AbstractRunner
-        implements Runnable
-{
+        implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(ReaderRunner.class);
 
     private RecordSender recordSender;
 
-    public ReaderRunner(AbstractTaskPlugin abstractTaskPlugin)
-    {
+    public ReaderRunner(AbstractTaskPlugin abstractTaskPlugin) {
         super(abstractTaskPlugin);
     }
 
-    public void setRecordSender(RecordSender recordSender)
-    {
+    public void setRecordSender(RecordSender recordSender) {
         this.recordSender = recordSender;
     }
 
     @Override
-    public void run()
-    {
+    public void run() {
         assert null != this.recordSender;
 
         Reader.Task taskReader = (Reader.Task) this.getPlugin();
@@ -92,12 +88,10 @@ public class ReaderRunner
             postPerfRecord.end();
             // automatic flush
             // super.markSuccess(); 这里不能标记为成功，成功的标志由 writerRunner 来标志（否则可能导致 reader 先结束，而 writer 还没有结束的严重 bug）
-        }
-        catch (Throwable e) {
+        } catch (Throwable e) {
             LOG.error("Reader runner Received Exceptions:", e);
             super.markFail(e);
-        }
-        finally {
+        } finally {
             LOG.debug("task reader starts to do destroy ...");
             PerfRecord desPerfRecord = new PerfRecord(getTaskGroupId(), getTaskId(), PerfRecord.PHASE.READ_TASK_DESTROY);
             desPerfRecord.start();
@@ -115,8 +109,7 @@ public class ReaderRunner
         }
     }
 
-    public void shutdown()
-    {
+    public void shutdown() {
         recordSender.shutdown();
     }
 }

@@ -22,8 +22,7 @@ package com.wgzhao.addax.plugin.writer.greenplumwriter;
 import com.wgzhao.addax.common.base.Constant;
 
 public class GPConstant
-        extends Constant
-{
+        extends Constant {
     // 字段分隔符
     public static final char DELIMITER = '\u0001';
 

@@ -24,18 +24,15 @@ import com.wgzhao.addax.core.statistics.communication.Communication;
 import com.wgzhao.addax.core.statistics.container.report.ProcessInnerReporter;
 
 public class StandaloneTGContainerCommunicator
-        extends AbstractTGContainerCommunicator
-{
+        extends AbstractTGContainerCommunicator {
 
-    public StandaloneTGContainerCommunicator(Configuration configuration)
-    {
+    public StandaloneTGContainerCommunicator(Configuration configuration) {
         super(configuration);
         super.setReporter(new ProcessInnerReporter());
     }
 
     @Override
-    public void report(Communication communication)
-    {
+    public void report(Communication communication) {
         super.getReporter().reportTGCommunication(super.taskGroupId, communication);
     }
 }

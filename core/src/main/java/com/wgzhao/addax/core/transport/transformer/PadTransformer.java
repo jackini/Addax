@@ -35,16 +35,13 @@ import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
  * Created by liqiang on 16/3/4.
  */
 public class PadTransformer
-        extends Transformer
-{
-    public PadTransformer()
-    {
+        extends Transformer {
+    public PadTransformer() {
         setTransformerName("dx_pad");
     }
 
     @Override
-    public Record evaluate(Record record, Object... paras)
-    {
+    public Record evaluate(Record record, Object... paras) {
 
         int columnIndex;
         String padType;
@@ -60,8 +57,7 @@ public class PadTransformer
             padType = (String) paras[1];
             length = Integer.parseInt((String) paras[2]);
             padString = (String) paras[3];
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     ILLEGAL_VALUE,
                     "paras:" + Arrays.asList(paras) + " => " + e.getMessage());
@@ -83,23 +79,20 @@ public class PadTransformer
             }
             if (length <= oriValue.length()) {
                 newValue = oriValue.substring(0, length);
-            }
-            else {
+            } else {
 
                 newValue = doPad(padType, oriValue, length, padString);
             }
 
             record.setColumn(columnIndex, new StringColumn(newValue));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     RUNTIME_ERROR, e.getMessage(), e);
         }
         return record;
     }
 
-    private String doPad(String padType, String oriValue, int length, String padString)
-    {
+    private String doPad(String padType, String oriValue, int length, String padString) {
 
         StringBuilder finalPad = new StringBuilder();
         int needLength = length - oriValue.length();
@@ -108,8 +101,7 @@ public class PadTransformer
             if (needLength >= padString.length()) {
                 finalPad.append(padString);
                 needLength -= padString.length();
-            }
-            else {
+            } else {
                 finalPad.append(padString, 0, needLength);
                 needLength = 0;
             }
@@ -117,8 +109,7 @@ public class PadTransformer
 
         if ("l".equalsIgnoreCase(padType)) {
             return finalPad + oriValue;
-        }
-        else {
+        } else {
             return oriValue + finalPad;
         }
     }

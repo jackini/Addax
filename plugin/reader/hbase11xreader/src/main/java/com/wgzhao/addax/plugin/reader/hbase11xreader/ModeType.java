@@ -25,20 +25,17 @@ import java.util.Arrays;
 
 import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 
-public enum ModeType
-{
+public enum ModeType {
     NORMAL("normal"),
     MULTI_VERSION_FIXED_COLUMN("multiVersionFixedColumn");
 
     private final String mode;
 
-    ModeType(String mode)
-    {
+    ModeType(String mode) {
         this.mode = mode.toLowerCase();
     }
 
-    public static ModeType getByTypeName(String modeName)
-    {
+    public static ModeType getByTypeName(String modeName) {
         for (ModeType modeType : values()) {
             if (modeType.mode.equalsIgnoreCase(modeName)) {
                 return modeType;
@@ -48,8 +45,7 @@ public enum ModeType
                 String.format("HbaseReader 不支持该 mode 类型:%s, 目前支持的 mode 类型是:%s", modeName, Arrays.asList(values())));
     }
 
-    public String getMode()
-    {
+    public String getMode() {
         return mode;
     }
 }

@@ -26,15 +26,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class TableExpandUtil
-{
+public final class TableExpandUtil {
 
     // schema.table[0-2]more
     // 1 2 3 4 5
     public static Pattern pattern = Pattern.compile("(\\w+\\.)?(\\w+)\\[(\\d+)-(\\d+)\\](.*)");
 
-    private TableExpandUtil()
-    {
+    private TableExpandUtil() {
     }
 
     /**
@@ -45,8 +43,7 @@ public final class TableExpandUtil
      * @param tables a string contains table name(one or many).
      * @return a split result of table name.
      */
-    public static List<String> splitTables(String tables)
-    {
+    public static List<String> splitTables(String tables) {
         List<String> splitTables = new ArrayList<>();
 
         String[] tableArrays = tables.split(",");
@@ -57,8 +54,7 @@ public final class TableExpandUtil
             if (!matcher.matches()) {
                 tableName = tableArray.trim();
                 splitTables.add(tableName);
-            }
-            else {
+            } else {
                 String start = matcher.group(3).trim();
                 String end = matcher.group(4).trim();
                 String tmp;
@@ -76,8 +72,7 @@ public final class TableExpandUtil
                         tableName = schema + matcher.group(2).trim()
                                 + String.format("%0" + len + "d", k)
                                 + matcher.group(5).trim();
-                    }
-                    else {
+                    } else {
                         tableName = schema + matcher.group(2).trim()
                                 + String.format("%d", k)
                                 + matcher.group(5).trim();
@@ -89,8 +84,7 @@ public final class TableExpandUtil
         return splitTables;
     }
 
-    public static List<String> expandTableConf(DataBaseType dataBaseType, List<String> tables)
-    {
+    public static List<String> expandTableConf(DataBaseType dataBaseType, List<String> tables) {
         List<String> parsedTables = new ArrayList<>();
         for (String table : tables) {
             if (table.startsWith("[") && dataBaseType == DataBaseType.SQLServer) {

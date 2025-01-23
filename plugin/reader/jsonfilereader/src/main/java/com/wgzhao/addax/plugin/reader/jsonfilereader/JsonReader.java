@@ -77,11 +77,9 @@ import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
  * Created by jin.zhang on 18-05-30.
  */
 public class JsonReader
-        extends Reader
-{
+        extends Reader {
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
         private static final Logger LOG = LoggerFactory.getLogger(Job.class);
 
         private Configuration originConfig = null;
@@ -91,23 +89,20 @@ public class JsonReader
         private List<String> sourceFiles;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originConfig = this.getPluginJobConf();
 
             this.validateParameter();
         }
 
-        private void validateParameter()
-        {
+        private void validateParameter() {
             // Compatible with the old version, path is a string before
             String pathInString = this.originConfig.getNecessaryValue(Key.PATH,
                     REQUIRED_VALUE);
             if (!pathInString.startsWith("[") && !pathInString.endsWith("]")) {
                 path = new ArrayList<>();
                 path.add(pathInString);
-            }
-            else {
+            } else {
                 path = this.originConfig.getList(Key.PATH, String.class);
                 if (null == path || path.isEmpty()) {
                     throw AddaxException.asAddaxException(
@@ -119,19 +114,16 @@ public class JsonReader
             String encoding = this.originConfig.getString(Key.ENCODING, Constant.DEFAULT_ENCODING);
             if (StringUtils.isBlank(encoding)) {
                 this.originConfig.set(Key.ENCODING, Constant.DEFAULT_ENCODING);
-            }
-            else {
+            } else {
                 try {
                     encoding = encoding.trim();
                     this.originConfig.set(Key.ENCODING, encoding);
                     Charsets.toCharset(encoding);
-                }
-                catch (UnsupportedCharsetException uce) {
+                } catch (UnsupportedCharsetException uce) {
                     throw AddaxException.asAddaxException(
                             NOT_SUPPORT_TYPE,
                             "Not supported encoding type " + encoding, uce);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     throw AddaxException.asAddaxException(
                             ENCODING_ERROR,
                             "Encoding Error:", e);
@@ -163,23 +155,20 @@ public class JsonReader
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             LOG.debug("begin to prepare...");
             this.sourceFiles = FileHelper.buildSourceTargets(this.path);
             LOG.info("The number of files you will read: [{}]", this.sourceFiles.size());
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
 
         // warn: 如果源目录为空会报错，拖空目录意图=>空文件显示指定此意图
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             LOG.debug("begin to split...");
             List<Configuration> readerSplitConfigs = new ArrayList<>();
 
@@ -202,8 +191,7 @@ public class JsonReader
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
         public static final String STRING = "string";
         public static final String LONG = "long";
@@ -220,8 +208,7 @@ public class JsonReader
         private boolean multiline;
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration readerSliceConfig = this.getPluginJobConf();
             this.sourceFiles = readerSliceConfig.getList(Key.SOURCE_FILES, String.class);
             this.columns = readerSliceConfig.getListConfiguration(Key.COLUMN);
@@ -235,8 +222,7 @@ public class JsonReader
         }
 
         //解析json，返回已经经过处理的行
-        private List<Column> parseFromJson(String json)
-        {
+        private List<Column> parseFromJson(String json) {
             List<Column> splitLine = new ArrayList<>();
             DocumentContext document = parse.parse(json);
             String tempValue;
@@ -248,8 +234,7 @@ public class JsonReader
                 // 这里是为了支持常量Value 现在需要考虑做容错，如果json里面没有的解析路径置为null
                 if (null != columnValue) {
                     tempValue = columnValue;
-                }
-                else {
+                } else {
                     tempValue = document.read(columnIndex, columnType.getClass());
                 }
                 Column insertColumn = getColumn(columnType, tempValue, columnFormat);
@@ -259,8 +244,7 @@ public class JsonReader
         }
 
         //匹配类型
-        private Column getColumn(String type, String columnValue, String columnFormat)
-        {
+        private Column getColumn(String type, String columnValue, String columnFormat) {
             Column columnGenerated;
             String errorTemplate = "Type cast error, can not cast %s to %s";
             switch (type) {
@@ -270,24 +254,21 @@ public class JsonReader
                 case DOUBLE:
                     try {
                         columnGenerated = new DoubleColumn(columnValue);
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         throw new IllegalArgumentException(String.format(errorTemplate, columnValue, "DOUBLE"));
                     }
                     break;
                 case BOOLEAN:
                     try {
                         columnGenerated = new BoolColumn(columnValue);
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         throw new IllegalArgumentException(String.format(errorTemplate, columnValue, "BOOLEAN"));
                     }
                     break;
                 case LONG:
                     try {
                         columnGenerated = new LongColumn(columnValue);
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         LOG.error(e.getMessage());
                         throw new IllegalArgumentException(String.format(errorTemplate, columnValue, "LONG"));
                     }
@@ -298,13 +279,11 @@ public class JsonReader
                             // 用户自己配置的格式转换, 脏数据行为出现变化
                             DateFormat format = new SimpleDateFormat(columnFormat);
                             columnGenerated = new DateColumn(format.parse(columnValue));
-                        }
-                        else {
+                        } else {
                             // 框架尝试转换
                             columnGenerated = new DateColumn(new StringColumn(columnValue).asDate());
                         }
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         throw new IllegalArgumentException(String.format(errorTemplate, columnValue, "DATE"));
                     }
                     break;
@@ -316,8 +295,7 @@ public class JsonReader
         }
 
         //传输一行数据
-        private void transportOneRecord(RecordSender recordSender, List<Column> sourceLine)
-        {
+        private void transportOneRecord(RecordSender recordSender, List<Column> sourceLine) {
             Record record = recordSender.createRecord();
             for (Column eachValue : sourceLine) {
                 record.addColumn(eachValue);
@@ -326,14 +304,12 @@ public class JsonReader
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             LOG.debug("begin to read source files...");
             FileInputStream fileInputStream;
             BufferedReader reader = null;
@@ -341,8 +317,7 @@ public class JsonReader
                 LOG.info("reading file : [{}]", fileName);
                 try {
                     fileInputStream = new FileInputStream(fileName);
-                }
-                catch (FileNotFoundException e) {
+                } catch (FileNotFoundException e) {
                     // warn: sock 文件无法read,能影响所有文件的传输,需要用户自己保证
                     String message = String.format("The file %s not found", fileName);
                     LOG.error(message);
@@ -353,18 +328,15 @@ public class JsonReader
                         if ("zip".equalsIgnoreCase(compressType)) {
                             ZipCycleInputStream zis = new ZipCycleInputStream(fileInputStream);
                             reader = new BufferedReader(new InputStreamReader(zis, encoding), Constant.DEFAULT_BUFFER_SIZE);
-                        }
-                        else {
+                        } else {
                             BufferedInputStream bis = new BufferedInputStream(fileInputStream);
                             CompressorInputStream input = new CompressorStreamFactory().createCompressorInputStream(bis);
                             reader = new BufferedReader(new InputStreamReader(input, encoding), Constant.DEFAULT_BUFFER_SIZE);
                         }
-                    }
-                    else {
+                    } else {
                         reader = new BufferedReader(new InputStreamReader(fileInputStream, encoding), Constant.DEFAULT_BUFFER_SIZE);
                     }
-                }
-                catch (CompressorException | UnsupportedEncodingException e) {
+                } catch (CompressorException | UnsupportedEncodingException e) {
                     throw AddaxException.asAddaxException(IO_ERROR, e);
                 }
                 if (multiline) {
@@ -381,11 +353,10 @@ public class JsonReader
          * parse JSON Lines file
          * each line is a json object
          *
-         * @param reader {@link BufferedReader}
+         * @param reader       {@link BufferedReader}
          * @param recordSender {@link RecordSender}
          */
-        private void multilineJsonParse(BufferedReader reader, RecordSender recordSender)
-        {
+        private void multilineJsonParse(BufferedReader reader, RecordSender recordSender) {
             // read the content
             String jsonLine;
             try {
@@ -396,22 +367,19 @@ public class JsonReader
                     recordSender.flush();
                     jsonLine = reader.readLine();
                 }
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 throw AddaxException.asAddaxException(IO_ERROR, e);
             }
         }
 
-        private void singleJsonParse(BufferedReader reader, RecordSender recordSender)
-        {
+        private void singleJsonParse(BufferedReader reader, RecordSender recordSender) {
             StringBuilder jsonBuffer = new StringBuilder();
             String line;
             try {
                 while ((line = reader.readLine()) != null) {
                     jsonBuffer.append(line);
                 }
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 throw AddaxException.asAddaxException(IO_ERROR, e);
             }
 
@@ -419,8 +387,8 @@ public class JsonReader
             List<List<String>> jsonColumns = new ArrayList<>();
             List<Column> sourceLine = new ArrayList<>();
             int recordNum = -1;
-            List<String> placeHolder =  Collections.emptyList();
-            for (Configuration col: columns) {
+            List<String> placeHolder = Collections.emptyList();
+            for (Configuration col : columns) {
                 if (col.getString(Key.VALUE) == null) {
                     if (recordNum < 0) {
                         List<String> jsonColumn = ctx.read(col.getString(Key.INDEX));
@@ -434,8 +402,8 @@ public class JsonReader
                     jsonColumns.add(placeHolder);
                 }
             }
-            for (int i =0 ;i < recordNum; i++) {
-                for (int j=0; j < columns.size(); j++) {
+            for (int i = 0; i < recordNum; i++) {
+                for (int j = 0; j < columns.size(); j++) {
                     Configuration column = columns.get(j);
                     if (jsonColumns.get(j).isEmpty()) {
                         // use constant value

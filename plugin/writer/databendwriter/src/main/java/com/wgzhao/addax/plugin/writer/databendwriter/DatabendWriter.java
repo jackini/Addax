@@ -68,8 +68,7 @@ public class DatabendWriter extends Writer {
         public void init() {
             this.writerSliceConfig = super.getPluginJobConf();
 
-            this.commonRdbmsWriterSlave = new CommonRdbmsWriter.Task(DataBaseType.Databend)
-            {
+            this.commonRdbmsWriterSlave = new CommonRdbmsWriter.Task(DataBaseType.Databend) {
                 @Override
                 protected PreparedStatement fillPreparedStatementColumnType(PreparedStatement preparedStatement, int columnIndex, int columnSqlType, Column column)
                         throws SQLException {
@@ -88,7 +87,7 @@ public class DatabendWriter extends Writer {
                             return preparedStatement;
                         case Types.BLOB:
                         case Types.BINARY:
-                            preparedStatement.setString(columnIndex,bytesToHex(column.asBytes()));
+                            preparedStatement.setString(columnIndex, bytesToHex(column.asBytes()));
                             return preparedStatement;
                     }
                     return super.fillPreparedStatementColumnType(preparedStatement, columnIndex, columnSqlType, column);

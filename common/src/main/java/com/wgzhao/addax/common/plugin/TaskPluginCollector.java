@@ -29,27 +29,25 @@ import com.wgzhao.addax.common.element.Record;
  * Job的插件在POST过程中通过getMessage()接口获取信息
  */
 public abstract class TaskPluginCollector
-        implements PluginCollector
-{
+        implements PluginCollector {
     /**
      * 收集脏数据
      *
-     * @param dirtyRecord 脏数据信息
-     * @param t 异常信息
+     * @param dirtyRecord  脏数据信息
+     * @param t            异常信息
      * @param errorMessage 错误的提示信息
      */
-    public abstract void collectDirtyRecord( Record dirtyRecord,
-             Throwable t,  String errorMessage);
+    public abstract void collectDirtyRecord(Record dirtyRecord,
+                                            Throwable t, String errorMessage);
 
     /**
      * 收集脏数据
      *
-     * @param dirtyRecord 脏数据信息
+     * @param dirtyRecord  脏数据信息
      * @param errorMessage 错误的提示信息
      */
-    public void collectDirtyRecord( Record dirtyRecord,
-             String errorMessage)
-    {
+    public void collectDirtyRecord(Record dirtyRecord,
+                                   String errorMessage) {
         this.collectDirtyRecord(dirtyRecord, null, errorMessage);
     }
 
@@ -57,18 +55,18 @@ public abstract class TaskPluginCollector
      * 收集脏数据
      *
      * @param dirtyRecord 脏数据信息
-     * @param t 异常信息
+     * @param t           异常信息
      */
-    public void collectDirtyRecord( Record dirtyRecord,  Throwable t)
-    {
+    public void collectDirtyRecord(Record dirtyRecord, Throwable t) {
         this.collectDirtyRecord(dirtyRecord, t, "");
     }
 
     /**
      * 收集自定义信息，Job插件可以通过getMessage获取该信息 <br >
      * 如果多个key冲突，内部使用List记录同一个key，多个value情况。<br >
-     * @param key message key
+     *
+     * @param key   message key
      * @param value message content
      */
-    public abstract void collectMessage( String key,  String value);
+    public abstract void collectMessage(String key, String value);
 }

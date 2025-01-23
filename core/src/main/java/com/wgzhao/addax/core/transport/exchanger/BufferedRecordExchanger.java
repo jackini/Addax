@@ -42,8 +42,7 @@ import static com.wgzhao.addax.core.util.container.CoreConstant.CORE_TRANSPORT_E
 import static com.wgzhao.addax.core.util.container.CoreConstant.CORE_TRANSPORT_RECORD_CLASS;
 
 public class BufferedRecordExchanger
-        implements RecordSender, RecordReceiver
-{
+        implements RecordSender, RecordReceiver {
 
     private static Class<? extends Record> recordClass;
     protected final int byteCapacity;
@@ -58,8 +57,7 @@ public class BufferedRecordExchanger
     private volatile boolean shutdown = false;
 
     @SuppressWarnings("unchecked")
-    public BufferedRecordExchanger(Channel channel, TaskPluginCollector pluginCollector)
-    {
+    public BufferedRecordExchanger(Channel channel, TaskPluginCollector pluginCollector) {
         assert null != channel;
         assert null != channel.getConfiguration();
 
@@ -79,26 +77,22 @@ public class BufferedRecordExchanger
                     .forName(configuration.getString(
                             CORE_TRANSPORT_RECORD_CLASS,
                             "com.wgzhao.addax.core.transport.record.DefaultRecord")));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(CONFIG_ERROR, e);
         }
     }
 
     @Override
-    public Record createRecord()
-    {
+    public Record createRecord() {
         try {
             return BufferedRecordExchanger.recordClass.getConstructor().newInstance();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(CONFIG_ERROR, e);
         }
     }
 
     @Override
-    public void sendToWriter(Record record)
-    {
+    public void sendToWriter(Record record) {
         if (shutdown) {
             throw AddaxException.asAddaxException(SHUT_DOWN_TASK, "");
         }
@@ -123,8 +117,7 @@ public class BufferedRecordExchanger
     }
 
     @Override
-    public void flush()
-    {
+    public void flush() {
         if (shutdown) {
             throw AddaxException.asAddaxException(SHUT_DOWN_TASK, "");
         }
@@ -135,8 +128,7 @@ public class BufferedRecordExchanger
     }
 
     @Override
-    public void terminate()
-    {
+    public void terminate() {
         if (shutdown) {
             throw AddaxException.asAddaxException(SHUT_DOWN_TASK, "");
         }
@@ -145,8 +137,7 @@ public class BufferedRecordExchanger
     }
 
     @Override
-    public Record getFromReader()
-    {
+    public Record getFromReader() {
         if (shutdown) {
             throw AddaxException.asAddaxException(SHUT_DOWN_TASK, "");
         }
@@ -163,20 +154,17 @@ public class BufferedRecordExchanger
     }
 
     @Override
-    public void shutdown()
-    {
+    public void shutdown() {
         shutdown = true;
         try {
             buffer.clear();
             channel.clear();
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             logger.error(t.getMessage());
         }
     }
 
-    private void receive()
-    {
+    private void receive() {
         this.channel.pullAll(this.buffer);
         this.bufferIndex = 0;
         this.bufferSize = this.buffer.size();

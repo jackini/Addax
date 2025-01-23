@@ -32,50 +32,40 @@ import static com.wgzhao.addax.common.spi.ErrorCode.PERMISSION_ERROR;
  * Created by judy.lt on 2015/6/5.
  */
 public class RdbmsException
-        extends AddaxException
-{
-    public RdbmsException(ErrorCode errorCode, String message)
-    {
+        extends AddaxException {
+    public RdbmsException(ErrorCode errorCode, String message) {
         super(errorCode, message);
     }
 
-    public static AddaxException asConnException(Exception e)
-    {
+    public static AddaxException asConnException(Exception e) {
         return asAddaxException(CONNECT_ERROR, e.getMessage());
     }
 
-    public static AddaxException asQueryException(Exception e, String querySql)
-    {
+    public static AddaxException asQueryException(Exception e, String querySql) {
         return asAddaxException(EXECUTE_FAIL, e.getMessage());
     }
 
-    public static AddaxException asSqlParserException(Exception e, String querySql)
-    {
+    public static AddaxException asSqlParserException(Exception e, String querySql) {
         throw asAddaxException(EXECUTE_FAIL, e.getMessage());
     }
 
-    public static AddaxException asPreSQLParserException(Exception e, String querySql)
-    {
+    public static AddaxException asPreSQLParserException(Exception e, String querySql) {
         throw asAddaxException(EXECUTE_FAIL, e.getMessage());
     }
 
-    public static AddaxException asPostSQLParserException(Exception e, String querySql)
-    {
+    public static AddaxException asPostSQLParserException(Exception e, String querySql) {
         throw asAddaxException(EXECUTE_FAIL, e.getMessage());
     }
 
-    public static AddaxException asInsertPriException(String userName, String jdbcUrl)
-    {
+    public static AddaxException asInsertPriException(String userName, String jdbcUrl) {
         throw asAddaxException(PERMISSION_ERROR, "");
     }
 
-    public static AddaxException asDeletePriException(String userName, String jdbcUrl)
-    {
+    public static AddaxException asDeletePriException(String userName, String jdbcUrl) {
         throw asAddaxException(PERMISSION_ERROR, "");
     }
 
-    public static AddaxException asSplitPKException(Exception e, String splitSql, String splitPkID)
-    {
+    public static AddaxException asSplitPKException(Exception e, String splitSql, String splitPkID) {
         return asAddaxException(EXECUTE_FAIL, e.getMessage());
     }
 }

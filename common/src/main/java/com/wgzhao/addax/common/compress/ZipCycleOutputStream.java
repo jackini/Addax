@@ -25,14 +25,12 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class ZipCycleOutputStream
-        extends OutputStream
-{
+        extends OutputStream {
 
     private final ZipOutputStream zipOutputStream;
 
     public ZipCycleOutputStream(OutputStream out, String fileName)
-            throws IOException
-    {
+            throws IOException {
         this.zipOutputStream = new ZipOutputStream(out);
         ZipEntry currentZipEntry = new ZipEntry(fileName);
         this.zipOutputStream.putNextEntry(currentZipEntry);
@@ -40,16 +38,14 @@ public class ZipCycleOutputStream
 
     @Override
     public void write(int b)
-            throws IOException
-    {
+            throws IOException {
         byte[] data = {(byte) b};
         this.zipOutputStream.write(data, 0, data.length);
     }
 
     @Override
     public void close()
-            throws IOException
-    {
+            throws IOException {
         this.zipOutputStream.closeEntry();
         this.zipOutputStream.close();
     }

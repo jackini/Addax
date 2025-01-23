@@ -29,8 +29,7 @@ import static com.wgzhao.addax.common.spi.ErrorCode.NOT_SUPPORT_TYPE;
 /**
  * 只对 normal 模式读取时有用，多版本读取时，不存在列类型的
  */
-public enum ColumnType
-{
+public enum ColumnType {
     BOOLEAN("boolean"),
     SHORT("short"),
     INT("int"),
@@ -43,13 +42,11 @@ public enum ColumnType
 
     private final String typeName;
 
-    ColumnType(String typeName)
-    {
+    ColumnType(String typeName) {
         this.typeName = typeName;
     }
 
-    public static ColumnType getByTypeName(String typeName)
-    {
+    public static ColumnType getByTypeName(String typeName) {
         if (StringUtils.isBlank(typeName)) {
             throw AddaxException.asAddaxException(NOT_SUPPORT_TYPE,
                     String.format("Hbasereader 不支持该类型:%s, 目前支持的类型是:%s", typeName, Arrays.asList(values())));
@@ -65,8 +62,7 @@ public enum ColumnType
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return this.typeName;
     }
 }

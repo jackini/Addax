@@ -17,8 +17,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class StarRocksWriterManager
-{
+public class StarRocksWriterManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(StarRocksWriterManager.class);
 
@@ -34,8 +33,7 @@ public class StarRocksWriterManager
     private ScheduledExecutorService scheduler;
     private ScheduledFuture<?> scheduledFuture;
 
-    public StarRocksWriterManager(StarRocksWriterOptions writerOptions)
-    {
+    public StarRocksWriterManager(StarRocksWriterOptions writerOptions) {
         this.writerOptions = writerOptions;
         this.starrocksStreamLoadVisitor = new StarRocksStreamLoadVisitor(writerOptions);
         flushQueue = new LinkedBlockingDeque<>(writerOptions.getFlushQueueLength());
@@ -43,8 +41,7 @@ public class StarRocksWriterManager
         this.startAsyncFlushing();
     }
 
-    public void startScheduler()
-    {
+    public void startScheduler() {
         stopScheduler();
         this.scheduler = Executors.newScheduledThreadPool(1, new BasicThreadFactory.Builder().namingPattern("starrocks-interval-flush").daemon(true).build());
         this.scheduledFuture = this.scheduler.schedule(() -> {
@@ -57,8 +54,7 @@ public class StarRocksWriterManager
                             startScheduler();
                         }
                         flush(label, false);
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         flushException = e;
                     }
                 }
@@ -66,8 +62,7 @@ public class StarRocksWriterManager
         }, writerOptions.getFlushInterval(), TimeUnit.MILLISECONDS);
     }
 
-    public void stopScheduler()
-    {
+    public void stopScheduler() {
         if (this.scheduledFuture != null) {
             scheduledFuture.cancel(false);
             this.scheduler.shutdown();
@@ -75,8 +70,7 @@ public class StarRocksWriterManager
     }
 
     public final synchronized void writeRecord(String record)
-            throws IOException
-    {
+            throws IOException {
         checkFlushException();
         try {
             byte[] bts = record.getBytes(StandardCharsets.UTF_8);
@@ -88,15 +82,13 @@ public class StarRocksWriterManager
                 LOG.debug(String.format("StarRocks buffer Sinking triggered: rows[%d] label[%s].", batchCount, label));
                 flush(label, false);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new IOException("Writing records to StarRocks failed.", e);
         }
     }
 
     public synchronized void flush(String label, boolean waitUtilDone)
-            throws Exception
-    {
+            throws Exception {
         checkFlushException();
         if (batchCount == 0) {
             if (waitUtilDone) {
@@ -114,8 +106,7 @@ public class StarRocksWriterManager
         batchSize = 0;
     }
 
-    public synchronized void close()
-    {
+    public synchronized void close() {
         if (!closed) {
             closed = true;
             try {
@@ -124,28 +115,24 @@ public class StarRocksWriterManager
                     LOG.debug(String.format("StarRocks Sink is about to close: label[%s].", label));
                 }
                 flush(label, true);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException("Writing records to StarRocks failed.", e);
             }
         }
         checkFlushException();
     }
 
-    public String createBatchLabel()
-    {
+    public String createBatchLabel() {
         return UUID.randomUUID().toString();
     }
 
-    private void startAsyncFlushing()
-    {
+    private void startAsyncFlushing() {
         // start flush thread
         Thread flushThread = new Thread(() -> {
             while (true) {
                 try {
                     asyncFlush();
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     flushException = e;
                 }
             }
@@ -155,8 +142,7 @@ public class StarRocksWriterManager
     }
 
     private void waitAsyncFlushingDone()
-            throws InterruptedException
-    {
+            throws InterruptedException {
         // wait previous flushings
         for (int i = 0; i <= writerOptions.getFlushQueueLength(); i++) {
             flushQueue.put(new StarRocksFlushTuple("", 0L, null));
@@ -165,8 +151,7 @@ public class StarRocksWriterManager
     }
 
     private void asyncFlush()
-            throws Exception
-    {
+            throws Exception {
         StarRocksFlushTuple flushData = flushQueue.take();
         if (Strings.isNullOrEmpty(flushData.getLabel())) {
             return;
@@ -180,8 +165,7 @@ public class StarRocksWriterManager
                 LOG.info(String.format("Async stream load finished: label[%s].", flushData.getLabel()));
                 startScheduler();
                 break;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Failed to flush batch data to StarRocks, retry times = {}", i, e);
                 if (i >= writerOptions.getMaxRetries()) {
                     throw new IOException(e);
@@ -193,8 +177,7 @@ public class StarRocksWriterManager
                 }
                 try {
                     TimeUnit.SECONDS.sleep(Math.min(i + 1, 10));
-                }
-                catch (InterruptedException ex) {
+                } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
                     throw new IOException("Unable to flush, interrupted while doing another attempt", e);
                 }
@@ -202,8 +185,7 @@ public class StarRocksWriterManager
         }
     }
 
-    private void checkFlushException()
-    {
+    private void checkFlushException() {
         if (flushException != null) {
             throw new RuntimeException("Writing records to StarRocks failed.", flushException);
         }

@@ -38,16 +38,14 @@ import java.util.concurrent.Callable;
  * Created by judy.lt on 2015/6/4.
  */
 public class PreCheckTask
-        implements Callable<Boolean>
-{
+        implements Callable<Boolean> {
     private final String userName;
     private final String password;
     private final String splitPkId;
     private final Configuration connection;
     private final DataBaseType dataBaseType;
 
-    public PreCheckTask(String userName, String password, Configuration connection, DataBaseType dataBaseType, String splitPkId)
-    {
+    public PreCheckTask(String userName, String password, Configuration connection, DataBaseType dataBaseType, String splitPkId) {
         this.connection = connection;
         this.userName = userName;
         this.password = password;
@@ -57,8 +55,7 @@ public class PreCheckTask
 
     @Override
     public Boolean call()
-            throws AddaxException
-    {
+            throws AddaxException {
         String jdbcUrl = this.connection.getString(Key.JDBC_URL);
         List<Object> querySqls = this.connection.getList(Key.QUERY_SQL, Object.class);
         List<Object> splitPkSqls = this.connection.getList(Key.SPLIT_PK_SQL, Object.class);
@@ -81,14 +78,11 @@ public class PreCheckTask
                     if (i == 0) {
                         rs = DBUtil.query(conn, querySql, fetchSize);
                     }
-                }
-                catch (ParserException e) {
+                } catch (ParserException e) {
                     throw RdbmsException.asSqlParserException(e, querySql);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     throw RdbmsException.asQueryException(e, querySql);
-                }
-                finally {
+                } finally {
                     DBUtil.closeDBResources(rs, null, null);
                 }
                 /*verify splitPK*/
@@ -97,19 +91,15 @@ public class PreCheckTask
                         splitPkSql = splitPkSqls.get(i).toString();
                         DBUtil.sqlValid(splitPkSql, dataBaseType);
                     }
-                }
-                catch (ParserException e) {
+                } catch (ParserException e) {
                     throw RdbmsException.asSqlParserException(e, splitPkSql);
-                }
-                catch (AddaxException e) {
+                } catch (AddaxException e) {
                     throw e;
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     throw RdbmsException.asSplitPKException(e, splitPkSql, splitPkId.trim());
                 }
             }
-        }
-        finally {
+        } finally {
             DBUtil.closeDBResources(null, conn);
         }
         return true;

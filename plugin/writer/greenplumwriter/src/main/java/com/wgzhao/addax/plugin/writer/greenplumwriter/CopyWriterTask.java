@@ -47,38 +47,32 @@ import static com.wgzhao.addax.common.base.Key.BATCH_SIZE;
 import static com.wgzhao.addax.common.spi.ErrorCode.EXECUTE_FAIL;
 
 public class CopyWriterTask
-        extends CommonRdbmsWriter.Task
-{
+        extends CommonRdbmsWriter.Task {
     private static final Logger LOG = LoggerFactory.getLogger(CopyWriterTask.class);
     private Configuration writerSliceConfig = null;
 
-    public CopyWriterTask()
-    {
+    public CopyWriterTask() {
         super(DataBaseType.PostgreSQL);
     }
 
-    public String getJdbcUrl()
-    {
+    public String getJdbcUrl() {
         return this.jdbcUrl;
     }
 
-    public Connection createConnection()
-    {
+    public Connection createConnection() {
         String basicMsg = String.format("jdbcUrl:[%s]", this.jdbcUrl);
         Connection connection = DBUtil.getConnection(this.dataBaseType, this.jdbcUrl, username, password);
         DBUtil.dealWithSessionConfig(connection, writerSliceConfig, this.dataBaseType, basicMsg);
         return connection;
     }
 
-    private String constructColumnNameList(List<String> columnList)
-    {
+    private String constructColumnNameList(List<String> columnList) {
         List<String> columns = new ArrayList<>();
 
         for (String column : columnList) {
             if (column.endsWith("\"") && column.startsWith("\"")) {
                 columns.add(column);
-            }
-            else {
+            } else {
                 columns.add("\"" + column + "\"");
             }
         }
@@ -86,8 +80,7 @@ public class CopyWriterTask
         return StringUtils.join(columns, ",");
     }
 
-    public String getCopySql(String tableName, List<String> columnList)
-    {
+    public String getCopySql(String tableName, List<String> columnList) {
 
         return "COPY " + tableName + "(" +
                 constructColumnNameList(columnList) +
@@ -97,8 +90,7 @@ public class CopyWriterTask
 
     @Override
     public void startWrite(RecordReceiver recordReceiver, Configuration writerSliceConfig,
-            TaskPluginCollector taskPluginCollector)
-    {
+                           TaskPluginCollector taskPluginCollector) {
         this.writerSliceConfig = writerSliceConfig;
         int batchSize = writerSliceConfig.getInt(BATCH_SIZE, DEFAULT_BATCH_SIZE);
         Record record;
@@ -124,12 +116,9 @@ public class CopyWriterTask
             if (multiRecords.length() > 0) {
                 mgr.copyIn(sql, new ByteArrayInputStream(multiRecords.toString().getBytes(StandardCharsets.UTF_8)));
             }
-        }
-
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(EXECUTE_FAIL, e);
-        }
-        finally {
+        } finally {
             DBUtil.closeDBResources(null, null, connection);
         }
     }
@@ -141,8 +130,7 @@ public class CopyWriterTask
      * @param data string will be escaped
      * @return escaped string
      */
-    protected String escapeString(String data)
-    {
+    protected String escapeString(String data) {
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < data.length(); ++i) {
@@ -170,16 +158,14 @@ public class CopyWriterTask
      * @param data byte[] bytes array will be escaped
      * @return escaped string
      */
-    protected String escapeBinary(byte[] data)
-    {
+    protected String escapeBinary(byte[] data) {
         StringBuilder sb = new StringBuilder();
 
         for (byte datum : data) {
             if (datum == GPConstant.ESCAPE) {
                 sb.append(GPConstant.ESCAPE);
                 sb.append(GPConstant.ESCAPE);
-            }
-            else if (datum < 0x20 || datum > 0x7e) {
+            } else if (datum < 0x20 || datum > 0x7e) {
                 byte b = datum;
                 char[] val = new char[3];
                 val[2] = (char) ((b & 7) + '0');
@@ -189,8 +175,7 @@ public class CopyWriterTask
                 val[0] = (char) ((b & 3) + '0');
                 sb.append('\\');
                 sb.append(val);
-            }
-            else {
+            } else {
                 sb.append((char) datum);
             }
         }
@@ -198,8 +183,7 @@ public class CopyWriterTask
         return sb.toString();
     }
 
-    protected String serializeRecord(Record record)
-    {
+    protected String serializeRecord(Record record) {
         StringBuilder sb = new StringBuilder();
         Column column;
         for (int i = 0; i < this.columnNumber; i++) {
@@ -256,15 +240,13 @@ public class CopyWriterTask
         return sb.toString();
     }
 
-    private void changeCsvSizeLimit(Connection conn)
-    {
+    private void changeCsvSizeLimit(Connection conn) {
         List<String> sqls = new ArrayList<>();
         sqls.add("set gp_max_csv_line_length = " + GPConstant.MAX_CSV_SIZE);
 
         try {
             WriterUtil.executeSqls(conn, sqls);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LOG.warn("Cannot set gp_max_csv_line_length to {}", GPConstant.MAX_CSV_SIZE);
         }
     }

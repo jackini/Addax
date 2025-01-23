@@ -38,11 +38,9 @@ import static com.wgzhao.addax.common.spi.ErrorCode.CONFIG_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class ExcelReader
-        extends Reader
-{
+        extends Reader {
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
 
         private static final Logger LOG = LoggerFactory.getLogger(Job.class);
 
@@ -50,8 +48,7 @@ public class ExcelReader
         private List<String> sourceFiles;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originConfig = this.getPluginJobConf();
             // Compatible with the old version, path is a string before
             String pathInString = this.originConfig.getNecessaryValue(Key.PATH, REQUIRED_VALUE);
@@ -59,8 +56,7 @@ public class ExcelReader
             if (!pathInString.startsWith("[") && !pathInString.endsWith("]")) {
                 path = new ArrayList<>();
                 path.add(pathInString);
-            }
-            else {
+            } else {
                 path = this.originConfig.getList(Key.PATH, String.class);
                 if (null == path || path.isEmpty()) {
                     throw AddaxException.asAddaxException(REQUIRED_VALUE, "the path is required");
@@ -76,14 +72,12 @@ public class ExcelReader
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             LOG.debug("Begin to split...");
             List<Configuration> readerSplitConfigs = new ArrayList<>();
 
@@ -101,8 +95,7 @@ public class ExcelReader
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
 
         private List<String> sourceFiles;
@@ -110,8 +103,7 @@ public class ExcelReader
         private int skipRows = 0;
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration readerSliceConfig = this.getPluginJobConf();
             this.sourceFiles = readerSliceConfig.getList(Key.SOURCE_FILES, String.class);
             this.header = readerSliceConfig.getBool("header", false);
@@ -125,14 +117,12 @@ public class ExcelReader
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             for (String file : sourceFiles) {
                 LOG.info("begin read file {}", file);
                 ExcelHelper excelHelper = new ExcelHelper(header, skipRows);

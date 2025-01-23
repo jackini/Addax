@@ -67,15 +67,13 @@ import static com.wgzhao.addax.common.spi.ErrorCode.CONFIG_ERROR;
 /**
  * Created by mazhenlin on 2019/8/21.
  */
-public class CassandraReaderHelper
-{
+public class CassandraReaderHelper {
     private static final Logger LOG = LoggerFactory
             .getLogger(CassandraReader.class);
     static CodecRegistry registry = new CodecRegistry();
 
     static String toJSonString(Object o, DataType type)
-            throws Exception
-    {
+            throws Exception {
         if (o == null) {
             return JSON.toJSONString(null);
         }
@@ -93,8 +91,7 @@ public class CassandraReaderHelper
     }
 
     static Object transferObjectForJson(Object o, DataType type)
-            throws TypeNotSupported
-    {
+            throws TypeNotSupported {
         if (o == null) {
             return o;
         }
@@ -162,8 +159,7 @@ public class CassandraReaderHelper
     }
 
     static List transferListForJson(List clist, DataType eleType)
-            throws TypeNotSupported
-    {
+            throws TypeNotSupported {
         List result = new ArrayList();
         switch (eleType.getName()) {
             case ASCII:
@@ -207,8 +203,7 @@ public class CassandraReaderHelper
     }
 
     static Set transferSetForJson(Set cset, DataType eleType)
-            throws TypeNotSupported
-    {
+            throws TypeNotSupported {
         Set result = new HashSet();
         switch (eleType.getName()) {
             case ASCII:
@@ -252,8 +247,7 @@ public class CassandraReaderHelper
     }
 
     static Map<Object, Object> transferMapForJson(Map<Object, Object> cmap, DataType keyType, DataType valueType)
-            throws TypeNotSupported
-    {
+            throws TypeNotSupported {
         Map<Object, Object> newMap = new HashMap<>();
         for (Object e : cmap.entrySet()) {
             Object k = ((Map.Entry) e).getKey();
@@ -269,8 +263,7 @@ public class CassandraReaderHelper
     }
 
     static List<Object> transferTupleForJson(TupleValue tupleValue, List<DataType> componentTypes)
-            throws TypeNotSupported
-    {
+            throws TypeNotSupported {
         List<Object> l = new ArrayList<>();
         for (int j = 0; j < componentTypes.size(); j++) {
             DataType dataType = componentTypes.get(j);
@@ -282,8 +275,7 @@ public class CassandraReaderHelper
     }
 
     static Map<String, Object> transferUDTForJson(UDTValue udtValue)
-            throws TypeNotSupported
-    {
+            throws TypeNotSupported {
         Map<String, Object> newMap = new HashMap<>();
         int j = 0;
         for (UserType.Field f : udtValue.getType()) {
@@ -297,8 +289,7 @@ public class CassandraReaderHelper
     }
 
     static Record buildRecord(Record record, Row rs, ColumnDefinitions metaData, int columnNumber,
-            TaskPluginCollector taskPluginCollector)
-    {
+                              TaskPluginCollector taskPluginCollector) {
 
         try {
             for (int i = 0; i < columnNumber; i++) {
@@ -428,8 +419,7 @@ public class CassandraReaderHelper
                                                     metaData.getName(i),
                                                     metaData.getType(i)));
                     }
-                }
-                catch (TypeNotSupported t) {
+                } catch (TypeNotSupported t) {
                     throw AddaxException
                             .asAddaxException(
                                     CONFIG_ERROR,
@@ -440,8 +430,7 @@ public class CassandraReaderHelper
                                             metaData.getType(i)));
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             //TODO 这里识别为脏数据靠谱吗？
             taskPluginCollector.collectDirtyRecord(record, e);
             if (e instanceof AddaxException) {
@@ -452,8 +441,7 @@ public class CassandraReaderHelper
         return record;
     }
 
-    public static List<Configuration> splitJob(int adviceNumber, Configuration jobConfig, Cluster cluster)
-    {
+    public static List<Configuration> splitJob(int adviceNumber, Configuration jobConfig, Cluster cluster) {
         List<Configuration> splitConfigs = new ArrayList<Configuration>();
         if (adviceNumber <= 1) {
             splitConfigs.add(jobConfig);
@@ -481,8 +469,7 @@ public class CassandraReaderHelper
                 taskConfig.set(MyKey.MAX_TOKEN, r.toString());
                 splitConfigs.add(taskConfig);
             }
-        }
-        else if (partitioner.endsWith("Murmur3Partitioner")) {
+        } else if (partitioner.endsWith("Murmur3Partitioner")) {
             BigDecimal minToken = BigDecimal.valueOf(Long.MIN_VALUE);
             BigDecimal maxToken = BigDecimal.valueOf(Long.MAX_VALUE);
             BigDecimal step = maxToken.subtract(minToken)
@@ -498,15 +485,13 @@ public class CassandraReaderHelper
                 taskConfig.set(MyKey.MAX_TOKEN, String.valueOf(r));
                 splitConfigs.add(taskConfig);
             }
-        }
-        else {
+        } else {
             splitConfigs.add(jobConfig);
         }
         return splitConfigs;
     }
 
-    public static String getQueryString(Configuration taskConfig, Cluster cluster)
-    {
+    public static String getQueryString(Configuration taskConfig, Cluster cluster) {
         List<String> columnMeta = taskConfig.getList(MyKey.COLUMN, String.class);
         String keyspace = taskConfig.getString(MyKey.KEYSPACE);
         String table = taskConfig.getString(MyKey.TABLE);
@@ -565,8 +550,7 @@ public class CassandraReaderHelper
         return select.toString();
     }
 
-    public static void checkConfig(Configuration jobConfig, Cluster cluster)
-    {
+    public static void checkConfig(Configuration jobConfig, Cluster cluster) {
         ensureStringExists(jobConfig, MyKey.HOST);
         ensureStringExists(jobConfig, MyKey.KEYSPACE);
         ensureStringExists(jobConfig, MyKey.TABLE);
@@ -604,8 +588,7 @@ public class CassandraReaderHelper
         }
     }
 
-    static void ensureExists(Configuration jobConfig, String keyword)
-    {
+    static void ensureExists(Configuration jobConfig, String keyword) {
         if (jobConfig.get(keyword) == null) {
             throw AddaxException
                     .asAddaxException(
@@ -616,8 +599,7 @@ public class CassandraReaderHelper
         }
     }
 
-    static void ensureStringExists(Configuration jobConfig, String keyword)
-    {
+    static void ensureStringExists(Configuration jobConfig, String keyword) {
         ensureExists(jobConfig, keyword);
         if (jobConfig.getString(keyword).isEmpty()) {
             throw AddaxException
@@ -630,5 +612,6 @@ public class CassandraReaderHelper
     }
 
     static class TypeNotSupported
-            extends Exception {}
+            extends Exception {
+    }
 }

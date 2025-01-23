@@ -43,8 +43,7 @@ import static com.wgzhao.addax.core.util.container.CoreConstant.CORE_TRANSPORT_C
  * <p>
  * 统计和限速都在这里
  */
-public abstract class Channel
-{
+public abstract class Channel {
 
     private static final Logger LOG = LoggerFactory.getLogger(Channel.class);
     private static Boolean isFirstPrint = true;
@@ -61,8 +60,7 @@ public abstract class Channel
     protected volatile AtomicLong waitWriterTime = new AtomicLong(0);
     private Communication currentCommunication;
 
-    public Channel(Configuration configuration)
-    {
+    public Channel(Configuration configuration) {
         //channel的queue里默认record为1万条。原来为512条
         int capacity = configuration.getInt(CORE_TRANSPORT_CHANNEL_CAPACITY, 2048);
         long byteSpeed = configuration.getLong(CORE_TRANSPORT_CHANNEL_SPEED_BYTE, 1024 * 1024L);
@@ -88,67 +86,56 @@ public abstract class Channel
         this.configuration = configuration;
     }
 
-    public void close()
-    {
+    public void close() {
         this.isClosed = true;
     }
 
-    public int getTaskGroupId()
-    {
+    public int getTaskGroupId() {
         return this.taskGroupId;
     }
 
-    public int getCapacity()
-    {
+    public int getCapacity() {
         return capacity;
     }
 
-    public long getByteSpeed()
-    {
+    public long getByteSpeed() {
         return byteSpeed;
     }
 
-    public Configuration getConfiguration()
-    {
+    public Configuration getConfiguration() {
         return this.configuration;
     }
 
-    public void setCommunication(final Communication communication)
-    {
+    public void setCommunication(final Communication communication) {
         this.currentCommunication = communication;
         this.lastCommunication.reset();
     }
 
-    public void push(Record r)
-    {
+    public void push(Record r) {
         Validate.notNull(r, "The record cannot be empty.");
         this.doPush(r);
         this.statPush(1L, r.getByteSize());
     }
 
-    public void pushTerminate(TerminateRecord r)
-    {
+    public void pushTerminate(TerminateRecord r) {
         Validate.notNull(r, "The record cannot be empty.");
         this.doPush(r);
     }
 
-    public void pushAll(Collection<Record> rs)
-    {
+    public void pushAll(Collection<Record> rs) {
         Validate.notNull(rs, "The Record must not be empty");
         Validate.noNullElements(rs);
         this.doPushAll(rs);
         this.statPush(rs.size(), this.getByteSize(rs));
     }
 
-    public Record pull()
-    {
+    public Record pull() {
         Record record = this.doPull();
         this.statPull(1L, record.getByteSize());
         return record;
     }
 
-    public void pullAll(Collection<Record> rs)
-    {
+    public void pullAll(Collection<Record> rs) {
         Validate.notNull(rs, "The Record must not be empty");
         this.doPullAll(rs);
         this.statPull(rs.size(), this.getByteSize(rs));
@@ -168,8 +155,7 @@ public abstract class Channel
 
     public abstract void clear();
 
-    private long getByteSize(Collection<Record> rs)
-    {
+    private long getByteSize(Collection<Record> rs) {
         long size = 0;
         for (Record each : rs) {
             size += each.getByteSize();
@@ -177,8 +163,7 @@ public abstract class Channel
         return size;
     }
 
-    private void statPush(long recordSize, long byteSize)
-    {
+    private void statPush(long recordSize, long byteSize) {
         currentCommunication.increaseCounter(CommunicationTool.READ_SUCCEED_RECORDS, recordSize);
         currentCommunication.increaseCounter(CommunicationTool.READ_SUCCEED_BYTES, byteSize);
         //在读的时候进行统计waitCounter即可，因为写（pull）的时候可能正在阻塞，但读的时候已经能读到这个阻塞的counter数
@@ -221,8 +206,7 @@ public abstract class Channel
             if (sleepTime > 0) {
                 try {
                     Thread.sleep(sleepTime);
-                }
-                catch (InterruptedException e) {
+                } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
             }
@@ -239,8 +223,7 @@ public abstract class Channel
         }
     }
 
-    private void statPull(long recordSize, long byteSize)
-    {
+    private void statPull(long recordSize, long byteSize) {
         currentCommunication.increaseCounter(CommunicationTool.WRITE_RECEIVED_RECORDS, recordSize);
         currentCommunication.increaseCounter(CommunicationTool.WRITE_RECEIVED_BYTES, byteSize);
     }

@@ -32,21 +32,18 @@ import java.util.Map;
 import static com.wgzhao.addax.common.spi.ErrorCode.CONFIG_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.EXECUTE_FAIL;
 
-public class SchemaManager
-{
+public class SchemaManager {
     private static final Logger LOG = LoggerFactory.getLogger(SchemaManager.class);
 
     private final Connection conn;
     private TimestampPrecision precision;
 
-    SchemaManager(Connection conn)
-    {
+    SchemaManager(Connection conn) {
         this.conn = conn;
     }
 
     public TimestampPrecision loadDatabasePrecision()
-            throws AddaxException
-    {
+            throws AddaxException {
         if (this.precision != null) {
             return this.precision;
         }
@@ -81,16 +78,14 @@ public class SchemaManager
                         this.precision = TimestampPrecision.MILLISEC;
                 }
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             throw AddaxException.asAddaxException(EXECUTE_FAIL, e.getMessage());
         }
         return this.precision;
     }
 
     public Map<String, TableMeta> loadTableMeta(List<String> tables)
-            throws AddaxException
-    {
+            throws AddaxException {
         Map<String, TableMeta> tableMetas = new HashMap();
 
         try (Statement stmt = conn.createStatement()) {
@@ -117,16 +112,14 @@ public class SchemaManager
                     throw AddaxException.asAddaxException(CONFIG_ERROR, "table metadata of " + tbname + " is empty!");
                 }
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             throw AddaxException.asAddaxException(EXECUTE_FAIL, e.getMessage());
         }
         return tableMetas;
     }
 
     public Map<String, List<ColumnMeta>> loadColumnMetas(List<String> tables)
-            throws AddaxException
-    {
+            throws AddaxException {
         Map<String, List<ColumnMeta>> ret = new HashMap<>();
 
         for (String table : tables) {
@@ -137,8 +130,7 @@ public class SchemaManager
                     ColumnMeta columnMeta = buildColumnMeta(rs, i == 0);
                     columnMetaList.add(columnMeta);
                 }
-            }
-            catch (SQLException e) {
+            } catch (SQLException e) {
                 throw AddaxException.asAddaxException(EXECUTE_FAIL, e.getMessage());
             }
 
@@ -159,8 +151,7 @@ public class SchemaManager
                             break;
                         }
                     }
-                }
-                catch (SQLException e) {
+                } catch (SQLException e) {
                     e.printStackTrace();
                 }
                 colMeta.value = value;
@@ -173,8 +164,7 @@ public class SchemaManager
     }
 
     private TableMeta buildSupTableMeta(ResultSet rs)
-            throws SQLException
-    {
+            throws SQLException {
         TableMeta tableMeta = new TableMeta();
         tableMeta.tableType = TableType.SUP_TABLE;
         tableMeta.tbname = rs.getString("name");
@@ -187,8 +177,7 @@ public class SchemaManager
     }
 
     private TableMeta buildSubTableMeta(ResultSet rs)
-            throws SQLException
-    {
+            throws SQLException {
         TableMeta tableMeta = new TableMeta();
         String stable_name = rs.getString("stable_name");
         tableMeta.tableType = StringUtils.isBlank(stable_name) ? TableType.NML_TABLE : TableType.SUB_TABLE;
@@ -201,8 +190,7 @@ public class SchemaManager
     }
 
     private ColumnMeta buildColumnMeta(ResultSet rs, boolean isPrimaryKey)
-            throws SQLException
-    {
+            throws SQLException {
         ColumnMeta columnMeta = new ColumnMeta();
         columnMeta.field = rs.getString("Field");
         columnMeta.type = rs.getString("Type");

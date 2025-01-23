@@ -44,17 +44,16 @@ import static com.wgzhao.addax.common.spi.ErrorCode.CONFIG_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
-public final class OriginalConfPretreatmentUtil
-{
+public final class OriginalConfPretreatmentUtil {
     private static final Logger LOG = LoggerFactory.getLogger(OriginalConfPretreatmentUtil.class);
 
     public static DataBaseType dataBaseType;
     private static final String jdbcUrlPath = Key.CONNECTION + "." + Key.JDBC_URL;
 
-    private OriginalConfPretreatmentUtil() {}
+    private OriginalConfPretreatmentUtil() {
+    }
 
-    public static void doPretreatment(Configuration originalConfig, DataBaseType dataBaseType)
-    {
+    public static void doPretreatment(Configuration originalConfig, DataBaseType dataBaseType) {
         // 检查 username 配置（必填）
         originalConfig.getNecessaryValue(Key.USERNAME, REQUIRED_VALUE);
         String pass = originalConfig.getString(Key.PASSWORD, null);
@@ -72,8 +71,7 @@ public final class OriginalConfPretreatmentUtil
         dealWriteMode(originalConfig, dataBaseType);
     }
 
-    public static void doCheckBatchSize(Configuration originalConfig)
-    {
+    public static void doCheckBatchSize(Configuration originalConfig) {
         // 检查batchSize 配置（选填，如果未填写，则设置为默认值）
         int batchSize = originalConfig.getInt(Key.BATCH_SIZE, Constant.DEFAULT_BATCH_SIZE);
         if (batchSize < 1) {
@@ -84,8 +82,7 @@ public final class OriginalConfPretreatmentUtil
         originalConfig.set(Key.BATCH_SIZE, batchSize);
     }
 
-    public static void simplifyConf(Configuration originalConfig)
-    {
+    public static void simplifyConf(Configuration originalConfig) {
         Configuration connConf = originalConfig.getConfiguration(Key.CONNECTION);
 
         // 是否配置的定制的驱动名称
@@ -121,20 +118,17 @@ public final class OriginalConfPretreatmentUtil
         originalConfig.set(Key.TABLE_NUMBER, expandedTables.size());
     }
 
-    public static void dealColumnConf(Configuration originalConfig, ConnectionFactory connectionFactory, String oneTable)
-    {
+    public static void dealColumnConf(Configuration originalConfig, ConnectionFactory connectionFactory, String oneTable) {
         List<String> userConfiguredColumns = originalConfig.getList(Key.COLUMN, String.class);
         if (null == userConfiguredColumns || userConfiguredColumns.isEmpty()) {
             throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                     "The item column is required and can not be empty.");
-        }
-        else {
+        } else {
             boolean isPreCheck = originalConfig.getBool(Key.DRY_RUN, false);
             List<String> allColumns;
             if (isPreCheck) {
                 allColumns = DBUtil.getTableColumnsByConn(connectionFactory.getConnectionWithoutRetry(), oneTable);
-            }
-            else {
+            } else {
                 allColumns = DBUtil.getTableColumnsByConn(connectionFactory.getConnection(), oneTable);
             }
 
@@ -147,13 +141,11 @@ public final class OriginalConfPretreatmentUtil
 
                 // 回填其值，需要以 String 的方式转交后续处理
                 originalConfig.set(Key.COLUMN, allColumns);
-            }
-            else if (userConfiguredColumns.size() > allColumns.size()) {
+            } else if (userConfiguredColumns.size() > allColumns.size()) {
                 throw AddaxException.asAddaxException(CONFIG_ERROR,
                         "The number of columns your configured " + userConfiguredColumns.size()
                                 + "are greater than the number of table columns " + allColumns.size());
-            }
-            else {
+            } else {
                 // 确保用户配置的 column 不重复
                 ListUtil.makeSureNoValueDuplicate(userConfiguredColumns, false);
                 Connection connection = null;
@@ -161,16 +153,14 @@ public final class OriginalConfPretreatmentUtil
                     // 检查列是否都为数据库表中正确的列（通过执行一次 select column from table 进行判断）
                     connection = connectionFactory.getConnection();
                     DBUtil.getColumnMetaData(connection, oneTable, StringUtils.join(userConfiguredColumns, ","));
-                }
-                finally {
+                } finally {
                     DBUtil.closeDBResources(null, null, connection);
                 }
             }
         }
     }
 
-    public static void dealColumnConf(Configuration originalConfig)
-    {
+    public static void dealColumnConf(Configuration originalConfig) {
         String jdbcUrl = originalConfig.getString(jdbcUrlPath);
         String username = originalConfig.getString(Key.USERNAME);
         String password = originalConfig.getString(Key.PASSWORD);
@@ -180,8 +170,7 @@ public final class OriginalConfPretreatmentUtil
         dealColumnConf(originalConfig, jdbcConnectionFactory, oneTable);
     }
 
-    public static void dealWriteMode(Configuration originalConfig, DataBaseType dataBaseType)
-    {
+    public static void dealWriteMode(Configuration originalConfig, DataBaseType dataBaseType) {
         List<String> columns = originalConfig.getList(Key.COLUMN, String.class);
         String writeMode = originalConfig.getString(Key.WRITE_MODE, "INSERT");
         List<String> valueHolders = new ArrayList<>(columns.size());

@@ -28,11 +28,9 @@ import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
 
 public class S3Reader
-        extends Reader
-{
+        extends Reader {
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
         private static final Logger LOG = LoggerFactory.getLogger(S3Reader.Job.class);
 
         private Configuration readerOriginConfig = null;
@@ -41,16 +39,14 @@ public class S3Reader
         private S3Client client = null;
 
         @Override
-        public void init()
-        {
+        public void init() {
             LOG.debug("init() begin...");
             this.readerOriginConfig = this.getPluginJobConf();
             this.validate();
             LOG.debug("init() ok and end...");
         }
 
-        private void validate()
-        {
+        private void validate() {
             readerOriginConfig.getNecessaryValue(S3Key.REGION, REQUIRED_VALUE);
             readerOriginConfig.getNecessaryValue(S3Key.ACCESS_ID, REQUIRED_VALUE);
             readerOriginConfig.getNecessaryValue(S3Key.ACCESS_KEY, REQUIRED_VALUE);
@@ -60,12 +56,10 @@ public class S3Reader
             String encoding = readerOriginConfig.getString(S3Key.ENCODING, Constant.DEFAULT_ENCODING);
             try {
                 Charsets.toCharset(encoding);
-            }
-            catch (UnsupportedCharsetException uce) {
+            } catch (UnsupportedCharsetException uce) {
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                         String.format("unsupported encoding : [%s]", encoding), uce);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                         String.format("Runtime Error : %s", e.getMessage()), e);
             }
@@ -75,8 +69,7 @@ public class S3Reader
             if (null != column && 1 == column.size() && ("\"*\"".equals(column.get(0).toString())
                     || "'*'".equals(column.get(0).toString()))) {
                 readerOriginConfig.set(S3Key.COLUMN, new ArrayList<String>());
-            }
-            else {
+            } else {
                 // column: 1. index type 2.value type 3.when type is Data, maybe with format string
                 List<Configuration> columns = readerOriginConfig.getListConfiguration(S3Key.COLUMN);
 
@@ -108,16 +101,14 @@ public class S3Reader
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             if (null != this.client) {
                 this.client.close();
             }
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             LOG.debug("split() begin...");
             List<Configuration> readerSplitConfigs = new ArrayList<>();
 
@@ -142,23 +133,20 @@ public class S3Reader
             return readerSplitConfigs;
         }
 
-        private List<String> parseOriginObjects(List<String> originObjects)
-        {
+        private List<String> parseOriginObjects(List<String> originObjects) {
             List<String> parsedObjects = new ArrayList<>();
             for (String object : originObjects) {
                 if (object.indexOf('*') > -1 || object.indexOf('?') > -1) {
                     List<String> remoteObjects = listObjectsWithPattern(object);
                     parsedObjects.addAll(remoteObjects);
-                }
-                else {
+                } else {
                     parsedObjects.add(object);
                 }
             }
             return parsedObjects;
         }
 
-        private List<String> listObjectsWithPattern(String pattern)
-        {
+        private List<String> listObjectsWithPattern(String pattern) {
             // Extract the prefix from the pattern up to the first wildcard character
             int firstWildcardIndex = Math.min(
                     pattern.indexOf('*') == -1 ? pattern.length() : pattern.indexOf('*'),
@@ -196,15 +184,13 @@ public class S3Reader
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
 
         private Configuration readerSliceConfig;
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             LOG.debug("Begin to start reading");
             String object = readerSliceConfig.getString(S3Key.OBJECT);
 
@@ -218,21 +204,18 @@ public class S3Reader
                         this.readerSliceConfig, recordSender,
                         this.getTaskPluginCollector());
                 recordSender.flush();
-            }
-            catch (NoSuchKeyException e) {
+            } catch (NoSuchKeyException e) {
                 LOG.warn("The object {} does not exists", object);
             }
         }
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.readerSliceConfig = this.getPluginJobConf();
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
 
         }
     }

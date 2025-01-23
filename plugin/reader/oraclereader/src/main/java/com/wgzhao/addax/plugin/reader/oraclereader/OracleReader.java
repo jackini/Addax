@@ -48,20 +48,17 @@ import static com.wgzhao.addax.common.spi.ErrorCode.CONFIG_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 
 public class OracleReader
-        extends Reader
-{
+        extends Reader {
 
     private static final DataBaseType DATABASE_TYPE = DataBaseType.Oracle;
 
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
         private Configuration originalConfig = null;
         private CommonRdbmsReader.Job commonRdbmsReaderJob;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = super.getPluginJobConf();
 
             dealFetchSize(this.originalConfig);
@@ -74,31 +71,26 @@ public class OracleReader
         }
 
         @Override
-        public void preCheck()
-        {
+        public void preCheck() {
             this.commonRdbmsReaderJob.preCheck(this.originalConfig, DATABASE_TYPE);
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             return this.commonRdbmsReaderJob.split(this.originalConfig, adviceNumber);
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsReaderJob.post(this.originalConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsReaderJob.destroy(this.originalConfig);
         }
 
-        private void dealFetchSize(Configuration originalConfig)
-        {
+        private void dealFetchSize(Configuration originalConfig) {
             int fetchSize = originalConfig.getInt(FETCH_SIZE, DEFAULT_FETCH_SIZE);
             if (fetchSize < 1) {
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE,
@@ -107,8 +99,7 @@ public class OracleReader
             originalConfig.set(FETCH_SIZE, fetchSize);
         }
 
-        private void dealHint(Configuration originalConfig)
-        {
+        private void dealHint(Configuration originalConfig) {
             String hint = originalConfig.getString(Key.HINT);
             if (StringUtils.isNotBlank(hint)) {
                 boolean isTableMode = originalConfig.getBool(IS_TABLE_MODE);
@@ -122,33 +113,27 @@ public class OracleReader
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
 
         private Configuration readerSliceConfig;
         private CommonRdbmsReader.Task commonRdbmsReaderTask;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.readerSliceConfig = getPluginJobConf();
-            this.commonRdbmsReaderTask = new CommonRdbmsReader.Task(DATABASE_TYPE, getTaskGroupId(), getTaskId())
-            {
+            this.commonRdbmsReaderTask = new CommonRdbmsReader.Task(DATABASE_TYPE, getTaskGroupId(), getTaskId()) {
                 @Override
                 protected Column createColumn(ResultSet rs, ResultSetMetaData metaData, int i)
-                        throws SQLException, UnsupportedEncodingException
-                {
+                        throws SQLException, UnsupportedEncodingException {
                     int dataType = metaData.getColumnType(i);
                     if (dataType == Types.STRUCT) {
                         try {
                             JGeometry geom = JGeometry.load(rs.getBytes(i));
                             return new StringColumn(convertGeometryToJson(geom));
-                        }
-                        catch (Exception e) {
+                        } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
-                    }
-                    else {
+                    } else {
                         return super.createColumn(rs, metaData, i);
                     }
                 }
@@ -157,27 +142,23 @@ public class OracleReader
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             int fetchSize = this.readerSliceConfig.getInt(FETCH_SIZE);
 
             this.commonRdbmsReaderTask.startRead(this.readerSliceConfig, recordSender, getTaskPluginCollector(), fetchSize);
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsReaderTask.post(this.readerSliceConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsReaderTask.destroy(this.readerSliceConfig);
         }
 
-        private String convertGeometryToJson(JGeometry geometry)
-        {
+        private String convertGeometryToJson(JGeometry geometry) {
             // Get the type of the geometry object
             JSONArray result = new JSONArray();
             JGeometry[] geoElems = geometry.getElements();

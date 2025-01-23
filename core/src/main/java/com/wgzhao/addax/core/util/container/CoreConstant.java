@@ -26,8 +26,7 @@ import java.io.File;
 /**
  * Created by jingxing on 14-8-25.
  */
-public class CoreConstant
-{
+public class CoreConstant {
     // --------------------------- 全局使用的变量(最好按照逻辑顺序，调整下成员变量顺序)
     // --------------------------------
     public static final String CORE_CONTAINER_TASK_GROUP_CHANNEL = "core.container.taskGroup.channel";
@@ -141,14 +140,14 @@ public class CoreConstant
 
     public static final String HOME = System.getProperty("addax.home");
 
-    public static final String CONF_PATH = StringUtils.join(new String[] {HOME, "conf", "core.json"}, File.separator);
+    public static final String CONF_PATH = StringUtils.join(new String[]{HOME, "conf", "core.json"}, File.separator);
 
-    public static final String PLUGIN_HOME = StringUtils.join(new String[] {HOME, "plugin"}, File.separator);
+    public static final String PLUGIN_HOME = StringUtils.join(new String[]{HOME, "plugin"}, File.separator);
 
-    public static final String PLUGIN_READER_HOME = StringUtils.join(new String[] {PLUGIN_HOME, "reader"}, File.separator);
+    public static final String PLUGIN_READER_HOME = StringUtils.join(new String[]{PLUGIN_HOME, "reader"}, File.separator);
 
-    public static final String PLUGIN_WRITER_HOME = StringUtils.join(new String[] {PLUGIN_HOME, "writer"}, File.separator);
+    public static final String PLUGIN_WRITER_HOME = StringUtils.join(new String[]{PLUGIN_HOME, "writer"}, File.separator);
 
-    public static final String STORAGE_TRANSFORMER_HOME = StringUtils.join(new String[] {HOME, "local_storage",
+    public static final String STORAGE_TRANSFORMER_HOME = StringUtils.join(new String[]{HOME, "local_storage",
             "transformer"}, File.separator);
 }

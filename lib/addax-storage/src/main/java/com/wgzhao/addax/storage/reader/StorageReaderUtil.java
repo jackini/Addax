@@ -71,19 +71,16 @@ import static com.wgzhao.addax.common.spi.ErrorCode.NOT_SUPPORT_TYPE;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
 
-public class StorageReaderUtil
-{
+public class StorageReaderUtil {
     private static final Logger LOG = LoggerFactory.getLogger(StorageReaderUtil.class);
 
-    private StorageReaderUtil()
-    {
+    private StorageReaderUtil() {
 
     }
 
     public static void readFromStream(InputStream inputStream, String fileName,
-            Configuration readerSliceConfig, RecordSender recordSender,
-            TaskPluginCollector taskPluginCollector)
-    {
+                                      Configuration readerSliceConfig, RecordSender recordSender,
+                                      TaskPluginCollector taskPluginCollector) {
         String compress = readerSliceConfig.getString(Key.COMPRESS, "");
 
         String encoding = readerSliceConfig.getString(Key.ENCODING, Constant.DEFAULT_ENCODING);
@@ -106,50 +103,41 @@ public class StorageReaderUtil
         try {
             if (compress == null || compress.isEmpty() || "none".equalsIgnoreCase(compress)) {
                 reader = new BufferedReader(new InputStreamReader(inputStream, encoding), bufferSize);
-            }
-            else {
+            } else {
                 if ("zip".equalsIgnoreCase(compress)) {
                     ZipCycleInputStream zipCycleInputStream = new ZipCycleInputStream(inputStream);
                     reader = new BufferedReader(new InputStreamReader(zipCycleInputStream, encoding), bufferSize);
-                }
-                else if ("lzo".equalsIgnoreCase(compress)) {
+                } else if ("lzo".equalsIgnoreCase(compress)) {
                     ExpandLzopInputStream expandLzopInputStream = new ExpandLzopInputStream(inputStream);
                     reader = new BufferedReader(new InputStreamReader(expandLzopInputStream, encoding), bufferSize);
-                }
-                else {
+                } else {
                     // common-compress supports almost compress alg
                     CompressorInputStream input = new CompressorStreamFactory().createCompressorInputStream(compress.toUpperCase(), inputStream, true);
                     reader = new BufferedReader(new InputStreamReader(input, encoding), bufferSize);
                 }
             }
             StorageReaderUtil.doReadFromStream(reader, fileName, readerSliceConfig, recordSender, taskPluginCollector);
-        }
-        catch (UnsupportedEncodingException uee) {
+        } catch (UnsupportedEncodingException uee) {
             throw AddaxException.asAddaxException(
                     ENCODING_ERROR,
                     String.format("%s is unsupported", encoding), uee);
-        }
-        catch (NullPointerException e) {
+        } catch (NullPointerException e) {
             throw AddaxException.asAddaxException(RUNTIME_ERROR, e);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw AddaxException.asAddaxException(
                     IO_ERROR, String.format("Failed to read stream [%s].", fileName), e);
-        }
-        catch (CompressorException e) {
+        } catch (CompressorException e) {
             throw AddaxException.asAddaxException(NOT_SUPPORT_TYPE,
                     "The compress algorithm [" + compress + "] is unsupported yet"
             );
-        }
-        finally {
+        } finally {
             IOUtils.closeQuietly(reader, null);
         }
     }
 
     public static void doReadFromStream(BufferedReader reader, String fileName,
-            Configuration readerSliceConfig, RecordSender recordSender,
-            TaskPluginCollector taskPluginCollector)
-    {
+                                        Configuration readerSliceConfig, RecordSender recordSender,
+                                        TaskPluginCollector taskPluginCollector) {
         CSVFormat.Builder csvFormatBuilder = CSVFormat.DEFAULT.builder();
         String encoding = readerSliceConfig.getString(Key.ENCODING, Constant.DEFAULT_ENCODING);
         Character fieldDelimiter;
@@ -183,33 +171,27 @@ public class StorageReaderUtil
                     StorageReaderUtil.transportOneRecord(recordSender, column, csvRecord.toList().toArray(new String[0]), nullFormat, taskPluginCollector)
             );
             csvParser.close();
-        }
-        catch (UnsupportedEncodingException uee) {
+        } catch (UnsupportedEncodingException uee) {
             throw AddaxException.asAddaxException(
                     ENCODING_ERROR,
                     String.format("The encoding: [%s] is unsupported", encoding), uee);
-        }
-        catch (FileNotFoundException fnfe) {
+        } catch (FileNotFoundException fnfe) {
             throw AddaxException.asAddaxException(
                     IO_ERROR, String.format("The file [%s] does not exists ", fileName), fnfe);
-        }
-        catch (IOException ioe) {
+        } catch (IOException ioe) {
             throw AddaxException.asAddaxException(
                     IO_ERROR, String.format("Failed to ead file [%s]", fileName), ioe);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     RUNTIME_ERROR, e);
-        }
-        finally {
+        } finally {
 
             IOUtils.closeQuietly(reader, null);
         }
     }
 
     public static void transportOneRecord(RecordSender recordSender, Configuration configuration,
-            TaskPluginCollector taskPluginCollector, String line)
-    {
+                                          TaskPluginCollector taskPluginCollector, String line) {
         List<ColumnEntry> column = StorageReaderUtil.getListColumnEntry(configuration, Key.COLUMN);
         // 注意: nullFormat 没有默认值
         String nullFormat = configuration.getString(Key.NULL_FORMAT);
@@ -224,8 +206,7 @@ public class StorageReaderUtil
     }
 
     public static void transportOneRecord(RecordSender recordSender, List<ColumnEntry> columnConfigs, String[] sourceLine,
-            String nullFormat, TaskPluginCollector taskPluginCollector)
-    {
+                                          String nullFormat, TaskPluginCollector taskPluginCollector) {
         Record record = recordSender.createRecord();
         Column columnGenerated;
 
@@ -235,15 +216,13 @@ public class StorageReaderUtil
                 // not equalsIgnoreCase, it's all ok if nullFormat is null
                 if (columnValue.equals(nullFormat)) {
                     columnGenerated = new StringColumn(null);
-                }
-                else {
+                } else {
                     columnGenerated = new StringColumn(columnValue);
                 }
                 record.addColumn(columnGenerated);
             }
             recordSender.sendToWriter(record);
-        }
-        else {
+        } else {
             try {
                 for (ColumnEntry columnConfig : columnConfigs) {
                     String columnType = columnConfig.getType();
@@ -268,8 +247,7 @@ public class StorageReaderUtil
                                     columnIndex + 1, sourceLine.length, StringUtils.join(sourceLine, ",")));
                         }
                         columnValue = sourceLine[columnIndex];
-                    }
-                    else {
+                    } else {
                         columnValue = columnConst;
                     }
                     Type type = Type.valueOf(columnType.toUpperCase());
@@ -298,8 +276,7 @@ public class StorageReaderUtil
                                     // 用户自己配置的格式转换, 脏数据行为出现变化
                                     DateFormat format = columnConfig.getDateFormat();
                                     columnGenerated = new DateColumn(format.parse(columnValue));
-                                }
-                                else {
+                                } else {
                                     // 框架尝试转换
                                     columnGenerated = new DateColumn(new StringColumn(columnValue).asDate());
                                 }
@@ -309,20 +286,17 @@ public class StorageReaderUtil
                                 LOG.error(errorMessage);
                                 throw AddaxException.asAddaxException(NOT_SUPPORT_TYPE, errorMessage);
                         }
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         throw new IllegalArgumentException(String.format("Cast value [%s] to type [%s] failure", columnValue, type.name()));
                     }
 
                     record.addColumn(columnGenerated);
                 }
                 recordSender.sendToWriter(record);
-            }
-            catch (IllegalArgumentException | IndexOutOfBoundsException iae) {
+            } catch (IllegalArgumentException | IndexOutOfBoundsException iae) {
                 LOG.error(iae.getMessage());
                 taskPluginCollector.collectDirtyRecord(record, iae.getMessage());
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 if (e instanceof AddaxException) {
                     throw (AddaxException) e;
                 }
@@ -332,8 +306,7 @@ public class StorageReaderUtil
         }
     }
 
-    public static List<ColumnEntry> getListColumnEntry(Configuration configuration, final String path)
-    {
+    public static List<ColumnEntry> getListColumnEntry(Configuration configuration, final String path) {
         List<JSONObject> lists = configuration.getList(path, JSONObject.class);
         if (lists == null) {
             return null;
@@ -350,8 +323,7 @@ public class StorageReaderUtil
      *
      * @param readerConfiguration 配置项
      */
-    public static void validateParameter(Configuration readerConfiguration)
-    {
+    public static void validateParameter(Configuration readerConfiguration) {
 
         validateEncoding(readerConfiguration);
         validateFieldDelimiter(readerConfiguration);
@@ -360,43 +332,37 @@ public class StorageReaderUtil
         validateColumn(readerConfiguration);
     }
 
-    public static void validateEncoding(Configuration readerConfiguration)
-    {
+    public static void validateEncoding(Configuration readerConfiguration) {
         // encoding check
         String encoding = readerConfiguration.getString(Key.ENCODING, Constant.DEFAULT_ENCODING);
         try {
             encoding = encoding.trim();
             readerConfiguration.set(Key.ENCODING, encoding);
             Charsets.toCharset(encoding);
-        }
-        catch (UnsupportedCharsetException uce) {
+        } catch (UnsupportedCharsetException uce) {
             throw AddaxException.asAddaxException(NOT_SUPPORT_TYPE,
                     String.format("The encoding [%s] is unsupported yet.", encoding), uce);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(CONFIG_ERROR,
                     String.format("Exception occurred while applying encoding [%s].", e.getMessage()), e);
         }
     }
 
-    public static void validateFieldDelimiter(Configuration readerConfiguration)
-    {
+    public static void validateFieldDelimiter(Configuration readerConfiguration) {
         //fieldDelimiter check
         String delimiterInStr = readerConfiguration.getString(Key.FIELD_DELIMITER, ",");
         if (null == delimiterInStr) {
             throw AddaxException.asAddaxException(REQUIRED_VALUE,
                     String.format("The item [%s] is required.",
                             Key.FIELD_DELIMITER));
-        }
-        else if (1 != delimiterInStr.length()) {
+        } else if (1 != delimiterInStr.length()) {
             // warn: if it has, length must be one
             throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                     String.format("The delimiter only support single character, [%s] is invalid.", delimiterInStr));
         }
     }
 
-    public static void validateColumn(Configuration readerConfiguration)
-    {
+    public static void validateColumn(Configuration readerConfiguration) {
         // column: 1. index type 2.value type 3.when type is Date, may have
         // format
         List<Configuration> columns = readerConfiguration.getListConfiguration(Key.COLUMN);
@@ -441,8 +407,7 @@ public class StorageReaderUtil
      * @param regexPath path
      * @return String
      */
-    public static String getRegexPathParentPath(String regexPath)
-    {
+    public static String getRegexPathParentPath(String regexPath) {
         int lastDirSeparator = regexPath.lastIndexOf(IOUtils.DIR_SEPARATOR);
         String parentPath;
         parentPath = regexPath.substring(0, lastDirSeparator + 1);

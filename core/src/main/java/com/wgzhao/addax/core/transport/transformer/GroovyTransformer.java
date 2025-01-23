@@ -37,18 +37,15 @@ import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
  * Created by liqiang on 16/3/4.
  */
 public class GroovyTransformer
-        extends Transformer
-{
+        extends Transformer {
     private Transformer groovyTransformer;
 
-    public GroovyTransformer()
-    {
+    public GroovyTransformer() {
         setTransformerName("dx_groovy");
     }
 
     @Override
-    public Record evaluate(Record record, Object... paras)
-    {
+    public Record evaluate(Record record, Object... paras) {
 
         if (groovyTransformer == null) {
             //全局唯一
@@ -71,16 +68,14 @@ public class GroovyTransformer
         return this.groovyTransformer.evaluate(record);
     }
 
-    private void initGroovyTransformer(String code, List<String> extraPackage)
-    {
+    private void initGroovyTransformer(String code, List<String> extraPackage) {
         GroovyClassLoader loader = new GroovyClassLoader(GroovyTransformer.class.getClassLoader());
         String groovyRule = getGroovyRule(code, extraPackage);
 
         Class groovyClass;
         try {
             groovyClass = loader.parseClass(groovyRule);
-        }
-        catch (CompilationFailedException cfe) {
+        } catch (CompilationFailedException cfe) {
             throw AddaxException.asAddaxException(
                     RUNTIME_ERROR, cfe);
         }
@@ -93,15 +88,13 @@ public class GroovyTransformer
                         "Addax bug! ");
             }
             this.groovyTransformer = (Transformer) t;
-        }
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
             throw AddaxException.asAddaxException(
                     RUNTIME_ERROR, ex);
         }
     }
 
-    private String getGroovyRule(String expression, List<String> extraPackagesStrList)
-    {
+    private String getGroovyRule(String expression, List<String> extraPackagesStrList) {
         StringBuilder sb = new StringBuilder();
         if (extraPackagesStrList != null) {
             for (String extraPackagesStr : extraPackagesStrList) {

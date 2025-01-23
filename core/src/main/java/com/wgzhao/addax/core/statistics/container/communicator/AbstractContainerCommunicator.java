@@ -29,41 +29,34 @@ import com.wgzhao.addax.core.statistics.container.report.AbstractReporter;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractContainerCommunicator
-{
+public abstract class AbstractContainerCommunicator {
     private final Configuration configuration;
     private final VMInfo vmInfo = VMInfo.getVmInfo();
     private AbstractCollector collector;
     private AbstractReporter reporter;
     private long lastReportTime = System.currentTimeMillis();
 
-    public AbstractContainerCommunicator(Configuration configuration)
-    {
+    public AbstractContainerCommunicator(Configuration configuration) {
         this.configuration = configuration;
     }
 
-    public Configuration getConfiguration()
-    {
+    public Configuration getConfiguration() {
         return this.configuration;
     }
 
-    public AbstractCollector getCollector()
-    {
+    public AbstractCollector getCollector() {
         return collector;
     }
 
-    public void setCollector(AbstractCollector collector)
-    {
+    public void setCollector(AbstractCollector collector) {
         this.collector = collector;
     }
 
-    public AbstractReporter getReporter()
-    {
+    public AbstractReporter getReporter() {
         return reporter;
     }
 
-    public void setReporter(AbstractReporter reporter)
-    {
+    public void setReporter(AbstractReporter reporter) {
         this.reporter = reporter;
     }
 
@@ -84,14 +77,12 @@ public abstract class AbstractContainerCommunicator
      */
     public abstract Map<Integer, Communication> getCommunicationMap();
 
-    public void resetCommunication(Integer id)
-    {
+    public void resetCommunication(Integer id) {
         Map<Integer, Communication> map = getCommunicationMap();
         map.put(id, new Communication());
     }
 
-    public void reportVmInfo()
-    {
+    public void reportVmInfo() {
         long now = System.currentTimeMillis();
         //每5分钟打印一次
         if (now - lastReportTime >= 300000) {

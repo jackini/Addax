@@ -63,18 +63,15 @@ import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class MongoDBWriter
-        extends Writer
-{
+        extends Writer {
 
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
 
         private Configuration originalConfig = null;
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             List<Configuration> configList = new ArrayList<>();
             for (int i = 0; i < mandatoryNumber; i++) {
                 configList.add(this.originalConfig.clone());
@@ -83,14 +80,12 @@ public class MongoDBWriter
         }
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = super.getPluginJobConf();
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             super.prepare();
             // parameters check
             originalConfig.getNecessaryValue(CONNECTION, REQUIRED_VALUE);
@@ -114,8 +109,7 @@ public class MongoDBWriter
             MongoClient mongoClient;
             if (StringUtils.isEmpty((username)) || StringUtils.isEmpty((password))) {
                 mongoClient = MongoUtil.initMongoClient(address);
-            }
-            else {
+            } else {
                 mongoClient = MongoUtil.initCredentialMongoClient(address, username, password, dbName);
             }
 
@@ -125,8 +119,7 @@ public class MongoDBWriter
             }
         }
 
-        private void executePreSql(MongoClient mongoClient, String database, String collection, Configuration preSql)
-        {
+        private void executePreSql(MongoClient mongoClient, String database, String collection, Configuration preSql) {
 
             MongoDatabase db = mongoClient.getDatabase(database);
             MongoCollection<Document> col = db.getCollection(collection);
@@ -137,8 +130,7 @@ public class MongoDBWriter
 
             if (type.equals("drop")) {
                 col.drop();
-            }
-            else if (type.equals("remove")) {
+            } else if (type.equals("remove")) {
                 String json = preSql.getString("json");
                 BasicDBObject query;
                 if (!StringUtils.isBlank(json)) {
@@ -148,14 +140,12 @@ public class MongoDBWriter
                         Configuration _conf = Configuration.from(con.toString());
                         if (StringUtils.isBlank((_conf.getString("condition")))) {
                             query.put(_conf.getString("name"), _conf.get("value"));
-                        }
-                        else {
+                        } else {
                             query.put(_conf.getString("name"),
                                     new BasicDBObject(_conf.getString("condition"), _conf.get("value")));
                         }
                     }
-                }
-                else {
+                } else {
                     query = (BasicDBObject) JSON.parse(json);
                 }
                 col.deleteMany(query);
@@ -163,15 +153,13 @@ public class MongoDBWriter
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
 
         }
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
 
         private MongoClient mongoClient;
 
@@ -182,14 +170,12 @@ public class MongoDBWriter
         private String writeMode = null;
         private String updateKey;
 
-        private boolean isNullOrEmpty(String obj)
-        {
+        private boolean isNullOrEmpty(String obj) {
             return obj == null || obj.isEmpty();
         }
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration writerSliceConfig = this.getPluginJobConf();
             String userName = writerSliceConfig.getString(USERNAME);
             String password = writerSliceConfig.getString(PASSWORD);
@@ -202,8 +188,7 @@ public class MongoDBWriter
             List<Object> addressList = connConf.getList(KeyConstant.MONGO_ADDRESS, Object.class);
             if (!isNullOrEmpty((userName)) && !isNullOrEmpty((password))) {
                 this.mongoClient = MongoUtil.initCredentialMongoClient(addressList, userName, password, database);
-            }
-            else {
+            } else {
                 this.mongoClient = MongoUtil.initMongoClient(addressList);
             }
             this.collection = connConf.getString(KeyConstant.MONGO_COLLECTION_NAME);
@@ -221,8 +206,7 @@ public class MongoDBWriter
         }
 
         @Override
-        public void startWrite(RecordReceiver lineReceiver)
-        {
+        public void startWrite(RecordReceiver lineReceiver) {
             MongoDatabase db = mongoClient.getDatabase(database);
             MongoCollection<BasicDBObject> col = db.getCollection(this.collection, BasicDBObject.class);
             List<Record> writerBuffer = new ArrayList<>(this.batchSize);
@@ -240,8 +224,7 @@ public class MongoDBWriter
             }
         }
 
-        private void doBatchInsert(MongoCollection<BasicDBObject> collection, List<Record> writerBuffer, JSONArray columnMeta)
-        {
+        private void doBatchInsert(MongoCollection<BasicDBObject> collection, List<Record> writerBuffer, JSONArray columnMeta) {
 
             List<BasicDBObject> dataList = new ArrayList<>();
 
@@ -257,8 +240,7 @@ public class MongoDBWriter
                     if (isNullOrEmpty((record.getColumn(i)).asString())) {
                         if (KeyConstant.isArrayType(type.toLowerCase())) {
                             data.put(name, new Object[0]);
-                        }
-                        else {
+                        } else {
                             data.put(name, record.getColumn(i).asString());
                         }
                         continue;
@@ -267,18 +249,15 @@ public class MongoDBWriter
                         //int是特殊类型, 其他类型按照保存时Column的类型进行处理
                         try {
                             data.put(name, Integer.parseInt(String.valueOf(record.getColumn(i).getRawData())));
-                        }
-                        catch (Exception e) {
+                        } catch (Exception e) {
                             super.getTaskPluginCollector().collectDirtyRecord(record, e);
                         }
-                    }
-                    else if (record.getColumn(i) instanceof StringColumn) {
+                    } else if (record.getColumn(i) instanceof StringColumn) {
                         //处理ObjectId和数组类型
                         try {
                             if (KeyConstant.isObjectIdType(type.toLowerCase())) {
                                 data.put(name, new ObjectId(record.getColumn(i).asString()));
-                            }
-                            else if (KeyConstant.isArrayType(type.toLowerCase())) {
+                            } else if (KeyConstant.isArrayType(type.toLowerCase())) {
                                 String splitter = columnMeta.getJSONObject(i).getString(KeyConstant.COLUMN_SPLITTER);
                                 if (isNullOrEmpty((splitter))) {
                                     throw AddaxException.asAddaxException(ILLEGAL_VALUE,
@@ -294,102 +273,82 @@ public class MongoDBWriter
                                             list.add(Double.parseDouble(s));
                                         }
                                         data.put(name, list.toArray(new Double[0]));
-                                    }
-                                    else if (itemType.equalsIgnoreCase(Column.Type.INT.name())) {
+                                    } else if (itemType.equalsIgnoreCase(Column.Type.INT.name())) {
                                         ArrayList<Integer> list = new ArrayList<>();
                                         for (String s : item) {
                                             list.add(Integer.parseInt(s));
                                         }
                                         data.put(name, list.toArray(new Integer[0]));
-                                    }
-                                    else if (itemType.equalsIgnoreCase(Column.Type.LONG.name())) {
+                                    } else if (itemType.equalsIgnoreCase(Column.Type.LONG.name())) {
                                         ArrayList<Long> list = new ArrayList<>();
                                         for (String s : item) {
                                             list.add(Long.parseLong(s));
                                         }
                                         data.put(name, list.toArray(new Long[0]));
-                                    }
-                                    else if (itemType.equalsIgnoreCase(Column.Type.BOOL.name())) {
+                                    } else if (itemType.equalsIgnoreCase(Column.Type.BOOL.name())) {
                                         ArrayList<Boolean> list = new ArrayList<>();
                                         for (String s : item) {
                                             list.add(Boolean.parseBoolean(s));
                                         }
                                         data.put(name, list.toArray(new Boolean[0]));
-                                    }
-                                    else if (itemType.equalsIgnoreCase(Column.Type.BYTES.name())) {
+                                    } else if (itemType.equalsIgnoreCase(Column.Type.BYTES.name())) {
                                         ArrayList<Byte> list = new ArrayList<>();
                                         for (String s : item) {
                                             list.add(Byte.parseByte(s));
                                         }
                                         data.put(name, list.toArray(new Byte[0]));
-                                    }
-                                    else {
+                                    } else {
                                         data.put(name, record.getColumn(i).asString().split(splitter));
                                     }
-                                }
-                                else {
+                                } else {
                                     data.put(name, record.getColumn(i).asString().split(splitter));
                                 }
-                            }
-                            else if (type.equalsIgnoreCase("json")) {
+                            } else if (type.equalsIgnoreCase("json")) {
                                 //如果是json类型,将其进行转换
                                 Object mode = JSON.parse(record.getColumn(i).asString());
                                 data.put(name, JSON.toJSON(mode));
-                            }
-                            else {
+                            } else {
                                 data.put(name, record.getColumn(i).asString());
                             }
-                        }
-                        catch (Exception e) {
+                        } catch (Exception e) {
                             super.getTaskPluginCollector().collectDirtyRecord(record, e);
                         }
-                    }
-                    else if (record.getColumn(i) instanceof LongColumn) {
+                    } else if (record.getColumn(i) instanceof LongColumn) {
 
                         if (Column.Type.LONG.name().equalsIgnoreCase(type)) {
                             data.put(name, record.getColumn(i).asLong());
-                        }
-                        else {
+                        } else {
                             super.getTaskPluginCollector().collectDirtyRecord(record, "record's [" + i + "] column's type should be: " + type);
                         }
-                    }
-                    else if (record.getColumn(i) instanceof DateColumn) {
+                    } else if (record.getColumn(i) instanceof DateColumn) {
 
                         if (Column.Type.DATE.name().equalsIgnoreCase(type)) {
                             data.put(name, record.getColumn(i).asDate());
-                        }
-                        else {
+                        } else {
                             super.getTaskPluginCollector().collectDirtyRecord(record, "record's [" + i + "] column's type should be: " + type);
                         }
-                    }
-                    else if (record.getColumn(i) instanceof DoubleColumn) {
+                    } else if (record.getColumn(i) instanceof DoubleColumn) {
 
                         if (Column.Type.DOUBLE.name().equalsIgnoreCase(type)) {
                             data.put(name, record.getColumn(i).asDouble());
-                        }
-                        else {
+                        } else {
                             super.getTaskPluginCollector().collectDirtyRecord(record, "record's [" + i + "] column's type should be: " + type);
                         }
-                    }
-                    else if (record.getColumn(i) instanceof BoolColumn) {
+                    } else if (record.getColumn(i) instanceof BoolColumn) {
 
                         if (Column.Type.BOOL.name().equalsIgnoreCase(type)) {
                             data.put(name, record.getColumn(i).asBoolean());
-                        }
-                        else {
+                        } else {
                             super.getTaskPluginCollector().collectDirtyRecord(record, "record's [" + i + "] column's type should be: " + type);
                         }
-                    }
-                    else if (record.getColumn(i) instanceof BytesColumn) {
+                    } else if (record.getColumn(i) instanceof BytesColumn) {
 
                         if (Column.Type.BYTES.name().equalsIgnoreCase(type)) {
                             data.put(name, record.getColumn(i).asBytes());
-                        }
-                        else {
+                        } else {
                             super.getTaskPluginCollector().collectDirtyRecord(record, "record's [" + i + "] column's type should be: " + type);
                         }
-                    }
-                    else {
+                    } else {
                         data.put(name, record.getColumn(i).asString());
                     }
                 }
@@ -406,15 +365,13 @@ public class MongoDBWriter
                     replaceOneModelList.add(replaceOneModel);
                 }
                 collection.bulkWrite(replaceOneModelList, new BulkWriteOptions().ordered(false));
-            }
-            else {
+            } else {
                 collection.insertMany(dataList);
             }
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             mongoClient.close();
         }
     }

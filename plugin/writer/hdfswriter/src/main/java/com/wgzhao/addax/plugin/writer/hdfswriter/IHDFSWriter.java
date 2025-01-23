@@ -23,10 +23,9 @@ import com.wgzhao.addax.common.plugin.RecordReceiver;
 import com.wgzhao.addax.common.plugin.TaskPluginCollector;
 import com.wgzhao.addax.common.util.Configuration;
 
-public interface IHDFSWriter
-{
+public interface IHDFSWriter {
 
     void write(RecordReceiver lineReceiver, Configuration config, String fileName,
-            TaskPluginCollector taskPluginCollector);
+               TaskPluginCollector taskPluginCollector);
 
 }

@@ -25,11 +25,9 @@ import com.wgzhao.addax.core.statistics.container.communicator.AbstractContainer
  * Created by hongjiao.hj on 2014/12/22.
  */
 public class StandAloneScheduler
-        extends ProcessInnerScheduler
-{
+        extends ProcessInnerScheduler {
 
-    public StandAloneScheduler(AbstractContainerCommunicator containerCommunicator)
-    {
+    public StandAloneScheduler(AbstractContainerCommunicator containerCommunicator) {
         super(containerCommunicator);
     }
 }

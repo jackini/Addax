@@ -67,18 +67,15 @@ import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
  */
 
 public class EsReader
-        extends Reader
-{
+        extends Reader {
 
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
         private static final Logger log = LoggerFactory.getLogger(Job.class);
         private Configuration conf = null;
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             /*
              * 注意：此方法仅执行一次。
              * 最佳实践：如果 Job 中有需要进行数据同步之前的处理，可以在此处完成，如果没有必要则可以直接去掉。
@@ -100,22 +97,19 @@ public class EsReader
                 if (!isIndicesExists) {
                     throw new IOException(String.format("index[%s] not exist", indexName));
                 }
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 throw AddaxException.asAddaxException(CONFIG_ERROR, ex.toString());
             }
             esClient.closeJestClient();
         }
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.conf = getPluginJobConf();
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             List<Configuration> configurations = new ArrayList<>();
             List<Object> search = conf.getList(ESKey.SEARCH_KEY, Object.class);
             for (Object query : search) {
@@ -127,21 +121,18 @@ public class EsReader
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             //
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             log.info("============elasticsearch reader job destroy=================");
         }
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
         private static final Logger log = LoggerFactory.getLogger(Task.class);
         private final OgnlContext ognlContext = new OgnlContext(null, null, new DefaultMemberAccess(true));
         ESClient esClient = null;
@@ -157,8 +148,7 @@ public class EsReader
         private String filter;
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             esClient.createClient(ESKey.getEndpoint(conf),
                     ESKey.getAccessID(conf),
                     ESKey.getAccessKey(conf),
@@ -169,8 +159,7 @@ public class EsReader
         }
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.conf = getPluginJobConf();
             this.esClient = new ESClient();
             this.gson = new GsonBuilder().registerTypeAdapterFactory(MapTypeAdapter.FACTORY).create();
@@ -192,16 +181,14 @@ public class EsReader
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             //search
             PerfRecord queryPerfRecord = new PerfRecord(getTaskGroupId(), getTaskId(), PerfRecord.PHASE.SQL_QUERY);
             queryPerfRecord.start();
             SearchResult searchResult;
             try {
                 searchResult = esClient.search(query, searchType, index, type, scroll, headers, this.column);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw AddaxException.asAddaxException(EXECUTE_FAIL, e);
             }
             if (!searchResult.isSucceeded()) {
@@ -234,20 +221,16 @@ public class EsReader
                     hasElement = this.transportRecords(recordSender, parseSearchResult(currScroll));
                     allResultPerfRecord.end();
                 }
-            }
-            catch (AddaxException dxe) {
+            } catch (AddaxException dxe) {
                 throw dxe;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw AddaxException.asAddaxException(EXECUTE_FAIL, e);
-            }
-            finally {
+            } finally {
                 esClient.clearScroll(scrollId);
             }
         }
 
-        private SearchResult parseSearchResult(JestResult jestResult)
-        {
+        private SearchResult parseSearchResult(JestResult jestResult) {
             if (jestResult == null) {
                 return null;
             }
@@ -261,8 +244,7 @@ public class EsReader
             return searchResult;
         }
 
-        private Object getOgnlValue(Object expression, Map<String, Object> root, Object defaultValue)
-        {
+        private Object getOgnlValue(Object expression, Map<String, Object> root, Object defaultValue) {
             try {
                 if (!(expression instanceof String)) {
                     return defaultValue;
@@ -272,14 +254,12 @@ public class EsReader
                     return defaultValue;
                 }
                 return value;
-            }
-            catch (OgnlException e) {
+            } catch (OgnlException e) {
                 return defaultValue;
             }
         }
 
-        private boolean filter(String filter, String deleteFilterKey, Map<String, Object> record)
-        {
+        private boolean filter(String filter, String deleteFilterKey, Map<String, Object> record) {
             if (StringUtils.isNotBlank(deleteFilterKey)) {
                 record.remove(deleteFilterKey);
             }
@@ -289,8 +269,7 @@ public class EsReader
             return (Boolean) getOgnlValue(filter, record, Boolean.TRUE);
         }
 
-        private boolean transportRecords(RecordSender recordSender, SearchResult result)
-        {
+        private boolean transportRecords(RecordSender recordSender, SearchResult result) {
             if (result == null) {
                 return false;
             }
@@ -304,19 +283,17 @@ public class EsReader
             return true;
         }
 
-        private void transportOneRecord(RecordSender recordSender, Map<String, Object> recordMap)
-        {
+        private void transportOneRecord(RecordSender recordSender, Map<String, Object> recordMap) {
             boolean allow = filter(this.filter, null, recordMap);
             if (allow && recordMap.entrySet().stream().anyMatch(x -> x.getValue() != null)) {
                 Record record = recordSender.createRecord();
                 boolean hasDirty = false;
                 StringBuilder sb = new StringBuilder();
-                for (String col: column) {
+                for (String col : column) {
                     try {
                         Object o = recordMap.get(col);
                         record.addColumn(getColumn(o));
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         hasDirty = true;
                         sb.append(e);
                     }
@@ -328,66 +305,49 @@ public class EsReader
             }
         }
 
-        private Column getColumn(Object value)
-        {
+        private Column getColumn(Object value) {
             Column col;
             if (value == null) {
                 col = new StringColumn();
-            }
-            else if (value instanceof String) {
+            } else if (value instanceof String) {
                 col = new StringColumn((String) value);
-            }
-            else if (value instanceof Integer) {
+            } else if (value instanceof Integer) {
                 col = new LongColumn(((Integer) value).longValue());
-            }
-            else if (value instanceof Long) {
+            } else if (value instanceof Long) {
                 col = new LongColumn((Long) value);
-            }
-            else if (value instanceof Byte) {
+            } else if (value instanceof Byte) {
                 col = new LongColumn(((Byte) value).longValue());
-            }
-            else if (value instanceof Short) {
+            } else if (value instanceof Short) {
                 col = new LongColumn(((Short) value).longValue());
-            }
-            else if (value instanceof Double) {
+            } else if (value instanceof Double) {
                 col = new DoubleColumn(BigDecimal.valueOf((Double) value));
-            }
-            else if (value instanceof Float) {
+            } else if (value instanceof Float) {
                 col = new DoubleColumn(BigDecimal.valueOf(((Float) value).doubleValue()));
-            }
-            else if (value instanceof Date) {
+            } else if (value instanceof Date) {
                 col = new DateColumn((Date) value);
-            }
-            else if (value instanceof Boolean) {
+            } else if (value instanceof Boolean) {
                 col = new BoolColumn((Boolean) value);
-            }
-            else if (value instanceof byte[]) {
+            } else if (value instanceof byte[]) {
                 col = new BytesColumn((byte[]) value);
-            }
-            else if (value instanceof List) {
+            } else if (value instanceof List) {
                 col = new StringColumn(JSON.toJSONString(value));
-            }
-            else if (value instanceof Map) {
+            } else if (value instanceof Map) {
                 col = new StringColumn(JSON.toJSONString(value));
-            }
-            else if (value instanceof Array) {
+            } else if (value instanceof Array) {
                 col = new StringColumn(JSON.toJSONString(value));
-            }
-            else {
+            } else {
                 throw AddaxException.asAddaxException(NOT_SUPPORT_TYPE, "type:" + value.getClass().getName());
             }
             return col;
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             //
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             log.debug("============elasticsearch reader taskGroup[{}] taskId[{}] destroy=================", getTaskGroupId(), getTaskId());
             esClient.closeJestClient();
         }

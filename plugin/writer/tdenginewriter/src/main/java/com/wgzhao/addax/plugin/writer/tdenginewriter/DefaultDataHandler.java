@@ -45,8 +45,7 @@ import static com.wgzhao.addax.common.spi.ErrorCode.CONFIG_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.EXECUTE_FAIL;
 
 public class DefaultDataHandler
-        implements DataHandler
-{
+        implements DataHandler {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultDataHandler.class);
     private static final String DEFAULT_USERNAME = "root";
     private static final String DEFAULT_PASSWORD = "taosdata";
@@ -63,18 +62,15 @@ public class DefaultDataHandler
     private Map<String, TableMeta> tableMetas;
     private SchemaManager schemaManager;
 
-    public void setTableMetas(Map<String, TableMeta> tableMetas)
-    {
+    public void setTableMetas(Map<String, TableMeta> tableMetas) {
         this.tableMetas = tableMetas;
     }
 
-    public void setColumnMetas(Map<String, List<ColumnMeta>> columnMetas)
-    {
+    public void setColumnMetas(Map<String, List<ColumnMeta>> columnMetas) {
         this.columnMetas = columnMetas;
     }
 
-    public void setSchemaManager(SchemaManager schemaManager)
-    {
+    public void setSchemaManager(SchemaManager schemaManager) {
         this.schemaManager = schemaManager;
     }
 
@@ -84,14 +80,12 @@ public class DefaultDataHandler
         try {
             Class.forName("com.taosdata.jdbc.TSDBDriver");
             Class.forName("com.taosdata.jdbc.rs.RestfulDriver");
-        }
-        catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             LOG.error(e.getMessage());
         }
     }
 
-    public DefaultDataHandler(Configuration configuration)
-    {
+    public DefaultDataHandler(Configuration configuration) {
         this.username = configuration.getString(Key.USERNAME, DEFAULT_USERNAME);
         this.password = configuration.getString(Key.PASSWORD, DEFAULT_PASSWORD);
         this.jdbcUrl = configuration.getString(Key.JDBC_URL);
@@ -102,8 +96,7 @@ public class DefaultDataHandler
     }
 
     @Override
-    public int handle(RecordReceiver lineReceiver, TaskPluginCollector collector)
-    {
+    public int handle(RecordReceiver lineReceiver, TaskPluginCollector collector) {
         int count = 0;
         int affectedRows = 0;
 
@@ -120,8 +113,7 @@ public class DefaultDataHandler
             for (int i = 1; (record = lineReceiver.getFromReader()) != null; i++) {
                 if (i % batchSize != 0) {
                     recordBatch.add(record);
-                }
-                else {
+                } else {
                     affectedRows = writeBatch(conn, recordBatch);
                     recordBatch.clear();
                 }
@@ -132,8 +124,7 @@ public class DefaultDataHandler
                 affectedRows = writeBatch(conn, recordBatch);
                 recordBatch.clear();
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             throw AddaxException.asAddaxException(EXECUTE_FAIL, e.getMessage());
         }
 
@@ -156,12 +147,11 @@ public class DefaultDataHandler
      * 3. 对于tb，拼sql，例如：data: [ts, f1, f2, f3, t1, t2] tbColumn: [ts, f1, f2, t1] =&gt; insert into tb(ts, f1, f2) values(ts, f1, f2)
      * 4. 对于t，拼sql，例如：data: [ts, f1, f2, f3, t1, t2] tbColumn: [ts, f1, f2, f3, t1, t2] insert into t(ts, f1, f2, f3, t1, t2) values(ts, f1, f2, f3, t1, t2)
      *
-     * @param conn {@link Connection}
+     * @param conn        {@link Connection}
      * @param recordBatch list of {@link Record}
      * @return affectedRows
      */
-    public int writeBatch(Connection conn, List<Record> recordBatch)
-    {
+    public int writeBatch(Connection conn, List<Record> recordBatch) {
         int affectedRows = 0;
         for (String table : tables) {
             TableMeta tableMeta = tableMetas.get(table);
@@ -169,8 +159,7 @@ public class DefaultDataHandler
                 case SUP_TABLE: {
                     if (columns.contains("tbname")) {
                         affectedRows += writeBatchToSupTableBySQL(conn, table, recordBatch);
-                    }
-                    else {
+                    } else {
                         affectedRows += writeBatchToSupTableBySchemaless(conn, table, recordBatch);
                     }
                 }
@@ -191,13 +180,12 @@ public class DefaultDataHandler
      * record[idx(tbname)] using table tags(record[idx(t1)]) (ts, f1, f2, f3) values(record[idx(ts)], record[idx(f1)], )
      * record[idx(tbname)] using table tags(record[idx(t1)]) (ts, f1, f2, f3) values(record[idx(ts)], record[idx(f1)], )
      *
-     * @param conn {@link Connection}
-     * @param table {@link String}
+     * @param conn        {@link Connection}
+     * @param table       {@link String}
      * @param recordBatch list of {@link Record}
      * @return {@link Integer}
      */
-    private int writeBatchToSupTableBySQL(Connection conn, String table, List<Record> recordBatch)
-    {
+    private int writeBatchToSupTableBySQL(Connection conn, String table, List<Record> recordBatch) {
         List<ColumnMeta> columnMetas = this.columnMetas.get(table);
 
         StringBuilder sb = new StringBuilder("insert into");
@@ -229,21 +217,18 @@ public class DefaultDataHandler
     }
 
     private int executeUpdate(Connection conn, String sql)
-            throws AddaxException
-    {
+            throws AddaxException {
         int count;
         try (Statement stmt = conn.createStatement()) {
             LOG.debug(">>> " + sql);
             count = stmt.executeUpdate(sql);
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             throw AddaxException.asAddaxException(EXECUTE_FAIL, e.getMessage());
         }
         return count;
     }
 
-    private String buildColumnValue(ColumnMeta colMeta, Record record)
-    {
+    private String buildColumnValue(ColumnMeta colMeta, Record record) {
         Column column = record.getColumn(indexOf(colMeta.field));
         TimestampPrecision timestampPrecision = schemaManager.loadDatabasePrecision();
         switch (column.getType()) {
@@ -283,13 +268,12 @@ public class DefaultDataHandler
      * table: ["stb1"], column: ["ts", "f1", "f2", "t1"]
      * data: [ts, f1, f2, f3, t1, t2] tbColumn: [ts, f1, f2, t1] =&gt; schemaless: stb1,t1=t1 f1=f1,f2=f2 ts
      *
-     * @param conn {@link Connection}
-     * @param table {@link String}
+     * @param conn        {@link Connection}
+     * @param table       {@link String}
      * @param recordBatch list of {@link Record}
      * @return {@link Integer}
      */
-    private int writeBatchToSupTableBySchemaless(Connection conn, String table, List<Record> recordBatch)
-    {
+    private int writeBatchToSupTableBySchemaless(Connection conn, String table, List<Record> recordBatch) {
         int count = 0;
         TimestampPrecision timestampPrecision = schemaManager.loadDatabasePrecision();
 
@@ -334,11 +318,9 @@ public class DefaultDataHandler
                     default:
                         sb.append(time);
                 }
-            }
-            else if (column.getType() == Column.Type.STRING) {
+            } else if (column.getType() == Column.Type.STRING) {
                 sb.append(Utils.parseTimestamp(column.asString()));
-            }
-            else {
+            } else {
                 sb.append(column.asLong());
             }
             String line = sb.toString();
@@ -350,8 +332,7 @@ public class DefaultDataHandler
         SchemalessWriter writer;
         try {
             writer = new SchemalessWriter(conn);
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             throw AddaxException.asAddaxException(EXECUTE_FAIL, e.getMessage());
         }
         SchemalessTimestampType timestampType;
@@ -370,8 +351,7 @@ public class DefaultDataHandler
         }
         try {
             writer.write(lines, SchemalessProtocolType.LINE, timestampType);
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             throw AddaxException.asAddaxException(EXECUTE_FAIL, e.getMessage());
         }
 
@@ -379,8 +359,7 @@ public class DefaultDataHandler
         return count;
     }
 
-    private long dateAsLong(Column column)
-    {
+    private long dateAsLong(Column column) {
         TimestampPrecision timestampPrecision = schemaManager.loadDatabasePrecision();
         long time = column.asDate().getTime();
         switch (timestampPrecision) {
@@ -394,8 +373,7 @@ public class DefaultDataHandler
         }
     }
 
-    private String buildSchemalessColumnValue(ColumnMeta colMeta, Record record)
-    {
+    private String buildSchemalessColumnValue(ColumnMeta colMeta, Record record) {
         Column column = record.getColumn(indexOf(colMeta.field));
         switch (column.getType()) {
             case DATE:
@@ -455,14 +433,13 @@ public class DefaultDataHandler
      * else
      * insert into tb1 (ts, f1, f2) values( record[idx(ts)], record[idx(f1)], record[idx(f2)])
      *
-     * @param conn {@link Connection}
-     * @param table {@link String}
+     * @param conn        {@link Connection}
+     * @param table       {@link String}
      * @param recordBatch list of {@link Record}
-     * <p>
+     *                    <p>
      * @return {@link Integer}
      */
-    private int writeBatchToSubTable(Connection conn, String table, List<Record> recordBatch)
-    {
+    private int writeBatchToSubTable(Connection conn, String table, List<Record> recordBatch) {
         List<ColumnMeta> columnMetas = this.columnMetas.get(table);
 
         StringBuilder sb = new StringBuilder();
@@ -508,8 +485,7 @@ public class DefaultDataHandler
         return executeUpdate(conn, sql);
     }
 
-    private boolean equals(Column column, ColumnMeta colMeta)
-    {
+    private boolean equals(Column column, ColumnMeta colMeta) {
         switch (column.getType()) {
             case BOOL:
                 return column.asBoolean().equals(Boolean.valueOf(colMeta.value.toString()));
@@ -535,14 +511,13 @@ public class DefaultDataHandler
      * table: ["weather"], column: ["ts, f1, f2, f3, t1, t2"]
      * sql: insert into weather (ts, f1, f2, f3, t1, t2) values( record[idx(ts), record[idx(f1)], ...)
      *
-     * @param conn ${@link Connection}
-     * @param table ${@link String}
+     * @param conn        ${@link Connection}
+     * @param table       ${@link String}
      * @param recordBatch list of ${@link Record}
-     * <p>
+     *                    <p>
      * @return {@link Integer}
      */
-    private int writeBatchToNormalTable(Connection conn, String table, List<Record> recordBatch)
-    {
+    private int writeBatchToNormalTable(Connection conn, String table, List<Record> recordBatch) {
         List<ColumnMeta> columnMetas = this.columnMetas.get(table);
 
         StringBuilder sb = new StringBuilder();
@@ -564,8 +539,7 @@ public class DefaultDataHandler
     }
 
     private int indexOf(String colName)
-            throws AddaxException
-    {
+            throws AddaxException {
         for (int i = 0; i < columns.size(); i++) {
             if (columns.get(i).equals(colName)) {
                 return i;

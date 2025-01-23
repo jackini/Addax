@@ -53,19 +53,16 @@ import static com.wgzhao.addax.common.spi.ErrorCode.NOT_SUPPORT_TYPE;
 
 public class TextWriter
         extends HdfsHelper
-        implements IHDFSWriter
-{
+        implements IHDFSWriter {
     private final static Logger logger = LoggerFactory.getLogger(TextWriter.class.getName());
 
-    public TextWriter(Configuration conf)
-    {
+    public TextWriter(Configuration conf) {
         super();
         getFileSystem(conf);
     }
 
     @Override
-    public void write(RecordReceiver lineReceiver, Configuration config, String fileName, TaskPluginCollector taskPluginCollector)
-    {
+    public void write(RecordReceiver lineReceiver, Configuration config, String fileName, TaskPluginCollector taskPluginCollector) {
         char fieldDelimiter = config.getChar(Key.FIELD_DELIMITER);
         List<Configuration> columns = config.getListConfiguration(Key.COLUMN);
         String compress = config.getString(Key.COMPRESS, "NONE").toUpperCase().trim();
@@ -95,8 +92,7 @@ public class TextWriter
                 }
             }
             writer.close(Reporter.NULL);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             logger.error("IO exception occurred while writing text file [{}]", fileName);
             Path path = new Path(fileName);
             deleteDir(path.getParent());
@@ -105,8 +101,7 @@ public class TextWriter
     }
 
     public static MutablePair<Text, Boolean> transportOneRecord(
-            Record record, char fieldDelimiter, List<Configuration> columnsConfiguration, TaskPluginCollector taskPluginCollector)
-    {
+            Record record, char fieldDelimiter, List<Configuration> columnsConfiguration, TaskPluginCollector taskPluginCollector) {
         MutablePair<List<Object>, Boolean> transportResultList = transportOneRecord(record, columnsConfiguration, taskPluginCollector);
         MutablePair<Text, Boolean> transportResult = new MutablePair<>();
         transportResult.setRight(false);
@@ -118,8 +113,7 @@ public class TextWriter
 
     public static MutablePair<List<Object>, Boolean> transportOneRecord(
             Record record, List<Configuration> columnsConfiguration,
-            TaskPluginCollector taskPluginCollector)
-    {
+            TaskPluginCollector taskPluginCollector) {
 
         MutablePair<List<Object>, Boolean> transportResult = new MutablePair<>();
         transportResult.setRight(false);
@@ -183,8 +177,7 @@ public class TextWriter
                                                 columnsConfiguration.get(i).getString(Key.NAME),
                                                 columnsConfiguration.get(i).getString(Key.TYPE)));
                         }
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         // warn: 此处认为脏数据
                         logger.warn("Warn: convert field[{}] from [{}] to [{}] error.",
                                 columnsConfiguration.get(i).getString(Key.NAME),
@@ -196,8 +189,7 @@ public class TextWriter
                         transportResult.setRight(true);
                         break;
                     }
-                }
-                else {
+                } else {
                     // warn: it's all ok if nullFormat is null
                     recordList.add(null);
                 }

@@ -25,8 +25,7 @@ import com.wgzhao.addax.common.element.Record;
 import java.io.Serializable;
 
 public interface DorisCodec
-        extends Serializable
-{
+        extends Serializable {
 
     String codec(Record row);
 }

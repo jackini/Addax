@@ -48,8 +48,7 @@ import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
 /**
  * @author yanghan.y
  */
-public class HbaseSQLWriterTask
-{
+public class HbaseSQLWriterTask {
     private static final Logger LOG = LoggerFactory.getLogger(HbaseSQLWriterTask.class);
     private final HbaseSQLWriterConfig cfg;
     private TaskPluginCollector taskPluginCollector;
@@ -61,14 +60,12 @@ public class HbaseSQLWriterTask
     private int numberOfColumnsToRead;
     private int[] columnTypes;
 
-    public HbaseSQLWriterTask(Configuration configuration)
-    {
+    public HbaseSQLWriterTask(Configuration configuration) {
         // 这里仅解析配置，不访问远端集群，配置的合法性检查在writer的init过程中进行
         cfg = HbaseSQLHelper.parseConfig(configuration);
     }
 
-    public void startWriter(RecordReceiver lineReceiver, TaskPluginCollector taskPluginCollector)
-    {
+    public void startWriter(RecordReceiver lineReceiver, TaskPluginCollector taskPluginCollector) {
         this.taskPluginCollector = taskPluginCollector;
         Record record;
         try {
@@ -96,19 +93,16 @@ public class HbaseSQLWriterTask
                 doBatchUpsert(buffer);
                 buffer.clear();
             }
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             // 确保所有异常都转化为 AddaxException
             throw AddaxException.asAddaxException(RUNTIME_ERROR, t);
-        }
-        finally {
+        } finally {
             close();
         }
     }
 
     private void prepare()
-            throws SQLException
-    {
+            throws SQLException {
         if (connection == null) {
             connection = HbaseSQLHelper.getJdbcConnection(cfg);
             connection.setAutoCommit(false);    // 批量提交
@@ -121,13 +115,11 @@ public class HbaseSQLWriterTask
         }
     }
 
-    private void close()
-    {
+    private void close() {
         if (ps != null) {
             try {
                 ps.close();
-            }
-            catch (SQLException e) {
+            } catch (SQLException e) {
                 // 不会出错
                 LOG.error("Failed to close PreparedStatement", e);
             }
@@ -135,8 +127,7 @@ public class HbaseSQLWriterTask
         if (connection != null) {
             try {
                 connection.close();
-            }
-            catch (SQLException e) {
+            } catch (SQLException e) {
                 // 不会出错
                 LOG.error("Failed to close Connection", e);
             }
@@ -147,8 +138,7 @@ public class HbaseSQLWriterTask
      * 批量提交一组数据，如果失败，则尝试一行行提交，如果仍然失败，抛错给用户
      */
     private void doBatchUpsert(List<Record> records)
-            throws SQLException
-    {
+            throws SQLException {
         try {
             // 将所有record提交到connection缓存
             for (Record r : records) {
@@ -158,15 +148,13 @@ public class HbaseSQLWriterTask
 
             // 将缓存的数据提交到hbase
             connection.commit();
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             LOG.error("Failed to batch commit {} records", records.size(), e);
 
             // 批量提交失败，则一行行重试，以确定那一行出错
             connection.rollback();
             doSingleUpsert(records);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(EXECUTE_FAIL, e);
         }
     }
@@ -174,15 +162,13 @@ public class HbaseSQLWriterTask
     /*
      * 单行提交，将出错的行记录到脏数据中。由脏数据收集模块判断任务是否继续
      */
-    private void doSingleUpsert(List<Record> records)
-    {
+    private void doSingleUpsert(List<Record> records) {
         for (Record r : records) {
             try {
                 setupStatement(r);
                 ps.executeUpdate();
                 connection.commit();
-            }
-            catch (SQLException e) {
+            } catch (SQLException e) {
                 //出错了，记录脏数据
                 LOG.error("Failed to write hbase", e);
                 this.taskPluginCollector.collectDirtyRecord(r, e);
@@ -194,8 +180,7 @@ public class HbaseSQLWriterTask
      * 生成sql模板，并根据模板创建PreparedStatement
      */
     private PreparedStatement createPreparedStatement()
-            throws SQLException
-    {
+            throws SQLException {
         // 生成列名集合，列之间用逗号分隔： col1,col2,col3,...
         String columnNames = String.join(",", cfg.getColumns());
 
@@ -214,8 +199,7 @@ public class HbaseSQLWriterTask
      * 根据列名来从数据库元数据中获取这一列对应的SQL类型
      */
     private int[] getColumnSqlType(List<String> columnNames)
-            throws SQLException
-    {
+            throws SQLException {
         int[] types = new int[numberOfColumnsToWrite];
         PTable ptable = HbaseSQLHelper
                 .getTableSchema(connection, cfg.getNamespace(), cfg.getTableName(), cfg.isThinClient());
@@ -230,8 +214,7 @@ public class HbaseSQLWriterTask
     }
 
     private void setupStatement(Record record)
-            throws SQLException
-    {
+            throws SQLException {
         // 一开始的时候就已经校验过record中的列数量与ps中需要的值数量相等
         for (int i = 0; i < numberOfColumnsToWrite; i++) {
             Column col = record.getColumn(i);
@@ -242,8 +225,7 @@ public class HbaseSQLWriterTask
     }
 
     private void setupColumn(int pos, int sqlType, Column col)
-            throws SQLException
-    {
+            throws SQLException {
         if (col.getRawData() != null) {
             switch (sqlType) {
                 case Types.CHAR:
@@ -311,8 +293,7 @@ public class HbaseSQLWriterTask
                     throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                             "The data type " + sqlType + "is unsupported.");
             } // end switch
-        }
-        else {
+        } else {
             // 没有值，按空值的配置情况处理
             switch (cfg.getNullMode()) {
                 case SKIP:
@@ -341,8 +322,7 @@ public class HbaseSQLWriterTask
      * @param sqlType sql数据类型，定义于{@link Types}
      * @return Object
      */
-    private Object getEmptyValue(int sqlType)
-    {
+    private Object getEmptyValue(int sqlType) {
         switch (sqlType) {
             case Types.CHAR:
             case Types.VARCHAR:

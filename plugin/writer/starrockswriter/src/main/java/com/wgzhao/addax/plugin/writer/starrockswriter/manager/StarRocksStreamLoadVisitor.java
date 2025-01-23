@@ -31,8 +31,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class StarRocksStreamLoadVisitor
-{
+public class StarRocksStreamLoadVisitor {
 
     private static final Logger LOG = LoggerFactory.getLogger(StarRocksStreamLoadVisitor.class);
     private static final String RESULT_FAILED = "Fail";
@@ -45,14 +44,12 @@ public class StarRocksStreamLoadVisitor
     private final StarRocksWriterOptions writerOptions;
     private long pos;
 
-    public StarRocksStreamLoadVisitor(StarRocksWriterOptions writerOptions)
-    {
+    public StarRocksStreamLoadVisitor(StarRocksWriterOptions writerOptions) {
         this.writerOptions = writerOptions;
     }
 
     public void doStreamLoad(StarRocksFlushTuple flushData)
-            throws IOException
-    {
+            throws IOException {
         String host = getAvailableHost();
         if (null == host) {
             throw new IOException("None of the host in `load_url` could be connected.");
@@ -74,16 +71,14 @@ public class StarRocksStreamLoadVisitor
             throw new IOException(
                     "Failed to flush data to StarRocks.\n" + JSON.toJSONString(loadResult)
             );
-        }
-        else if (RESULT_LABEL_EXISTED.equals(loadResult.get(keyStatus))) {
+        } else if (RESULT_LABEL_EXISTED.equals(loadResult.get(keyStatus))) {
             LOG.debug("StreamLoad response:\n" + JSON.toJSONString(loadResult));
             // has to block-checking the state to get the final result
             checkLabelState(host, flushData.getLabel());
         }
     }
 
-    private String getAvailableHost()
-    {
+    private String getAvailableHost() {
         List<String> hostList = writerOptions.getLoadUrlList();
         long tmp = pos + hostList.size();
         for (; pos < tmp; pos++) {
@@ -95,8 +90,7 @@ public class StarRocksStreamLoadVisitor
         return null;
     }
 
-    private boolean tryHttpConnection(String host)
-    {
+    private boolean tryHttpConnection(String host) {
         try {
             URL url = new URL(host);
             HttpURLConnection co = (HttpURLConnection) url.openConnection();
@@ -104,15 +98,13 @@ public class StarRocksStreamLoadVisitor
             co.connect();
             co.disconnect();
             return true;
-        }
-        catch (Exception e1) {
+        } catch (Exception e1) {
             LOG.warn("Failed to connect to address:{}", host, e1);
             return false;
         }
     }
 
-    private byte[] joinRows(List<byte[]> rows, int totalBytes)
-    {
+    private byte[] joinRows(List<byte[]> rows, int totalBytes) {
         if (StarRocksWriterOptions.StreamLoadFormat.CSV.equals(writerOptions.getStreamLoadFormat())) {
             Map<String, Object> props = writerOptions.getLoadProps();
             byte[] lineDelimiter = StarRocksDelimiterParser.parse((String) props.get("row_delimiter"), "\n").getBytes(StandardCharsets.UTF_8);
@@ -144,14 +136,12 @@ public class StarRocksStreamLoadVisitor
 
     @SuppressWarnings("unchecked")
     private void checkLabelState(String host, String label)
-            throws IOException
-    {
+            throws IOException {
         int idx = 0;
         while (true) {
             try {
                 TimeUnit.SECONDS.sleep(Math.min(++idx, 5));
-            }
-            catch (InterruptedException ex) {
+            } catch (InterruptedException ex) {
                 break;
             }
             try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
@@ -197,15 +187,12 @@ public class StarRocksStreamLoadVisitor
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> doHttpPut(String loadUrl, String label, byte[] data)
-            throws IOException
-    {
+            throws IOException {
         LOG.info(String.format("Executing stream load to: '%s', size: '%s'", loadUrl, data.length));
         final HttpClientBuilder httpClientBuilder = HttpClients.custom()
-                .setRedirectStrategy(new DefaultRedirectStrategy()
-                {
+                .setRedirectStrategy(new DefaultRedirectStrategy() {
                     @Override
-                    protected boolean isRedirectable(String method)
-                    {
+                    protected boolean isRedirectable(String method) {
                         return true;
                     }
                 });
@@ -236,15 +223,13 @@ public class StarRocksStreamLoadVisitor
         }
     }
 
-    private String getBasicAuthHeader(String username, String password)
-    {
+    private String getBasicAuthHeader(String username, String password) {
         String auth = username + ":" + password;
         byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.UTF_8));
         return "Basic " + new String(encodedAuth, Charset.defaultCharset());
     }
 
-    private HttpEntity getHttpEntity(CloseableHttpResponse resp)
-    {
+    private HttpEntity getHttpEntity(CloseableHttpResponse resp) {
         int code = resp.getStatusLine().getStatusCode();
         if (200 != code) {
             LOG.warn("Request failed with code:{}", code);

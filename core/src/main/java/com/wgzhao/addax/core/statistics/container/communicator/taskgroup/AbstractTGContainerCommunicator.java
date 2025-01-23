@@ -35,8 +35,7 @@ import java.util.Map;
  * 主要是 taskCommunicationMap 记录了 taskExecutor 的 communication 属性
  */
 public abstract class AbstractTGContainerCommunicator
-        extends AbstractContainerCommunicator
-{
+        extends AbstractContainerCommunicator {
     /**
      * 由于taskGroupContainer是进程内部调度
      * 其registerCommunication()，getCommunication()，
@@ -45,8 +44,7 @@ public abstract class AbstractTGContainerCommunicator
      */
     protected int taskGroupId;
 
-    public AbstractTGContainerCommunicator(Configuration configuration)
-    {
+    public AbstractTGContainerCommunicator(Configuration configuration) {
         super(configuration);
 //        this.jobId = configuration.getInt(CoreConstant.CORE_CONTAINER_JOB_ID);
         super.setCollector(new ProcessInnerCollector());
@@ -54,20 +52,17 @@ public abstract class AbstractTGContainerCommunicator
     }
 
     @Override
-    public void registerCommunication(List<Configuration> configurationList)
-    {
+    public void registerCommunication(List<Configuration> configurationList) {
         super.getCollector().registerTaskCommunication(configurationList);
     }
 
     @Override
-    public final Communication collect()
-    {
+    public final Communication collect() {
         return this.getCollector().collectFromTask();
     }
 
     @Override
-    public final State collectState()
-    {
+    public final State collectState() {
         Communication communication = new Communication();
         communication.setState(State.SUCCEEDED);
 
@@ -79,16 +74,14 @@ public abstract class AbstractTGContainerCommunicator
     }
 
     @Override
-    public final Communication getCommunication(Integer taskId)
-    {
+    public final Communication getCommunication(Integer taskId) {
         Validate.isTrue(taskId >= 0, "注册的taskId不能小于0");
 
         return super.getCollector().getTaskCommunication(taskId);
     }
 
     @Override
-    public final Map<Integer, Communication> getCommunicationMap()
-    {
+    public final Map<Integer, Communication> getCommunicationMap() {
         return super.getCollector().getTaskCommunicationMap();
     }
 }

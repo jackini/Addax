@@ -37,13 +37,12 @@ import static com.wgzhao.addax.common.base.Key.CONNECTION;
 import static com.wgzhao.addax.common.base.Key.DATABASE;
 import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 
-public class CollectionSplitUtil
-{
+public class CollectionSplitUtil {
 
-    private CollectionSplitUtil() {}
+    private CollectionSplitUtil() {
+    }
 
-    public static List<Configuration> doSplit(Configuration originalSliceConfig, int adviceNumber, MongoClient mongoClient)
-    {
+    public static List<Configuration> doSplit(Configuration originalSliceConfig, int adviceNumber, MongoClient mongoClient) {
 
         List<Configuration> confList = new ArrayList<>();
 
@@ -70,8 +69,7 @@ public class CollectionSplitUtil
         return confList;
     }
 
-    private static boolean isPrimaryIdObjectId(MongoClient mongoClient, String dbName, String collName)
-    {
+    private static boolean isPrimaryIdObjectId(MongoClient mongoClient, String dbName, String collName) {
         MongoDatabase database = mongoClient.getDatabase(dbName);
         MongoCollection<Document> col = database.getCollection(collName);
         Document doc = col.find().limit(1).first();
@@ -82,8 +80,7 @@ public class CollectionSplitUtil
 
     // split the collection into multiple chunks, each chunk specifies a range
     private static List<Range> doSplitCollection(int adviceNumber, MongoClient mongoClient,
-            String dbName, String collName, boolean isObjectId)
-    {
+                                                 String dbName, String collName, boolean isObjectId) {
 
         MongoDatabase database = mongoClient.getDatabase(dbName);
         List<Range> rangeList = new ArrayList<>();
@@ -104,8 +101,7 @@ public class CollectionSplitUtil
         Object avgObjSizeObj = result.get("avgObjSize");
         if (avgObjSizeObj instanceof Integer) {
             avgObjSize = (Integer) avgObjSizeObj;
-        }
-        else if (avgObjSizeObj instanceof Double) {
+        } else if (avgObjSizeObj instanceof Double) {
             avgObjSize = ((Double) avgObjSizeObj).intValue();
         }
         int splitPointCount = adviceNumber - 1;
@@ -118,8 +114,7 @@ public class CollectionSplitUtil
             database.runCommand(new Document("splitVector", dbName + "." + collName)
                     .append("keyPattern", new Document(KeyConstant.MONGO_PRIMARY_ID, 1))
                     .append("force", true));
-        }
-        catch (MongoCommandException e) {
+        } catch (MongoCommandException e) {
             if (e.getErrorCode() == KeyConstant.MONGO_UNAUTHORIZED_ERR_CODE ||
                     e.getErrorCode() == KeyConstant.MONGO_ILLEGAL_OP_ERR_CODE ||
                     e.getErrorCode() == KeyConstant.MONGO_COMMAND_NOT_FOUND_CODE) {
@@ -139,8 +134,7 @@ public class CollectionSplitUtil
                         .append("keyPattern", new Document(KeyConstant.MONGO_PRIMARY_ID, 1))
                         .append("maxChunkSize", maxChunkSize)
                         .append("maxSplitPoints", adviceNumber - 1));
-            }
-            else {
+            } else {
                 result = database.runCommand(new Document("splitVector", dbName + "." + collName)
                         .append("keyPattern", new Document(KeyConstant.MONGO_PRIMARY_ID, 1))
                         .append("force", true));
@@ -152,13 +146,11 @@ public class CollectionSplitUtil
                 if (isObjectId) {
                     ObjectId oid = (ObjectId) id;
                     splitPoints.add(oid.toHexString());
-                }
-                else {
+                } else {
                     splitPoints.add(id);
                 }
             }
-        }
-        else {
+        } else {
             int skipCount = chunkDocCount;
             MongoCollection<Document> col = database.getCollection(collName);
 
@@ -169,8 +161,7 @@ public class CollectionSplitUtil
                 if (isObjectId) {
                     ObjectId oid = (ObjectId) id;
                     splitPoints.add(oid.toHexString());
-                }
-                else {
+                } else {
                     splitPoints.add(id);
                 }
                 skipCount += chunkDocCount;
@@ -194,8 +185,7 @@ public class CollectionSplitUtil
     }
 }
 
-class Range
-{
+class Range {
     Object lowerBound;
     Object upperBound;
 }

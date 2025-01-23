@@ -54,29 +54,24 @@ import static com.wgzhao.addax.common.spi.ErrorCode.EXECUTE_FAIL;
 import static com.wgzhao.addax.common.spi.ErrorCode.NOT_SUPPORT_TYPE;
 
 public class HbaseSQLReader
-        extends Reader
-{
+        extends Reader {
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
         private Configuration originalConfig;
         private HbaseSQLHelper hbaseSQLHelper;
 
         @Override
-        public void init()
-        {
+        public void init() {
             hbaseSQLHelper = new HbaseSQLHelper(this.getPluginJobConf());
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             originalConfig = hbaseSQLHelper.parseConfig();
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             List<Configuration> splitResultConfigs = new ArrayList<>();
             for (int j = 0; j < adviceNumber; j++) {
                 splitResultConfigs.add(originalConfig.clone());
@@ -85,33 +80,28 @@ public class HbaseSQLReader
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
         private Configuration writerConfig;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.writerConfig = this.getPluginJobConf();
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             //
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             LOG.info("Begin reading.....");
             PreparedStatement preparedStatement;
             ResultSet resultSet;
@@ -129,8 +119,7 @@ public class HbaseSQLReader
                     recordSender.sendToWriter(record);
                 }
                 recordSender.flush();
-            }
-            catch (SQLException e) {
+            } catch (SQLException e) {
                 throw AddaxException.asAddaxException(EXECUTE_FAIL,
                         e.getMessage()
                 );
@@ -138,8 +127,7 @@ public class HbaseSQLReader
             LOG.info("End reading.....");
         }
 
-        private Record transportOneRecord(RecordSender recordSender, ResultSet resultSet, ResultSetMetaData rmd, int columnNum, TaskPluginCollector taskPluginCollector)
-        {
+        private Record transportOneRecord(RecordSender recordSender, ResultSet resultSet, ResultSetMetaData rmd, int columnNum, TaskPluginCollector taskPluginCollector) {
             Record record = recordSender.createRecord();
             Column column;
             try {
@@ -194,22 +182,19 @@ public class HbaseSQLReader
                     record.addColumn(column);
                 }
                 return record;
-            }
-            catch (SQLException e) {
+            } catch (SQLException e) {
                 taskPluginCollector.collectDirtyRecord(record, e);
                 return null;
             }
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             //
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }

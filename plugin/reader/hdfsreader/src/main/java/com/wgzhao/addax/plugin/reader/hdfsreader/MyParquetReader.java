@@ -58,8 +58,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class MyParquetReader
-{
+public class MyParquetReader {
     private static final Logger LOG = LoggerFactory.getLogger(MyParquetReader.class);
 
     // the offset of julian, 2440588 is 1970/1/1
@@ -72,15 +71,13 @@ public class MyParquetReader
     private List<ColumnEntry> columnEntries;
     private final ParquetReader<Group> reader;
 
-    public MyParquetReader(org.apache.hadoop.conf.Configuration hadoopConf, Path path, String nullFormat, List<ColumnEntry> columns)
-    {
+    public MyParquetReader(org.apache.hadoop.conf.Configuration hadoopConf, Path path, String nullFormat, List<ColumnEntry> columns) {
         hadoopConf.set("parquet.avro.readInt96AsFixed", "true");
         JobConf jobConf = new JobConf(hadoopConf);
         this.nullFormat = nullFormat;
         try {
             this.schema = ParquetFileReader.open(HadoopInputFile.fromPath(path, hadoopConf)).getFileMetaData().getSchema();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException("Failed to open parquet file", e);
         }
         GenericData decimalSupport = new GenericData();
@@ -89,14 +86,12 @@ public class MyParquetReader
             this.reader = ParquetReader.builder(new GroupReadSupport(), path)
                     .withConf(jobConf)
                     .build();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
         if (columnEntries != null && !columnEntries.isEmpty()) {
             this.columnEntries = columns;
-        }
-        else {
+        } else {
             List<Type> fields = schema.getFields();
             this.columnEntries = new ArrayList<>(fields.size());
             // 用户没有填写具体的字段信息，需要从parquet文件构建
@@ -109,8 +104,7 @@ public class MyParquetReader
         }
     }
 
-    public void reader(RecordSender recordSender, TaskPluginCollector taskPluginCollector)
-    {
+    public void reader(RecordSender recordSender, TaskPluginCollector taskPluginCollector) {
         try {
             Group group = reader.read();
             while (group != null) {
@@ -122,8 +116,7 @@ public class MyParquetReader
                         record.addColumn(columnGenerated);
                     } // end for
                     recordSender.sendToWriter(record);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     if (e instanceof AddaxException) {
                         throw (AddaxException) e;
                     }
@@ -132,14 +125,12 @@ public class MyParquetReader
                 }
                 group = reader.read();
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Column getColumn(Group group, ColumnEntry columnEntry)
-    {
+    private Column getColumn(Group group, ColumnEntry columnEntry) {
         Column columnGenerated;
         String columnType = columnEntry.getType();
         Integer columnIndex = columnEntry.getIndex();
@@ -177,8 +168,7 @@ public class MyParquetReader
                     columnValue = group.getString(columnIndex, 0);
                     if (null == columnValue) {
                         columnGenerated = new DoubleColumn((Double) null);
-                    }
-                    else {
+                    } else {
                         columnGenerated = new DoubleColumn(new BigDecimal(columnValue).setScale(10, RoundingMode.HALF_UP));
                     }
                     break;
@@ -189,15 +179,13 @@ public class MyParquetReader
                     columnValue = group.getString(columnIndex, 0);
                     if (columnValue == null) {
                         columnGenerated = new DateColumn((Date) null);
-                    }
-                    else {
+                    } else {
                         String formatString = columnEntry.getFormat();
                         if (StringUtils.isNotBlank(formatString)) {
                             // 用户自己配置的格式转换
                             SimpleDateFormat format = new SimpleDateFormat(formatString);
                             columnGenerated = new DateColumn(format.parse(columnValue));
-                        }
-                        else {
+                        } else {
                             // 框架尝试转换
                             columnGenerated = new DateColumn(new StringColumn(columnValue).asDate());
                         }
@@ -215,8 +203,7 @@ public class MyParquetReader
                     LOG.debug("try to convert column type {} to String, ", columnType);
                     columnGenerated = new StringColumn(group.getString(columnIndex, 0));
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException(String.format(
                     "Can not convert column type %s to %s: %s", columnType, type, e));
         }
@@ -229,8 +216,7 @@ public class MyParquetReader
      * @param timestampBinary INT96 parquet timestamp
      * @return timestamp in millis, GMT timezone
      */
-    public static long getTimestampMills(Binary timestampBinary)
-    {
+    public static long getTimestampMills(Binary timestampBinary) {
         if (timestampBinary.length() != 12) {
             return 0;
         }
@@ -239,8 +225,7 @@ public class MyParquetReader
         return getTimestampMills(bytes);
     }
 
-    public static long getTimestampMills(byte[] bytes)
-    {
+    public static long getTimestampMills(byte[] bytes) {
         assert bytes.length == 12;
         // little endian encoding - need to invert byte order
         long timeOfDayNanos = Longs.fromBytes(bytes[7], bytes[6], bytes[5], bytes[4], bytes[3], bytes[2], bytes[1], bytes[0]);
@@ -249,13 +234,11 @@ public class MyParquetReader
         return julianDayToMillis(julianDay) + (timeOfDayNanos / NANOS_PER_MILLISECOND);
     }
 
-    private static long julianDayToMillis(int julianDay)
-    {
+    private static long julianDayToMillis(int julianDay) {
         return (julianDay - JULIAN_EPOCH_OFFSET_DAYS) * MILLIS_IN_DAY;
     }
 
-    private JavaType getJavaType(Type field)
-    {
+    private JavaType getJavaType(Type field) {
         if (field.isPrimitive()) {
             switch (field.asPrimitiveType().getPrimitiveTypeName()) {
                 case INT32:
@@ -275,8 +258,7 @@ public class MyParquetReader
                 default:
                     return JavaType.STRING; //Binary as string
             }
-        }
-        else {
+        } else {
             return JavaType.STRING;
         }
     }

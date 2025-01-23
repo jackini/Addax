@@ -29,9 +29,9 @@
                 "value": true,
                 "type": "bool"
               },
-	          {
-			    "value":"中文测试",
-				"type": "string"
+              {
+                "value": "中文测试",
+                "type": "string"
               }
             ],
             "sliceRecordCount": 10
@@ -60,16 +60,16 @@
                 "name": "col4",
                 "type": "logical"
               },
-			  {
-				"name": "col5",
-				"type":"char",
-				"length": 100
-			  }
+              {
+                "name": "col5",
+                "type": "char",
+                "length": 100
+              }
             ],
             "fileName": "test.dbf",
             "path": "/tmp/out",
             "writeMode": "truncate",
-			"encoding": "UTF-8"
+            "encoding": "UTF-8"
           }
         }
       }

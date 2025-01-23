@@ -57,31 +57,26 @@ import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class MongoDBReader
-        extends Reader
-{
+        extends Reader {
 
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
 
         private Configuration originalConfig = null;
 
         private MongoClient mongoClient;
 
-        private boolean notNullAndEmpty(String obj)
-        {
+        private boolean notNullAndEmpty(String obj) {
             return obj != null && !obj.isEmpty();
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             return CollectionSplitUtil.doSplit(originalConfig, adviceNumber, mongoClient);
         }
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = getPluginJobConf();
             // check required configuration
             String userName = originalConfig.getNecessaryValue(USERNAME, REQUIRED_VALUE);
@@ -102,22 +97,19 @@ public class MongoDBReader
             }
             if (notNullAndEmpty((userName)) && notNullAndEmpty((password))) {
                 this.mongoClient = MongoUtil.initCredentialMongoClient(addressList, userName, password, authDb);
-            }
-            else {
+            } else {
                 this.mongoClient = MongoUtil.initMongoClient(addressList);
             }
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
 
         private MongoClient mongoClient;
 
@@ -132,14 +124,12 @@ public class MongoDBReader
         private boolean isObjectId = true;
         private int fetchSize;
 
-        private boolean notNullAndEmpty(String obj)
-        {
+        private boolean notNullAndEmpty(String obj) {
             return obj != null && !obj.isEmpty();
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
 
             if (lowerBound == null || upperBound == null ||
                     mongoClient == null || database == null ||
@@ -156,11 +146,9 @@ public class MongoDBReader
                 if (!upperBound.equals("max")) {
                     filter.append(KeyConstant.MONGO_PRIMARY_ID, new Document("$lt", isObjectId ? new ObjectId(upperBound.toString()) : upperBound));
                 }
-            }
-            else if (upperBound.equals("max")) {
+            } else if (upperBound.equals("max")) {
                 filter.append(KeyConstant.MONGO_PRIMARY_ID, new Document("$gte", isObjectId ? new ObjectId(lowerBound.toString()) : lowerBound));
-            }
-            else {
+            } else {
                 filter.append(KeyConstant.MONGO_PRIMARY_ID, new Document("$gte", isObjectId ? new ObjectId(lowerBound.toString()) : lowerBound)
                         .append("$lt", isObjectId ? new ObjectId(upperBound.toString()) : upperBound));
             }
@@ -186,13 +174,11 @@ public class MongoDBReader
                         Double a = Double.parseDouble(column);
                         if (column.contains(".")) {
                             record.addColumn(new DoubleColumn(a));
-                        }
-                        else {
+                        } else {
                             record.addColumn(new LongColumn(Long.parseLong(column)));
                         }
                         continue;
-                    }
-                    catch (NumberFormatException ignore) {
+                    } catch (NumberFormatException ignore) {
 
                     }
                     if (!item.containsKey(column)) {
@@ -207,23 +193,17 @@ public class MongoDBReader
 
                     if (tempCol instanceof Double) {
                         record.addColumn(new DoubleColumn((Double) tempCol));
-                    }
-                    else if (tempCol instanceof Boolean) {
+                    } else if (tempCol instanceof Boolean) {
                         record.addColumn(new BoolColumn((Boolean) tempCol));
-                    }
-                    else if (tempCol instanceof Date) {
+                    } else if (tempCol instanceof Date) {
                         record.addColumn(new DateColumn((Date) tempCol));
-                    }
-                    else if (tempCol instanceof Integer) {
+                    } else if (tempCol instanceof Integer) {
                         record.addColumn(new LongColumn((Integer) tempCol));
-                    }
-                    else if (tempCol instanceof Long) {
+                    } else if (tempCol instanceof Long) {
                         record.addColumn(new LongColumn((Long) tempCol));
-                    }
-                    else if (tempCol instanceof Document) {
+                    } else if (tempCol instanceof Document) {
                         record.addColumn(new StringColumn(((Document) tempCol).toJson()));
-                    }
-                    else {
+                    } else {
                         record.addColumn(new StringColumn(tempCol.toString()));
                     }
                 }
@@ -232,8 +212,7 @@ public class MongoDBReader
         }
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration readerSliceConfig = getPluginJobConf();
             String userName = readerSliceConfig.getString(USERNAME);
             String password = readerSliceConfig.getString(PASSWORD);
@@ -255,15 +234,13 @@ public class MongoDBReader
             List<Object> addressList = connConf.getList(KeyConstant.MONGO_ADDRESS, Object.class);
             if (notNullAndEmpty((userName)) && notNullAndEmpty((password))) {
                 this.mongoClient = MongoUtil.initCredentialMongoClient(addressList, userName, password, authDb);
-            }
-            else {
+            } else {
                 this.mongoClient = MongoUtil.initMongoClient(addressList);
             }
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }

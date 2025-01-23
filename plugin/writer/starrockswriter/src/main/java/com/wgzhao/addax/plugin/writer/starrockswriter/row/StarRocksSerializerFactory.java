@@ -4,13 +4,12 @@ import com.wgzhao.addax.plugin.writer.starrockswriter.StarRocksWriterOptions;
 
 import java.util.Map;
 
-public class StarRocksSerializerFactory
-{
+public class StarRocksSerializerFactory {
 
-    private StarRocksSerializerFactory() {}
+    private StarRocksSerializerFactory() {
+    }
 
-    public static StarRocksISerializer createSerializer(StarRocksWriterOptions writerOptions)
-    {
+    public static StarRocksISerializer createSerializer(StarRocksWriterOptions writerOptions) {
         if (StarRocksWriterOptions.StreamLoadFormat.CSV.equals(writerOptions.getStreamLoadFormat())) {
             Map<String, Object> props = writerOptions.getLoadProps();
             return new StarRocksCsvSerializer(null == props || !props.containsKey("column_separator") ?

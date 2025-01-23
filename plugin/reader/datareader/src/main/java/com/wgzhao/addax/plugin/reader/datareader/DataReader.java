@@ -74,20 +74,16 @@ import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 import static com.wgzhao.addax.plugin.reader.datareader.DataKey.RULE;
 
 public class DataReader
-        extends Reader
-{
+        extends Reader {
 
-    private enum Type
-    {
+    private enum Type {
         STRING, LONG, BOOL, DOUBLE, DATE, BYTES,
         ;
 
-        private static boolean isTypeIllegal(String typeString)
-        {
+        private static boolean isTypeIllegal(String typeString) {
             try {
                 Type.valueOf(typeString.toUpperCase());
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 return false;
             }
 
@@ -96,15 +92,13 @@ public class DataReader
     }
 
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
         private Configuration originalConfig;
         private static final List<String> validUnits = Arrays.asList("d", "day", "M", "month", "y", "year", "h", "hour", "m", "minute",
                 "s", "second", "w", "week");
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = getPluginJobConf();
             // warn: 忽略大小写
             dealColumn(this.originalConfig);
@@ -112,14 +106,12 @@ public class DataReader
             Long sliceRecordCount = this.originalConfig.getLong(SLICE_RECORD_COUNT);
             if (null == sliceRecordCount) {
                 throw AddaxException.asAddaxException(REQUIRED_VALUE, "sliceRecordCount is required");
-            }
-            else if (sliceRecordCount < 1) {
+            } else if (sliceRecordCount < 1) {
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE, "sliceRecordCount must be greater than 1");
             }
         }
 
-        private void dealColumn(Configuration originalConfig)
-        {
+        private void dealColumn(Configuration originalConfig) {
             List<JSONObject> columns = originalConfig.getList(COLUMN, JSONObject.class);
             if (null == columns || columns.isEmpty()) {
                 throw AddaxException.asAddaxException(REQUIRED_VALUE, "column is required and NOT be empty");
@@ -130,8 +122,7 @@ public class DataReader
                 Configuration eachColumnConfig = Configuration.from(eachColumn);
                 try {
                     this.parseMixupFunctions(eachColumnConfig);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     throw AddaxException.asAddaxException(NOT_SUPPORT_TYPE,
                             String.format("Failed to parse column: %s", e.getMessage()), e);
                 }
@@ -139,8 +130,7 @@ public class DataReader
                 if (StringUtils.isBlank(typeName)) {
                     // empty typeName will be set to default type: string
                     eachColumnConfig.set(TYPE, Type.STRING);
-                }
-                else {
+                } else {
                     if (Type.DATE.name().equalsIgnoreCase(typeName)) {
                         boolean notAssignDateFormat = StringUtils.isBlank(eachColumnConfig.getString(DATE_FORMAT));
                         if (notAssignDateFormat) {
@@ -178,13 +168,11 @@ public class DataReader
          *
          * @param eachColumnConfig see {@link Configuration}
          */
-        private void parseMixupFunctions(Configuration eachColumnConfig)
-        {
+        private void parseMixupFunctions(Configuration eachColumnConfig) {
             String columnRule = eachColumnConfig.getString(RULE, "constant").toLowerCase();
             if ("incr".equals(columnRule)) {
                 validateIncrRule(eachColumnConfig);
-            }
-            else if ("random".equals(columnRule)) {
+            } else if ("random".equals(columnRule)) {
                 validateRandom(eachColumnConfig);
             }
         }
@@ -199,8 +187,7 @@ public class DataReader
          *
          * @param eachColumnConfig {@link Configuration}
          */
-        private void validateIncrRule(Configuration eachColumnConfig)
-        {
+        private void validateIncrRule(Configuration eachColumnConfig) {
             String value = eachColumnConfig.getString(VALUE);
             String dType = eachColumnConfig.getString(TYPE).toLowerCase();
             if ("long".equals(dType)) {
@@ -214,46 +201,39 @@ public class DataReader
                 try {
                     Long.parseLong(value.split(",")[0].trim());
                     Long.parseLong(value.split(",")[1].trim());
-                }
-                catch (NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw AddaxException.asAddaxException(
                             ILLEGAL_VALUE,
                             value + " is illegal, it must be a digital string"
                     );
-                }
-                catch(IndexOutOfBoundsException e) {
+                } catch (IndexOutOfBoundsException e) {
                     throw AddaxException.asAddaxException(
                             ILLEGAL_VALUE,
                             value + " is illegal, it must format as 'start, step'"
                     );
                 }
-            }
-            else if ("date".equals(dType)) {
+            } else if ("date".equals(dType)) {
                 String[] fields = value.split(",");
                 if (fields.length == 1) {
                     eachColumnConfig.set(VALUE, value.trim() + ",1,d");
-                }
-                else if (fields.length == 2) {
+                } else if (fields.length == 2) {
                     try {
                         Integer.parseInt(fields[1]);
-                    }
-                    catch (NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         throw AddaxException.asAddaxException(
                                 ILLEGAL_VALUE,
                                 "The second field must be numeric, value [" + fields[1] + "] is not valid"
                         );
                     }
                     eachColumnConfig.set(VALUE, fields[0].trim() + "," + fields[1].trim() + ",d");
-                }
-                else {
+                } else {
                     String unit = fields[2].charAt(0) + "";
                     // validate unit
                     validateDateIncrUnit(unit);
                     // normalize unit to 1-char
                     eachColumnConfig.set(VALUE, fields[0].trim() + "," + fields[1].trim() + "," + unit);
                 }
-            }
-            else {
+            } else {
                 throw AddaxException.asAddaxException(
                         NOT_SUPPORT_TYPE,
                         "递增序列当前仅支持整数类型(long)和日期类型(date)"
@@ -261,8 +241,7 @@ public class DataReader
             }
         }
 
-        private void validateRandom(Configuration config)
-        {
+        private void validateRandom(Configuration config) {
             String value = config.getString(VALUE);
             String[] split = value.split(",");
             if (split.length < 2) {
@@ -288,15 +267,13 @@ public class DataReader
                     //warn: do no concern int -> long
                     param1Int = format.parse(param1).getTime();//milliseconds
                     param2Int = format.parse(param2).getTime();//milliseconds
-                }
-                catch (ParseException e) {
+                } catch (ParseException e) {
                     throw AddaxException.asAddaxException(
                             ILLEGAL_VALUE,
                             String.format("dateFormat参数[%s]和混淆函数random的参数不匹配，解析错误:%s, %s",
                                     dateFormat, param1, param2), e);
                 }
-            }
-            else {
+            } else {
                 param1Int = Integer.parseInt(param1);
                 param2Int = Integer.parseInt(param2);
             }
@@ -334,15 +311,13 @@ public class DataReader
          *
          * @param unit the date interval unit
          */
-        private void validateDateIncrUnit(String unit)
-        {
+        private void validateDateIncrUnit(String unit) {
             boolean isOK = true;
             if (unit.length() == 1) {
                 if (!validUnits.contains(unit)) {
                     isOK = false;
                 }
-            }
-            else if (!validUnits.contains(unit.toLowerCase())) {
+            } else if (!validUnits.contains(unit.toLowerCase())) {
                 isOK = false;
             }
             if (!isOK) {
@@ -353,14 +328,12 @@ public class DataReader
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             //
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             List<Configuration> configurations = new ArrayList<>();
 
             for (int i = 0; i < adviceNumber; i++) {
@@ -370,21 +343,18 @@ public class DataReader
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             //
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
         private List<String> columns;
 
         private long sliceRecordCount;
@@ -393,22 +363,19 @@ public class DataReader
         private static final Map<Integer, Object> incrMap = new HashMap<>();
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration readerSliceConfig = getPluginJobConf();
             this.columns = readerSliceConfig.getList(Key.COLUMN, String.class);
             this.sliceRecordCount = readerSliceConfig.getLong(Key.SLICE_RECORD_COUNT);
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             //
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             Record oneRecord;
             while (this.sliceRecordCount > 0) {
                 oneRecord = buildOneRecord(recordSender, this.columns);
@@ -418,20 +385,17 @@ public class DataReader
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             //
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
 
         private Column buildOneColumn(Configuration eachColumnConfig, int columnIndex)
-                throws Exception
-        {
+                throws Exception {
             String columnValue = eachColumnConfig.getString(VALUE);
             // convert rule from caseFormat to UPPER_UNDERSCORE
             String rule = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, eachColumnConfig.getString(RULE, "constant"));
@@ -481,8 +445,7 @@ public class DataReader
                             BigDecimal b = BigDecimal.valueOf(rng.nextDouble(param1Int, param2Int + 1))
                                     .setScale(scale, RoundingMode.HALF_UP);
                             return new DoubleColumn(b.doubleValue());
-                        }
-                        else {
+                        } else {
                             return new DoubleColumn(rng.nextDouble(param1Int, param2Int + 1));
                         }
                     case DATE:
@@ -495,11 +458,9 @@ public class DataReader
                         }
                         if (param1Int == 0) {
                             return new BoolColumn(true);
-                        }
-                        else if (param2Int == 0) {
+                        } else if (param2Int == 0) {
                             return new BoolColumn(false);
-                        }
-                        else {
+                        } else {
                             long randomInt = rng.nextLong(0, param1Int + param2Int + 1);
                             return new BoolColumn(randomInt > param1Int);
                         }
@@ -522,8 +483,7 @@ public class DataReader
                     currVal = incrMap.getOrDefault(columnIndex, currVal);
                     incrMap.put(columnIndex, (long) currVal + step);
                     return new LongColumn((long) currVal);
-                }
-                else if (columnType == Type.DATE) {
+                } else if (columnType == Type.DATE) {
                     String[] fields = columnValue.split(",");
                     currVal = incrMap.getOrDefault(columnIndex, null);
                     if (currVal == null) {
@@ -531,8 +491,7 @@ public class DataReader
                         SimpleDateFormat sdf = new SimpleDateFormat(datePattern);
                         try {
                             currVal = sdf.parse(fields[0]);
-                        }
-                        catch (java.text.ParseException e) {
+                        } catch (java.text.ParseException e) {
                             throw AddaxException.asAddaxException(
                                     ILLEGAL_VALUE,
                                     String.format("can not parse date value [%s] with date format [%s]", fields[0], datePattern)
@@ -541,8 +500,7 @@ public class DataReader
                     }
                     incrMap.put(columnIndex, dateIncrement((Date) currVal, Integer.parseInt(fields[1]), fields[2]));
                     return new DateColumn((Date) currVal);
-                }
-                else {
+                } else {
                     throw AddaxException.asAddaxException(
                             NOT_SUPPORT_TYPE,
                             columnType + " can not support for increment"
@@ -596,12 +554,11 @@ public class DataReader
          * calculate next date via interval
          *
          * @param curDate current date
-         * @param step interval
-         * @param unit unit
+         * @param step    interval
+         * @param unit    unit
          * @return next date
          */
-        private Date dateIncrement(Date curDate, int step, String unit)
-        {
+        private Date dateIncrement(Date curDate, int step, String unit) {
             switch (unit) {
                 case "d":
                     return DateUtils.addDays(curDate, step);
@@ -624,8 +581,7 @@ public class DataReader
         }
 
         private Record buildOneRecord(RecordSender recordSender,
-                List<String> columns)
-        {
+                                      List<String> columns) {
             if (null == recordSender) {
                 throw new IllegalArgumentException("参数[recordSender]不能为空.");
             }
@@ -640,8 +596,7 @@ public class DataReader
                     Configuration eachColumnConfig = Configuration.from(columns.get(i));
                     record.addColumn(this.buildOneColumn(eachColumnConfig, i));
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE, "构造一个record失败.", e);
             }
             return record;

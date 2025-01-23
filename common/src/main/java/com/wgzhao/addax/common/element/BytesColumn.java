@@ -32,23 +32,19 @@ import java.util.Date;
  * Created by jingxing on 14-8-24.
  */
 public class BytesColumn
-        extends Column
-{
+        extends Column {
 
-    public BytesColumn()
-    {
+    public BytesColumn() {
         this(null);
     }
 
-    public BytesColumn(byte[] bytes)
-    {
+    public BytesColumn(byte[] bytes) {
         super(ArrayUtils.clone(bytes), Column.Type.BYTES, null == bytes ? 0
                 : bytes.length);
     }
 
     @Override
-    public byte[] asBytes()
-    {
+    public byte[] asBytes() {
         if (null == this.getRawData()) {
             return new byte[0];
         }
@@ -57,16 +53,14 @@ public class BytesColumn
     }
 
     @Override
-    public String asString()
-    {
+    public String asString() {
         if (null == this.getRawData()) {
             return null;
         }
 
         try {
             return ColumnCast.bytes2String(this);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     ErrorCode.CONVERT_NOT_SUPPORT,
                     "Bytes[" + this + "] cannot be converted to String .");
@@ -74,8 +68,7 @@ public class BytesColumn
     }
 
     @Override
-    public Long asLong()
-    {
+    public Long asLong() {
         long value = 0L;
         for (byte b : this.asBytes()) {
             // Shifting previous value 8 bits to right and
@@ -86,43 +79,37 @@ public class BytesColumn
     }
 
     @Override
-    public BigDecimal asBigDecimal()
-    {
+    public BigDecimal asBigDecimal() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, "Bytes type cannot converted to BigDecimal.");
     }
 
     @Override
-    public BigInteger asBigInteger()
-    {
+    public BigInteger asBigInteger() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, "Bytes type cannot converted to BigInteger.");
     }
 
     @Override
-    public Timestamp asTimestamp()
-    {
+    public Timestamp asTimestamp() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, "Bytes type cannot converted to Timestamp.");
     }
 
     @Override
-    public Double asDouble()
-    {
+    public Double asDouble() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, "Bytes type cannot converted to Long.");
     }
 
     @Override
-    public Date asDate()
-    {
+    public Date asDate() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, "Bytes type cannot converted to Date.");
     }
 
     @Override
-    public Boolean asBoolean()
-    {
+    public Boolean asBoolean() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, "Bytes type cannot converted to Boolean.");
     }

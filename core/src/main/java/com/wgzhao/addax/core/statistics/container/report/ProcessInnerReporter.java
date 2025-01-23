@@ -23,18 +23,15 @@ import com.wgzhao.addax.core.statistics.communication.Communication;
 import com.wgzhao.addax.core.statistics.communication.LocalTGCommunicationManager;
 
 public class ProcessInnerReporter
-        extends AbstractReporter
-{
+        extends AbstractReporter {
 
     @Override
-    public void reportJobCommunication(Communication communication)
-    {
+    public void reportJobCommunication(Communication communication) {
         // do nothing
     }
 
     @Override
-    public void reportTGCommunication(Integer taskGroupId, Communication communication)
-    {
+    public void reportTGCommunication(Integer taskGroupId, Communication communication) {
         LocalTGCommunicationManager.updateTaskGroupCommunication(taskGroupId, communication);
     }
 }

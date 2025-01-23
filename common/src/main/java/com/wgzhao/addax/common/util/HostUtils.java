@@ -30,10 +30,10 @@ import java.nio.charset.StandardCharsets;
 /**
  * Created by liqiang on 15/8/25.
  */
-public class HostUtils
-{
+public class HostUtils {
 
-    private HostUtils() {}
+    private HostUtils() {
+    }
 
     public static final String IP;
     public static final String HOSTNAME;
@@ -47,8 +47,7 @@ public class HostUtils
             InetAddress inetAddress = InetAddress.getLocalHost();
             ip = inetAddress.getHostAddress();
             hostname = inetAddress.getHostName();
-        }
-        catch (UnknownHostException e) {
+        } catch (UnknownHostException e) {
             log.error("Can't find out address: {}", e.getMessage());
         }
         if (ip.equals("127.0.0.1") || ip.equals("::1") || ip.equals(UNKNOWN)) {
@@ -63,8 +62,7 @@ public class HostUtils
                     hostname = (new String(IOUtils.toByteArray(process.getInputStream()), StandardCharsets.UTF_8)).trim();
                 }
                 process.destroy();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 log.warn("Failed to get hostname: {}", e.getMessage());
             }
         }

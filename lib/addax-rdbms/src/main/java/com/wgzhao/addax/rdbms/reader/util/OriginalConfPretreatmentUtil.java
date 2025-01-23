@@ -41,16 +41,15 @@ import static com.wgzhao.addax.common.spi.ErrorCode.CONFIG_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.EXECUTE_FAIL;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
-public final class OriginalConfPretreatmentUtil
-{
+public final class OriginalConfPretreatmentUtil {
     private static final Logger LOG = LoggerFactory.getLogger(OriginalConfPretreatmentUtil.class);
 
     public static DataBaseType dataBaseType;
 
-    private OriginalConfPretreatmentUtil() {}
+    private OriginalConfPretreatmentUtil() {
+    }
 
-    public static void doPretreatment(Configuration originalConfig)
-    {
+    public static void doPretreatment(Configuration originalConfig) {
         // 检查 username 配置（必填）
         originalConfig.getNecessaryValue(Key.USERNAME, REQUIRED_VALUE);
         /*
@@ -58,8 +57,7 @@ public final class OriginalConfPretreatmentUtil
          */
         if (originalConfig.getString(Key.PASSWORD) == null) {
             originalConfig.set(Key.PASSWORD, "");
-        }
-        else if (originalConfig.getString(Key.PASSWORD).startsWith(Constant.ENC_PASSWORD_PREFIX)) {
+        } else if (originalConfig.getString(Key.PASSWORD).startsWith(Constant.ENC_PASSWORD_PREFIX)) {
             // encrypted password, need to decrypt
             String pass = originalConfig.getString(Key.PASSWORD);
             String decryptPassword = EncryptUtil.decrypt(pass.substring(6, pass.length() - 1));
@@ -70,8 +68,7 @@ public final class OriginalConfPretreatmentUtil
         simplifyConf(originalConfig);
     }
 
-    public static void dealWhere(Configuration originalConfig)
-    {
+    public static void dealWhere(Configuration originalConfig) {
         String where = originalConfig.getString(Key.WHERE, null);
         if (StringUtils.isNotBlank(where)) {
             String whereImprove = where.trim();
@@ -92,8 +89,7 @@ public final class OriginalConfPretreatmentUtil
      *
      * @param originalConfig configuration
      */
-    private static void simplifyConf(Configuration originalConfig)
-    {
+    private static void simplifyConf(Configuration originalConfig) {
         boolean isTableMode = recognizeTableOrQuerySqlMode(originalConfig);
         originalConfig.set(Key.IS_TABLE_MODE, isTableMode);
 
@@ -102,8 +98,7 @@ public final class OriginalConfPretreatmentUtil
         dealColumnConf(originalConfig);
     }
 
-    private static void dealJdbcAndTable(Configuration originalConfig)
-    {
+    private static void dealJdbcAndTable(Configuration originalConfig) {
         String username = originalConfig.getString(Key.USERNAME);
         String password = originalConfig.getString(Key.PASSWORD);
         boolean isTableMode = originalConfig.getBool(Key.IS_TABLE_MODE);
@@ -132,13 +127,12 @@ public final class OriginalConfPretreatmentUtil
 
         if (isPreCheck) {
             DBUtil.validJdbcUrlWithoutRetry(dataBaseType, jdbcUrl, username, password, preSql);
-        }
-        else {
+        } else {
             DBUtil.validJdbcUrl(dataBaseType, jdbcUrl, username, password, preSql);
         }
 
         // 回写到connection.jdbcUrl
-        originalConfig.set(Key.CONNECTION + "."  + Key.JDBC_URL, jdbcUrl);
+        originalConfig.set(Key.CONNECTION + "." + Key.JDBC_URL, jdbcUrl);
 
         if (isTableMode) {
             // table 方式
@@ -159,8 +153,7 @@ public final class OriginalConfPretreatmentUtil
         originalConfig.set(Key.TABLE_NUMBER, tableNum);
     }
 
-    private static void dealColumnConf(Configuration originalConfig)
-    {
+    private static void dealColumnConf(Configuration originalConfig) {
         boolean isTableMode = originalConfig.getBool(Key.IS_TABLE_MODE);
 
         List<String> userConfiguredColumns = originalConfig.getList(Key.COLUMN, String.class);
@@ -169,8 +162,7 @@ public final class OriginalConfPretreatmentUtil
             if (null == userConfiguredColumns
                     || userConfiguredColumns.isEmpty()) {
                 throw AddaxException.asAddaxException(REQUIRED_VALUE, "The item column is required.");
-            }
-            else {
+            } else {
                 String splitPk = originalConfig.getString(Key.SPLIT_PK, null);
 
                 if (1 == userConfiguredColumns.size()
@@ -180,8 +172,7 @@ public final class OriginalConfPretreatmentUtil
                             "the correctness of the task or even cause errors.");
                     // 回填其值，需要以 String 的方式转交后续处理
                     originalConfig.set(Key.COLUMN, "*");
-                }
-                else {
+                } else {
                     String jdbcUrl = originalConfig.getString(Key.CONNECTION + "." + Key.JDBC_URL);
 
                     String username = originalConfig.getString(Key.USERNAME);
@@ -209,12 +200,11 @@ public final class OriginalConfPretreatmentUtil
                     originalConfig.set(Key.COLUMN, StringUtils.join(quotedColumns, ","));
                     if (StringUtils.isNotBlank(splitPk) && !allColumns.contains(splitPk.toLowerCase())) {
                         throw AddaxException.asAddaxException(CONFIG_ERROR,
-                                "The table " + tableName + " has not the primary key " +  splitPk);
+                                "The table " + tableName + " has not the primary key " + splitPk);
                     }
                 }
             }
-        }
-        else {
+        } else {
             // querySql模式，不希望配制 column，那样是混淆不清晰的
             if (null != userConfiguredColumns && !userConfiguredColumns.isEmpty()) {
                 LOG.warn("You configured both column and querySql, querySql will be preferred.");
@@ -237,8 +227,7 @@ public final class OriginalConfPretreatmentUtil
         }
     }
 
-    private static boolean recognizeTableOrQuerySqlMode(Configuration originalConfig)
-    {
+    private static boolean recognizeTableOrQuerySqlMode(Configuration originalConfig) {
         Configuration connConf = originalConfig.getConfiguration(Key.CONNECTION);
 
         String table;
@@ -258,8 +247,7 @@ public final class OriginalConfPretreatmentUtil
             // table 和 querySql 二者均未配置
             throw AddaxException.asAddaxException(
                     REQUIRED_VALUE, "You must configure either table or querySql.");
-        }
-        else if (isTableMode && isQuerySqlMode) {
+        } else if (isTableMode && isQuerySqlMode) {
             // table 和 querySql 二者均配置
             throw AddaxException.asAddaxException(CONFIG_ERROR,
                     "You ca not configure both table and querySql at the same time.");

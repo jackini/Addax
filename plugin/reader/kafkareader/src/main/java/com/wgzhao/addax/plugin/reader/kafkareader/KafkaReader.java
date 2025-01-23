@@ -32,38 +32,32 @@ import static com.wgzhao.addax.common.spi.ErrorCode.CONFIG_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class KafkaReader
-        extends Reader
-{
+        extends Reader {
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
         private Configuration conf = null;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.conf = getPluginJobConf();
             conf.getNecessaryValue(KafkaKey.BROKER_LIST, REQUIRED_VALUE);
             conf.getNecessaryValue(KafkaKey.TOPIC, REQUIRED_VALUE);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
 
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             // only one split
             return Collections.singletonList(conf.clone());
         }
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
         private final static Logger logger = LoggerFactory.getLogger(Task.class);
         private final static String GROUP_ID = "addax-kafka-grp";
         private final static String CLIENT_ID = "addax-kafka-reader";
@@ -74,8 +68,7 @@ public class KafkaReader
         private String missKeyValue;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.configuration = getPluginJobConf();
             Properties properties = new Properties();
             String brokeLists = configuration.getString(KafkaKey.BROKER_LIST);
@@ -96,14 +89,12 @@ public class KafkaReader
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             kafkaConsumer.close();
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             while (true) {
                 ConsumerRecords<String, Object> items = kafkaConsumer.poll(Duration.ofSeconds(2));
                 sendData(items, recordSender);
@@ -111,8 +102,7 @@ public class KafkaReader
             }
         }
 
-        private Column guessColumnType(Object obj)
-        {
+        private Column guessColumnType(Object obj) {
             if (obj instanceof Long) {
                 return new LongColumn((Long) obj);
             }
@@ -125,8 +115,7 @@ public class KafkaReader
             return new StringColumn(obj.toString());
         }
 
-        private void sendData(ConsumerRecords<String, Object> items, RecordSender recordSender)
-        {
+        private void sendData(ConsumerRecords<String, Object> items, RecordSender recordSender) {
             for (ConsumerRecord<String, Object> item : items) {
                 Record record = recordSender.createRecord();
                 logger.debug("topic = {}, partition = {}, offset = {}, kafkaConsumer = {}, country = {}%n",
@@ -138,8 +127,7 @@ public class KafkaReader
                     for (String key : jsonObject.keySet()) {
                         record.addColumn(new StringColumn(jsonObject.getString(key)));
                     }
-                }
-                else {
+                } else {
                     for (String col : columns) {
                         if (!jsonObject.containsKey(col)) {
                             if (this.missKeyValue == null) {
@@ -147,8 +135,7 @@ public class KafkaReader
                                         "The column " + col + " not exists");
                             }
                             record.addColumn(new StringColumn(this.missKeyValue));
-                        }
-                        else {
+                        } else {
                             record.addColumn(guessColumnType(jsonObject.get(col)));
                         }
                     }

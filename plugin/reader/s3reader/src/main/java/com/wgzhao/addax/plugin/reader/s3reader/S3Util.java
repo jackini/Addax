@@ -11,8 +11,7 @@ import java.net.URI;
 
 import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 
-public class S3Util
-{
+public class S3Util {
     public static S3Client initS3Client(Configuration conf) {
         String regionStr = conf.getString(S3Key.REGION);
         Region region = Region.of(regionStr);

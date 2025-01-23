@@ -35,68 +35,57 @@ import java.util.List;
 import static com.wgzhao.addax.common.base.Constant.DEFAULT_DATE_FORMAT;
 
 public class ClickHouseWriter
-        extends Writer
-{
+        extends Writer {
     private static final DataBaseType DATABASE_TYPE = DataBaseType.ClickHouse;
 
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
         private Configuration originalConfig = null;
         private CommonRdbmsWriter.Job commonRdbmsWriterMaster;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = super.getPluginJobConf();
             this.commonRdbmsWriterMaster = new CommonRdbmsWriter.Job(DATABASE_TYPE);
             this.commonRdbmsWriterMaster.init(this.originalConfig);
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             this.commonRdbmsWriterMaster.prepare(this.originalConfig);
         }
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             return this.commonRdbmsWriterMaster.split(this.originalConfig, mandatoryNumber);
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsWriterMaster.post(this.originalConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsWriterMaster.destroy(this.originalConfig);
         }
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
         private Configuration writerSliceConfig;
 
         private CommonRdbmsWriter.Task commonRdbmsWriterSlave;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.writerSliceConfig = super.getPluginJobConf();
 
-            this.commonRdbmsWriterSlave = new CommonRdbmsWriter.Task(DATABASE_TYPE)
-            {
+            this.commonRdbmsWriterSlave = new CommonRdbmsWriter.Task(DATABASE_TYPE) {
                 @Override
                 protected PreparedStatement fillPreparedStatementColumnType(PreparedStatement preparedStatement, int columnIndex,
-                        int columnSqlType, Column column)
-                        throws SQLException
-                {
+                                                                            int columnSqlType, Column column)
+                        throws SQLException {
                     if (column == null || column.getRawData() == null) {
                         preparedStatement.setObject(columnIndex, null);
                         return preparedStatement;
@@ -106,16 +95,13 @@ public class ClickHouseWriter
                         String columnTypeName = (String) this.resultSetMetaData.get(columnIndex).get("typeName");
                         if (columnTypeName.startsWith("DateTime64(") && columnTypeName.contains(",")) {
                             preparedStatement.setObject(columnIndex, column.asTimestamp()); //setTimestamp is slow and not recommended
-                        }
-                        else if (columnTypeName.startsWith("DateTime(")) {
+                        } else if (columnTypeName.startsWith("DateTime(")) {
                             preparedStatement.setObject(columnIndex, column.asTimestamp());
-                        }
-                        else if (columnTypeName.equals("DateTime")) {
+                        } else if (columnTypeName.equals("DateTime")) {
                             // no precision specified, use default
                             SimpleDateFormat sdf = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
                             preparedStatement.setString(columnIndex, sdf.format(column.asDate()));
-                        }
-                        else {
+                        } else {
                             preparedStatement.setString(columnIndex, column.asString());
                         }
                         return preparedStatement;
@@ -128,26 +114,22 @@ public class ClickHouseWriter
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             this.commonRdbmsWriterSlave.prepare(this.writerSliceConfig);
         }
 
         @Override
-        public void startWrite(RecordReceiver recordReceiver)
-        {
+        public void startWrite(RecordReceiver recordReceiver) {
             this.commonRdbmsWriterSlave.startWrite(recordReceiver, this.writerSliceConfig, super.getTaskPluginCollector());
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsWriterSlave.post(this.writerSliceConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsWriterSlave.destroy(this.writerSliceConfig);
         }
     }

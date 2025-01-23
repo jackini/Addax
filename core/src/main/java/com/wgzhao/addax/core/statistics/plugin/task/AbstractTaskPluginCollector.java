@@ -35,8 +35,7 @@ import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
  * Created by jingxing on 14-9-11.
  */
 public abstract class AbstractTaskPluginCollector
-        extends TaskPluginCollector
-{
+        extends TaskPluginCollector {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTaskPluginCollector.class);
 
     private final Communication communication;
@@ -45,37 +44,31 @@ public abstract class AbstractTaskPluginCollector
 
     private final PluginType pluginType;
 
-    public AbstractTaskPluginCollector(Configuration conf, Communication communication, PluginType type)
-    {
+    public AbstractTaskPluginCollector(Configuration conf, Communication communication, PluginType type) {
         this.configuration = conf;
         this.communication = communication;
         this.pluginType = type;
     }
 
-    public Communication getCommunication()
-    {
+    public Communication getCommunication() {
         return communication;
     }
 
-    public Configuration getConfiguration()
-    {
+    public Configuration getConfiguration() {
         return configuration;
     }
 
-    public PluginType getPluginType()
-    {
+    public PluginType getPluginType() {
         return pluginType;
     }
 
     @Override
-    public final void collectMessage(String key, String value)
-    {
+    public final void collectMessage(String key, String value) {
         this.communication.addMessage(key, value);
     }
 
     @Override
-    public void collectDirtyRecord(Record dirtyRecord, Throwable t, String errorMessage)
-    {
+    public void collectDirtyRecord(Record dirtyRecord, Throwable t, String errorMessage) {
 
         if (null == dirtyRecord) {
             LOG.warn("The dirty record is null.");
@@ -85,12 +78,10 @@ public abstract class AbstractTaskPluginCollector
         if (this.pluginType == PluginType.READER) {
             this.communication.increaseCounter(CommunicationTool.READ_FAILED_RECORDS, 1);
             this.communication.increaseCounter(CommunicationTool.READ_FAILED_BYTES, dirtyRecord.getByteSize());
-        }
-        else if (this.pluginType.equals(PluginType.WRITER)) {
+        } else if (this.pluginType.equals(PluginType.WRITER)) {
             this.communication.increaseCounter(CommunicationTool.WRITE_FAILED_RECORDS, 1);
             this.communication.increaseCounter(CommunicationTool.WRITE_FAILED_BYTES, dirtyRecord.getByteSize());
-        }
-        else {
+        } else {
             throw AddaxException.asAddaxException(RUNTIME_ERROR, String.format("不知道的插件类型[%s].", this.pluginType));
         }
     }

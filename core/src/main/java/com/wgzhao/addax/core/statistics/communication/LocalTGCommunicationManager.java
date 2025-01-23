@@ -25,19 +25,17 @@ import org.apache.commons.lang3.Validate;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class LocalTGCommunicationManager
-{
+public final class LocalTGCommunicationManager {
     private static final Map<Integer, Communication> taskGroupCommunicationMap = new ConcurrentHashMap<>();
 
-    private LocalTGCommunicationManager() {}
+    private LocalTGCommunicationManager() {
+    }
 
-    public static void registerTaskGroupCommunication(int taskGroupId, Communication communication)
-    {
+    public static void registerTaskGroupCommunication(int taskGroupId, Communication communication) {
         taskGroupCommunicationMap.put(taskGroupId, communication);
     }
 
-    public static Communication getJobCommunication()
-    {
+    public static Communication getJobCommunication() {
         Communication communication = new Communication();
         communication.setState(State.SUCCEEDED);
 
@@ -55,29 +53,25 @@ public final class LocalTGCommunicationManager
      * @param taskGroupId task group id
      * @return set
      */
-    public static Communication getTaskGroupCommunication(int taskGroupId)
-    {
+    public static Communication getTaskGroupCommunication(int taskGroupId) {
         Validate.isTrue(taskGroupId >= 0, "The number of taskGroupId cannot be less than zero.");
 
         return taskGroupCommunicationMap.get(taskGroupId);
     }
 
     public static void updateTaskGroupCommunication(final int taskGroupId,
-            final Communication communication)
-    {
+                                                    final Communication communication) {
         Validate.isTrue(taskGroupCommunicationMap.containsKey(taskGroupId),
                 String.format("There is no communication registered for taskGroupId[%d] in taskGroupCommunicationMap," +
-                "Unable to update the information for this taskGroup", taskGroupId));
+                        "Unable to update the information for this taskGroup", taskGroupId));
         taskGroupCommunicationMap.put(taskGroupId, communication);
     }
 
-    public static void clear()
-    {
+    public static void clear() {
         taskGroupCommunicationMap.clear();
     }
 
-    public static Map<Integer, Communication> getTaskGroupCommunicationMap()
-    {
+    public static Map<Integer, Communication> getTaskGroupCommunicationMap() {
         return taskGroupCommunicationMap;
     }
 }

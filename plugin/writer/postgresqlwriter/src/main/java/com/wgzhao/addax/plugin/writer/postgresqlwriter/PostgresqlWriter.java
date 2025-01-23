@@ -36,19 +36,16 @@ import java.util.List;
 import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 
 public class PostgresqlWriter
-        extends Writer
-{
+        extends Writer {
     private static final DataBaseType DATABASE_TYPE = DataBaseType.PostgreSQL;
 
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
         private Configuration originalConfig = null;
         private CommonRdbmsWriter.Job commonRdbmsWriterMaster;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = getPluginJobConf();
 
             String writeMode = this.originalConfig.getString(Key.WRITE_MODE);
@@ -68,61 +65,48 @@ public class PostgresqlWriter
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             this.commonRdbmsWriterMaster.prepare(this.originalConfig);
         }
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             return this.commonRdbmsWriterMaster.split(this.originalConfig, mandatoryNumber);
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsWriterMaster.post(this.originalConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsWriterMaster.destroy(this.originalConfig);
         }
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
         private Configuration writerSliceConfig;
         private CommonRdbmsWriter.Task commonRdbmsWriterSlave;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.writerSliceConfig = getPluginJobConf();
-            this.commonRdbmsWriterSlave = new CommonRdbmsWriter.Task(DATABASE_TYPE)
-            {
+            this.commonRdbmsWriterSlave = new CommonRdbmsWriter.Task(DATABASE_TYPE) {
                 @Override
-                public String calcValueHolder(String columnType)
-                {
+                public String calcValueHolder(String columnType) {
                     if ("serial".equalsIgnoreCase(columnType)) {
                         return "?::INT";
-                    }
-                    else if ("bit".equalsIgnoreCase(columnType)) {
+                    } else if ("bit".equalsIgnoreCase(columnType)) {
                         return "?::BIT VARYING";
-                    }
-                    else if ("bigserial".equalsIgnoreCase(columnType)) {
+                    } else if ("bigserial".equalsIgnoreCase(columnType)) {
                         return "?::BIGINT";
-                    }
-                    else if ("xml".equalsIgnoreCase(columnType)) {
+                    } else if ("xml".equalsIgnoreCase(columnType)) {
                         return "?::XML";
-                    }
-                    else if ("money".equalsIgnoreCase(columnType)) {
+                    } else if ("money".equalsIgnoreCase(columnType)) {
                         return "?::NUMERIC::MONEY";
-                    }
-                    else if ("bool".equalsIgnoreCase(columnType)) {
+                    } else if ("bool".equalsIgnoreCase(columnType)) {
                         return "?::BOOLEAN";
                     }
                     return super.calcValueHolder(columnType);
@@ -130,8 +114,7 @@ public class PostgresqlWriter
 
                 @Override
                 protected PreparedStatement fillPreparedStatementColumnType(PreparedStatement preparedStatement, int columnIndex, int columnSqlType, Column column)
-                        throws SQLException
-                {
+                        throws SQLException {
                     if (column == null || column.getRawData() == null) {
                         preparedStatement.setObject(columnIndex, null);
                         return preparedStatement;
@@ -140,7 +123,7 @@ public class PostgresqlWriter
                     if (columnSqlType == Types.BIT) {
                         String v;
                         if (column.getType() == Column.Type.BOOL) {
-                           v =  column.asBoolean() ? "1" : "0";
+                            v = column.asBoolean() ? "1" : "0";
                         } else {
                             v = bytes2Binary(column.asBytes());
                         }
@@ -155,8 +138,7 @@ public class PostgresqlWriter
             this.commonRdbmsWriterSlave.init(this.writerSliceConfig);
         }
 
-        private String bytes2Binary(byte[] bytes)
-        {
+        private String bytes2Binary(byte[] bytes) {
             StringBuilder sb = new StringBuilder();
             for (byte b : bytes) {
                 sb.append(String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0'));
@@ -165,25 +147,21 @@ public class PostgresqlWriter
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             this.commonRdbmsWriterSlave.prepare(this.writerSliceConfig);
         }
 
-        public void startWrite(RecordReceiver recordReceiver)
-        {
+        public void startWrite(RecordReceiver recordReceiver) {
             this.commonRdbmsWriterSlave.startWrite(recordReceiver, this.writerSliceConfig, super.getTaskPluginCollector());
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsWriterSlave.post(this.writerSliceConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsWriterSlave.destroy(this.writerSliceConfig);
         }
     }

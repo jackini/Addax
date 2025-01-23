@@ -62,12 +62,10 @@ import static org.apache.parquet.schema.LogicalTypeAnnotation.decimalType;
 
 public class ParquetWriter
         extends HdfsHelper
-        implements IHDFSWriter
-{
+        implements IHDFSWriter {
     private static final Logger logger = LoggerFactory.getLogger(ParquetWriter.class.getName());
 
-    public ParquetWriter(Configuration conf)
-    {
+    public ParquetWriter(Configuration conf) {
         super();
         getFileSystem(conf);
     }
@@ -93,8 +91,7 @@ public class ParquetWriter
      * "null" 表示该字段允许为空
      */
     @Override
-    public void write(RecordReceiver lineReceiver, Configuration config, String fileName, TaskPluginCollector taskPluginCollector)
-    {
+    public void write(RecordReceiver lineReceiver, Configuration config, String fileName, TaskPluginCollector taskPluginCollector) {
         List<Configuration> columns = config.getListConfiguration(Key.COLUMN);
         String compress = config.getString(Key.COMPRESS, "UNCOMPRESSED").toUpperCase().trim();
         if ("NONE".equals(compress)) {
@@ -131,16 +128,14 @@ public class ParquetWriter
                 group = buildRecord(record, columns, taskPluginCollector, simpleGroupFactory);
                 writer.write(group);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     public Group buildRecord(
             Record record, List<Configuration> columns,
-            TaskPluginCollector taskPluginCollector, SimpleGroupFactory simpleGroupFactory)
-    {
+            TaskPluginCollector taskPluginCollector, SimpleGroupFactory simpleGroupFactory) {
         Column column;
         Group group = simpleGroupFactory.newGroup();
         for (int i = 0; i < record.getColumnNumber(); i++) {
@@ -197,8 +192,7 @@ public class ParquetWriter
      * @param ts the {@link Timestamp} want to convert
      * @return {@link Binary}
      */
-    private Binary tsToBinary(Timestamp ts)
-    {
+    private Binary tsToBinary(Timestamp ts) {
         long millis = ts.getTime();
         int julianDays = (int) (millis / 86400000L) + 2440588;
         long nanosOfDay = (millis % 86400000L) * 1000000L;
@@ -218,8 +212,7 @@ public class ParquetWriter
      * @param bigDecimal the decimal value string want to convert
      * @return {@link Binary}
      */
-    private Binary decimalToBinary(String bigDecimal, int scale)
-    {
+    private Binary decimalToBinary(String bigDecimal, int scale) {
         int realScale = new BigDecimal(bigDecimal).scale();
         RoundingMode mode = scale >= realScale ? RoundingMode.UNNECESSARY : RoundingMode.HALF_UP;
         byte[] decimalBytes = new BigDecimal(bigDecimal)
@@ -237,15 +230,13 @@ public class ParquetWriter
                 myDecimalBufferIndex--;
             }
             return Binary.fromConstantByteArray(myDecimalBuffer);
-        }
-        else {
+        } else {
             throw new IllegalArgumentException(String.format("Decimal size: %d was greater than the allowed max: %d",
                     decimalBytes.length, myDecimalBuffer.length));
         }
     }
 
-    private MessageType generateParquetSchema(List<Configuration> columns)
-    {
+    private MessageType generateParquetSchema(List<Configuration> columns) {
         String type;
         String fieldName;
         Type t;

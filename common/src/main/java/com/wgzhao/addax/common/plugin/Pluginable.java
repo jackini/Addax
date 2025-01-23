@@ -21,8 +21,7 @@ package com.wgzhao.addax.common.plugin;
 
 import com.wgzhao.addax.common.util.Configuration;
 
-public interface Pluginable
-{
+public interface Pluginable {
     String getDeveloper();
 
     String getDescription();

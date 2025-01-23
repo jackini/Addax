@@ -21,8 +21,8 @@
                   "test_tbl"
                 ],
                 "jdbcUrl": "jdbc:clickhouse://127.0.0.1:8123/default",
-				"postSql": "select 1",
-				"preSql": "truncate table @table"
+                "postSql": "select 1",
+                "preSql": "truncate table @table"
               }
             ]
           }

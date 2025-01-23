@@ -44,18 +44,18 @@ public class DorisWriterManager {
 
     private final DorisStreamLoadObserver visitor;
     private final DorisKey options;
-    private final List<byte[]> buffer = new ArrayList<> ();
+    private final List<byte[]> buffer = new ArrayList<>();
     private int batchCount = 0;
     private long batchSize = 0;
     private volatile boolean closed = false;
     private volatile Throwable flushException;
-    private final LinkedBlockingDeque< WriterTuple > flushQueue;
+    private final LinkedBlockingDeque<WriterTuple> flushQueue;
     private ScheduledExecutorService scheduler;
     private ScheduledFuture<?> scheduledFuture;
 
-    public DorisWriterManager( DorisKey options) {
+    public DorisWriterManager(DorisKey options) {
         this.options = options;
-        this.visitor = new DorisStreamLoadObserver (options);
+        this.visitor = new DorisStreamLoadObserver(options);
         flushQueue = new LinkedBlockingDeque<>(options.getFlushQueueLength());
         this.startScheduler();
         this.startAsyncFlushing();
@@ -114,7 +114,7 @@ public class DorisWriterManager {
             }
             return;
         }
-        flushQueue.put(new WriterTuple (label, batchSize,  new ArrayList<>(buffer)));
+        flushQueue.put(new WriterTuple(label, batchSize, new ArrayList<>(buffer)));
         if (waitUtilDone) {
             // wait the last flush
             waitAsyncFlushingDone();
@@ -144,9 +144,9 @@ public class DorisWriterManager {
 
     private void startAsyncFlushing() {
         // start flush thread
-        Thread flushThread = new Thread(new Runnable(){
+        Thread flushThread = new Thread(new Runnable() {
             public void run() {
-                while(true) {
+                while (true) {
                     try {
                         asyncFlush();
                     } catch (Throwable e) {
@@ -162,7 +162,7 @@ public class DorisWriterManager {
     private void waitAsyncFlushingDone() throws InterruptedException {
         // wait previous flushing
         for (int i = 0; i <= options.getFlushQueueLength(); i++) {
-            flushQueue.put(new WriterTuple ("", 0L, null));
+            flushQueue.put(new WriterTuple("", 0L, null));
         }
         checkFlushException();
     }
@@ -186,7 +186,7 @@ public class DorisWriterManager {
                 if (i >= options.getMaxRetries()) {
                     throw new IOException(e);
                 }
-                if (e instanceof DorisWriterException && ((DorisWriterException)e).needReCreateLabel()) {
+                if (e instanceof DorisWriterException && ((DorisWriterException) e).needReCreateLabel()) {
                     String newLabel = createBatchLabel();
                     LOG.warn("Batch label changed from [{}] to [{}]", flushData.getLabel(), newLabel);
                     flushData.setLabel(newLabel);

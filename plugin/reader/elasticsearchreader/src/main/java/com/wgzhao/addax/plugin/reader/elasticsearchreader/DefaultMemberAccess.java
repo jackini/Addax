@@ -39,8 +39,7 @@ import java.lang.reflect.Modifier;
  * @version 15 October 1999
  */
 public class DefaultMemberAccess
-        implements MemberAccess
-{
+        implements MemberAccess {
 
     public boolean allowPrivateAccess;
     public boolean allowProtectedAccess;
@@ -49,13 +48,11 @@ public class DefaultMemberAccess
     /*===================================================================
         Constructors
       ===================================================================*/
-    public DefaultMemberAccess(boolean allowAllAccess)
-    {
+    public DefaultMemberAccess(boolean allowAllAccess) {
         this(allowAllAccess, allowAllAccess, allowAllAccess);
     }
 
-    public DefaultMemberAccess(boolean allowPrivateAccess, boolean allowProtectedAccess, boolean allowPackageProtectedAccess)
-    {
+    public DefaultMemberAccess(boolean allowPrivateAccess, boolean allowProtectedAccess, boolean allowPackageProtectedAccess) {
         super();
         this.allowPrivateAccess = allowPrivateAccess;
         this.allowProtectedAccess = allowProtectedAccess;
@@ -65,41 +62,34 @@ public class DefaultMemberAccess
     /*===================================================================
         Public methods
       ===================================================================*/
-    public boolean getAllowPrivateAccess()
-    {
+    public boolean getAllowPrivateAccess() {
         return allowPrivateAccess;
     }
 
-    public void setAllowPrivateAccess(boolean value)
-    {
+    public void setAllowPrivateAccess(boolean value) {
         allowPrivateAccess = value;
     }
 
-    public boolean getAllowProtectedAccess()
-    {
+    public boolean getAllowProtectedAccess() {
         return allowProtectedAccess;
     }
 
-    public void setAllowProtectedAccess(boolean value)
-    {
+    public void setAllowProtectedAccess(boolean value) {
         allowProtectedAccess = value;
     }
 
-    public boolean getAllowPackageProtectedAccess()
-    {
+    public boolean getAllowPackageProtectedAccess() {
         return allowPackageProtectedAccess;
     }
 
-    public void setAllowPackageProtectedAccess(boolean value)
-    {
+    public void setAllowPackageProtectedAccess(boolean value) {
         allowPackageProtectedAccess = value;
     }
 
     /*===================================================================
         MemberAccess interface
       ===================================================================*/
-    public Object setup(OgnlContext ognlContext, Object o, Member member, String s)
-    {
+    public Object setup(OgnlContext ognlContext, Object o, Member member, String s) {
         Object result = null;
 
         if (isAccessible(ognlContext, o, member, s)) {
@@ -113,8 +103,7 @@ public class DefaultMemberAccess
         return result;
     }
 
-    public void restore(OgnlContext ognlContext, Object o, Member member, String s, Object o1)
-    {
+    public void restore(OgnlContext ognlContext, Object o, Member member, String s, Object o1) {
         if (o1 != null) {
             ((AccessibleObject) member).setAccessible((Boolean) o1);
         }
@@ -125,25 +114,22 @@ public class DefaultMemberAccess
      * by this object.
      *
      * @param ognlContext the current execution context (not used).
-     * @param o the Object to test accessibility for (not used).
-     * @param member the Member to test accessibility for.
-     * @param s the property to test accessibility for (not used).
+     * @param o           the Object to test accessibility for (not used).
+     * @param member      the Member to test accessibility for.
+     * @param s           the property to test accessibility for (not used).
      * @return true if the member is accessible in the context, false otherwise.
      */
-    public boolean isAccessible(OgnlContext ognlContext, Object o, Member member, String s)
-    {
+    public boolean isAccessible(OgnlContext ognlContext, Object o, Member member, String s) {
         int modifiers = member.getModifiers();
         boolean result = Modifier.isPublic(modifiers);
 
         if (!result) {
             if (Modifier.isPrivate(modifiers)) {
                 result = getAllowPrivateAccess();
-            }
-            else {
+            } else {
                 if (Modifier.isProtected(modifiers)) {
                     result = getAllowProtectedAccess();
-                }
-                else {
+                } else {
                     result = getAllowPackageProtectedAccess();
                 }
             }

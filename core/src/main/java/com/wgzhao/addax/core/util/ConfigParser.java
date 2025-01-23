@@ -58,19 +58,16 @@ import static com.wgzhao.addax.core.util.container.CoreConstant.JOB_PRE_HANDLER_
 import static com.wgzhao.addax.core.util.container.CoreConstant.PLUGIN_READER_HOME;
 import static com.wgzhao.addax.core.util.container.CoreConstant.PLUGIN_WRITER_HOME;
 
-public final class ConfigParser
-{
+public final class ConfigParser {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigParser.class);
 
-    private ConfigParser()
-    {
+    private ConfigParser() {
     }
 
     /*
      * 指定Job配置路径，ConfigParser会解析Job、Plugin、Core全部信息，并以Configuration返回
      */
-    public static Configuration parse(String jobPath)
-    {
+    public static Configuration parse(String jobPath) {
         Configuration configuration = ConfigParser.parseJobConfig(jobPath);
 
         // Upgrade the new job format to the old one
@@ -107,8 +104,7 @@ public final class ConfigParser
      *
      * @param configuration {@link Configuration}
      */
-    private static void upgradeJobConfig(Configuration configuration)
-    {
+    private static void upgradeJobConfig(Configuration configuration) {
         configuration.getNecessaryValue(JOB_CONTENT);
         if (configuration.getString(JOB_CONTENT).startsWith("[")) {
             // get the first element
@@ -143,19 +139,16 @@ public final class ConfigParser
         }
     }
 
-    private static Configuration parseCoreConfig()
-    {
+    private static Configuration parseCoreConfig() {
         return Configuration.from(new File(CONF_PATH));
     }
 
-    public static Configuration parseJobConfig(String path)
-    {
+    public static Configuration parseJobConfig(String path) {
         String jobContent = getJobContent(path);
         return Configuration.from(jobContent);
     }
 
-    private static String getJobContent(String jobResource)
-    {
+    private static String getJobContent(String jobResource) {
         String jobContent;
 
         boolean isJobResourceFromHttp = jobResource.trim().toLowerCase().startsWith("http");
@@ -171,17 +164,14 @@ public final class ConfigParser
                         .execute()
                         .returnContent()
                         .asString();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 throw AddaxException.asAddaxException(IO_ERROR, "Failed to obtain job configuration:" + jobResource, e);
             }
-        }
-        else {
+        } else {
             // jobResource 是本地文件绝对路径
             try {
                 jobContent = FileUtils.readFileToString(new File(jobResource), StandardCharsets.UTF_8);
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 throw AddaxException.asAddaxException(CONFIG_ERROR, "Failed to obtain job configuration:" + jobResource, e);
             }
         }
@@ -192,8 +182,7 @@ public final class ConfigParser
         return jobContent;
     }
 
-    public static Configuration parsePluginConfig(List<String> wantPluginNames)
-    {
+    public static Configuration parsePluginConfig(List<String> wantPluginNames) {
         Configuration configuration = Configuration.newDefault();
 
         int complete = 0;
@@ -203,8 +192,7 @@ public final class ConfigParser
             if (plugin.endsWith("reader")) {
                 pluginType = "reader";
                 pluginPath = PLUGIN_READER_HOME + File.separator + plugin;
-            }
-            else {
+            } else {
                 pluginType = "writer";
                 pluginPath = PLUGIN_WRITER_HOME + File.separator + plugin;
             }
@@ -232,10 +220,9 @@ public final class ConfigParser
         return configuration;
     }
 
-    private static void validateJob(Configuration conf)
-    {
+    private static void validateJob(Configuration conf) {
         final Map content = conf.getMap(JOB_CONTENT);
-        String[] validPaths = new String[] {JOB_CONTENT_READER, JOB_CONTENT_WRITER, JOB_CONTENT_READER_NAME,
+        String[] validPaths = new String[]{JOB_CONTENT_READER, JOB_CONTENT_WRITER, JOB_CONTENT_READER_NAME,
                 JOB_CONTENT_READER_PARAMETER, JOB_CONTENT_WRITER_NAME, JOB_CONTENT_WRITER_PARAMETER};
 
         if (content == null || content.isEmpty()) {

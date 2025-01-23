@@ -35,16 +35,13 @@ import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
  * Created by liqiang on 16/3/4.
  */
 public class ReplaceTransformer
-        extends Transformer
-{
-    public ReplaceTransformer()
-    {
+        extends Transformer {
+    public ReplaceTransformer() {
         setTransformerName("dx_replace");
     }
 
     @Override
-    public Record evaluate(Record record, Object... paras)
-    {
+    public Record evaluate(Record record, Object... paras) {
 
         int columnIndex;
         int startIndex;
@@ -59,8 +56,7 @@ public class ReplaceTransformer
             startIndex = Integer.parseInt((String) paras[1]);
             length = Integer.parseInt((String) paras[2]);
             replaceString = (String) paras[3];
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                     "paras:" + Arrays.asList(paras) + " => " + e.getMessage());
         }
@@ -81,15 +77,13 @@ public class ReplaceTransformer
             }
             if (startIndex + length >= oriValue.length()) {
                 newValue = oriValue.substring(0, startIndex) + replaceString;
-            }
-            else {
+            } else {
                 newValue = oriValue.substring(0, startIndex) + replaceString
                         + oriValue.substring(startIndex + length);
             }
 
             record.setColumn(columnIndex, new StringColumn(newValue));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     RUNTIME_ERROR, e.getMessage(), e);
         }

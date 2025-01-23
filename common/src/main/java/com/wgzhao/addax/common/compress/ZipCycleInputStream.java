@@ -25,21 +25,18 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class ZipCycleInputStream
-        extends InputStream
-{
+        extends InputStream {
 
     private final ZipInputStream zipInputStream;
     private ZipEntry currentZipEntry;
 
-    public ZipCycleInputStream(InputStream in)
-    {
+    public ZipCycleInputStream(InputStream in) {
         this.zipInputStream = new ZipInputStream(in);
     }
 
     @Override
     public int read()
-            throws IOException
-    {
+            throws IOException {
         // 定位一个Entry数据流的开头
         if (null == this.currentZipEntry) {
             this.currentZipEntry = this.zipInputStream.getNextEntry();
@@ -61,16 +58,14 @@ public class ZipCycleInputStream
         if (-1 == result) {
             this.currentZipEntry = null;
             return this.read();
-        }
-        else {
+        } else {
             return result;
         }
     }
 
     @Override
     public void close()
-            throws IOException
-    {
+            throws IOException {
         this.zipInputStream.close();
     }
 }

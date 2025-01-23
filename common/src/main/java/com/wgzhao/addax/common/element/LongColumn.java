@@ -30,16 +30,14 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 public class LongColumn
-        extends Column
-{
+        extends Column {
     /**
      * 从整形字符串表示转为LongColumn，支持Java科学计数法
      * 如果data为浮点类型的字符串表示，数据将会失真，请使用DoubleColumn对接浮点字符串
      *
      * @param data 要转成long型的字符串
      */
-    public LongColumn(String data)
-    {
+    public LongColumn(String data) {
         super(null, Column.Type.LONG, 0);
         if (null == data) {
             return;
@@ -54,42 +52,35 @@ public class LongColumn
 			 super.setByteSize(rawData.bitLength() / 8)
 			 */
             super.setByteSize(data.length());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     ErrorCode.CONVERT_NOT_SUPPORT,
                     String.format("Cannot convert the string [%s] to Long.", data));
         }
     }
 
-    public LongColumn(Long data)
-    {
+    public LongColumn(Long data) {
         this(null == data ? null : BigInteger.valueOf(data));
     }
 
-    public LongColumn(Integer data)
-    {
+    public LongColumn(Integer data) {
         this(null == data ? null : BigInteger.valueOf(data));
     }
 
-    public LongColumn(BigInteger data)
-    {
+    public LongColumn(BigInteger data) {
         this(data, null == data ? 0 : 8);
     }
 
-    private LongColumn(BigInteger data, int byteSize)
-    {
+    private LongColumn(BigInteger data, int byteSize) {
         super(data, Column.Type.LONG, byteSize);
     }
 
-    public LongColumn()
-    {
+    public LongColumn() {
         this((BigInteger) null);
     }
 
     @Override
-    public BigInteger asBigInteger()
-    {
+    public BigInteger asBigInteger() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -98,21 +89,18 @@ public class LongColumn
     }
 
     @Override
-    public Timestamp asTimestamp()
-    {
+    public Timestamp asTimestamp() {
         if (this.getRawData() instanceof BigInteger) {
             BigInteger b = (BigInteger) this.getRawData();
             long l = b.longValue();
             return new Timestamp(l);
-        }
-        else {
+        } else {
             return new Timestamp((Long) this.getRawData());
         }
     }
 
     @Override
-    public Long asLong()
-    {
+    public Long asLong() {
         BigInteger rawData = (BigInteger) this.getRawData();
         if (null == rawData) {
             return null;
@@ -124,8 +112,7 @@ public class LongColumn
     }
 
     @Override
-    public Double asDouble()
-    {
+    public Double asDouble() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -137,8 +124,7 @@ public class LongColumn
     }
 
     @Override
-    public Boolean asBoolean()
-    {
+    public Boolean asBoolean() {
         if (null == this.getRawData()) {
             return null; //NOSONAR;
         }
@@ -147,8 +133,7 @@ public class LongColumn
     }
 
     @Override
-    public BigDecimal asBigDecimal()
-    {
+    public BigDecimal asBigDecimal() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -157,8 +142,7 @@ public class LongColumn
     }
 
     @Override
-    public String asString()
-    {
+    public String asString() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -166,8 +150,7 @@ public class LongColumn
     }
 
     @Override
-    public Date asDate()
-    {
+    public Date asDate() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -175,8 +158,7 @@ public class LongColumn
     }
 
     @Override
-    public byte[] asBytes()
-    {
+    public byte[] asBytes() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, "Long type cannot be converted to Bytes.");
     }

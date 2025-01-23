@@ -38,20 +38,17 @@ import static com.wgzhao.addax.common.base.Key.JDBC_DRIVER;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class RdbmsReader
-        extends Reader
-{
+        extends Reader {
     private static final DataBaseType DATABASE_TYPE = DataBaseType.RDBMS;
 
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
 
         private Configuration originalConfig;
         private CommonRdbmsReader.Job commonRdbmsReaderMaster;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = getPluginJobConf();
             int fetchSize = this.originalConfig.getInt(FETCH_SIZE, DEFAULT_FETCH_SIZE);
             if (fetchSize < 1) {
@@ -72,8 +69,7 @@ public class RdbmsReader
                 Arrays.stream(DataBaseType.values()).filter(
                         dataBaseType -> dataBaseType.getTypeName().equals(jdbcType)).findFirst().ifPresent(dataBaseType ->
                         DATABASE_TYPE.setDriverClassName(dataBaseType.getDriverClassName()));
-            }
-            else {
+            } else {
                 // use custom jdbc driver
                 DATABASE_TYPE.setDriverClassName(jdbcDriver);
             }
@@ -82,56 +78,48 @@ public class RdbmsReader
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             return this.commonRdbmsReaderMaster.split(this.originalConfig, adviceNumber);
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsReaderMaster.post(this.originalConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsReaderMaster.destroy(this.originalConfig);
         }
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
 
         private Configuration readerSliceConfig;
         private CommonRdbmsReader.Task commonRdbmsReaderSlave;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.readerSliceConfig = getPluginJobConf();
             this.commonRdbmsReaderSlave = new SubCommonRdbmsReader.Task(DATABASE_TYPE);
             this.commonRdbmsReaderSlave.init(this.readerSliceConfig);
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             int fetchSize = this.readerSliceConfig.getInt(FETCH_SIZE);
 
             this.commonRdbmsReaderSlave.startRead(this.readerSliceConfig, recordSender, getTaskPluginCollector(), fetchSize);
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsReaderSlave.post(this.readerSliceConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsReaderSlave.destroy(this.readerSliceConfig);
         }
     }

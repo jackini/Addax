@@ -38,23 +38,20 @@ import static com.wgzhao.addax.core.util.container.CoreConstant.JOB_CONTENT;
 import static com.wgzhao.addax.core.util.container.CoreConstant.JOB_READER_PARAMETER;
 import static com.wgzhao.addax.core.util.container.CoreConstant.JOB_WRITER_PARAMETER;
 
-public final class JobAssignUtil
-{
-    private JobAssignUtil()
-    {
+public final class JobAssignUtil {
+    private JobAssignUtil() {
     }
 
     /**
      * 公平的分配 task 到对应的 taskGroup 中。
      * 公平体现在：会考虑 task 中对资源负载作的 load 标识进行更均衡的作业分配操作。
      *
-     * @param configuration configuration
-     * @param channelNumber the number of channel
+     * @param configuration        configuration
+     * @param channelNumber        the number of channel
      * @param channelsPerTaskGroup the channel of task group
      * @return list of configuration
      */
-    public static List<Configuration> assignFairly(Configuration configuration, int channelNumber, int channelsPerTaskGroup)
-    {
+    public static List<Configuration> assignFairly(Configuration configuration, int channelNumber, int channelsPerTaskGroup) {
         Validate.isTrue(configuration != null, "The `job.content` can not be null.");
 
         List<Configuration> contentConfig = configuration.getListConfiguration(JOB_CONTENT);
@@ -94,8 +91,7 @@ public final class JobAssignUtil
         return taskGroupConfig;
     }
 
-    private static void adjustChannelNumPerTaskGroup(List<Configuration> taskGroupConfig, int channelNumber)
-    {
+    private static void adjustChannelNumPerTaskGroup(List<Configuration> taskGroupConfig, int channelNumber) {
         int taskGroupNumber = taskGroupConfig.size();
         int avgChannelsPerTaskGroup = channelNumber / taskGroupNumber;
         int remainderChannelCount = channelNumber % taskGroupNumber;
@@ -119,8 +115,7 @@ public final class JobAssignUtil
      * @param contentConfig configuration
      * @return hashmap
      */
-    private static LinkedHashMap<String, List<Integer>> parseAndGetResourceMarkAndTaskIdMap(List<Configuration> contentConfig)
-    {
+    private static LinkedHashMap<String, List<Integer>> parseAndGetResourceMarkAndTaskIdMap(List<Configuration> contentConfig) {
         // key: resourceMark, value: taskId
         LinkedHashMap<String, List<Integer>> readerResourceMarkAndTaskIdMap = new LinkedHashMap<>();
         LinkedHashMap<String, List<Integer>> writerResourceMarkAndTaskIdMap = new LinkedHashMap<>();
@@ -141,8 +136,7 @@ public final class JobAssignUtil
         if (readerResourceMarkAndTaskIdMap.size() >= writerResourceMarkAndTaskIdMap.size()) {
             // 采用 reader 对资源做的标记进行 shuffle
             return readerResourceMarkAndTaskIdMap;
-        }
-        else {
+        } else {
             // 采用 writer 对资源做的标记进行 shuffle
             return writerResourceMarkAndTaskIdMap;
         }
@@ -165,12 +159,11 @@ public final class JobAssignUtil
      * </pre>
      *
      * @param resourceMarkAndTaskIdMap resource map
-     * @param jobConfiguration configuration
-     * @param taskGroupNumber the number of group
+     * @param jobConfiguration         configuration
+     * @param taskGroupNumber          the number of group
      * @return list of configuration
      */
-    private static List<Configuration> doAssign(LinkedHashMap<String, List<Integer>> resourceMarkAndTaskIdMap, Configuration jobConfiguration, int taskGroupNumber)
-    {
+    private static List<Configuration> doAssign(LinkedHashMap<String, List<Integer>> resourceMarkAndTaskIdMap, Configuration jobConfiguration, int taskGroupNumber) {
         List<Configuration> contentConfig = jobConfiguration.getListConfiguration(JOB_CONTENT);
 
         Configuration taskGroupTemplate = jobConfiguration.clone();

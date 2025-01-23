@@ -22,8 +22,7 @@ package com.wgzhao.addax.core.meta;
 /**
  * Created by liupeng on 15/12/21.
  */
-public enum State
-{
+public enum State {
     SUBMITTING(10),
     WAITING(20),
     RUNNING(30),
@@ -35,23 +34,19 @@ public enum State
 
     private final int value;
 
-    State(int value)
-    {
+    State(int value) {
         this.value = value;
     }
 
-    public int value()
-    {
+    public int value() {
         return this.value;
     }
 
-    public boolean isFinished()
-    {
+    public boolean isFinished() {
         return this == KILLED || this == FAILED || this == SUCCEEDED;
     }
 
-    public boolean isRunning()
-    {
+    public boolean isRunning() {
         return !this.isFinished();
     }
 }

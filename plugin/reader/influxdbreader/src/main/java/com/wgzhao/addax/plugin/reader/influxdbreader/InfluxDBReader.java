@@ -31,24 +31,20 @@ import java.util.List;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class InfluxDBReader
-        extends Reader
-{
+        extends Reader {
 
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
 
         private Configuration originalConfig = null;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = super.getPluginJobConf();
         }
 
         @Override
-        public void preCheck()
-        {
+        public void preCheck() {
             init();
             originalConfig.getNecessaryValue(InfluxDBKey.ENDPOINT, REQUIRED_VALUE);
             originalConfig.getNecessaryValue(InfluxDBKey.DATABASE, REQUIRED_VALUE);
@@ -69,8 +65,7 @@ public class InfluxDBReader
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             Configuration readerSliceConfig = super.getPluginJobConf();
             List<Configuration> splitConfigs = new ArrayList<>();
             splitConfigs.add(readerSliceConfig);
@@ -78,40 +73,34 @@ public class InfluxDBReader
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
 
         private InfluxDBReaderTask influxDBReaderTask;
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration readerSliceConfig = super.getPluginJobConf();
             this.influxDBReaderTask = new InfluxDBReaderTask(readerSliceConfig);
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             this.influxDBReaderTask.startRead(recordSender, super.getTaskPluginCollector());
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.influxDBReaderTask.post();
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.influxDBReaderTask.destroy();
         }
     }

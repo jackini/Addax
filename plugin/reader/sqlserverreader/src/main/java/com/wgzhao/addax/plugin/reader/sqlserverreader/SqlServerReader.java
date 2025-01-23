@@ -41,21 +41,18 @@ import static com.wgzhao.addax.common.base.Constant.DEFAULT_FETCH_SIZE;
 import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 
 public class SqlServerReader
-        extends Reader
-{
+        extends Reader {
 
     private static final DataBaseType DATABASE_TYPE = DataBaseType.SQLServer;
 
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
 
         private Configuration originalConfig = null;
         private CommonRdbmsReader.Job commonRdbmsReaderJob;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = getPluginJobConf();
             int fetchSize = this.originalConfig.getInt(FETCH_SIZE, DEFAULT_FETCH_SIZE);
             if (fetchSize < 1) {
@@ -70,41 +67,34 @@ public class SqlServerReader
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             return this.commonRdbmsReaderJob.split(this.originalConfig, adviceNumber);
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsReaderJob.post(this.originalConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsReaderJob.destroy(this.originalConfig);
         }
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
 
         private Configuration readerSliceConfig;
         private CommonRdbmsReader.Task commonRdbmsReaderTask;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.readerSliceConfig = getPluginJobConf();
-            this.commonRdbmsReaderTask = new CommonRdbmsReader.Task(DATABASE_TYPE, getTaskGroupId(), getTaskId())
-            {
+            this.commonRdbmsReaderTask = new CommonRdbmsReader.Task(DATABASE_TYPE, getTaskGroupId(), getTaskId()) {
                 @Override
                 protected Column createColumn(ResultSet rs, ResultSetMetaData metaData, int i)
-                        throws SQLException, UnsupportedEncodingException
-                {
+                        throws SQLException, UnsupportedEncodingException {
                     if (metaData.getColumnType(i) == -151) {
                         // 兼容老的SQLServer版本的datetime数据类型
                         return new TimestampColumn(rs.getTimestamp(i));
@@ -119,22 +109,19 @@ public class SqlServerReader
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             int fetchSize = this.readerSliceConfig.getInt(FETCH_SIZE);
 
             this.commonRdbmsReaderTask.startRead(this.readerSliceConfig, recordSender, getTaskPluginCollector(), fetchSize);
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsReaderTask.post(this.readerSliceConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsReaderTask.destroy(this.readerSliceConfig);
         }
     }

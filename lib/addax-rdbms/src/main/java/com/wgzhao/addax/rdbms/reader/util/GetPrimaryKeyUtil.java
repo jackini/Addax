@@ -41,14 +41,12 @@ import static com.wgzhao.addax.common.base.Key.PASSWORD;
 import static com.wgzhao.addax.common.base.Key.TABLE;
 import static com.wgzhao.addax.common.base.Key.USERNAME;
 
-public class GetPrimaryKeyUtil
-{
+public class GetPrimaryKeyUtil {
     private static final Logger LOG = LoggerFactory.getLogger(GetPrimaryKeyUtil.class);
 
     public static DataBaseType dataBaseType;
 
-    private GetPrimaryKeyUtil()
-    {
+    private GetPrimaryKeyUtil() {
     }
 
     /**
@@ -60,8 +58,7 @@ public class GetPrimaryKeyUtil
      * @param readConf {@link Configuration}
      * @return column name if has primary key or unique key, else null
      */
-    public static String getPrimaryKey(Configuration readConf)
-    {
+    public static String getPrimaryKey(Configuration readConf) {
         String sql;
         List<String[]> columns = new ArrayList<>();
         Configuration connConf = readConf.getConfiguration(CONNECTION);
@@ -87,10 +84,9 @@ public class GetPrimaryKeyUtil
 
             while (resultSet.next()) {
                 // column_name, data_type
-                columns.add(new String[] {resultSet.getString(1), resultSet.getString(2)});
+                columns.add(new String[]{resultSet.getString(1), resultSet.getString(2)});
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             LOG.debug(e.getMessage());
             return null;
         }
@@ -122,8 +118,7 @@ public class GetPrimaryKeyUtil
             }
             try {
                 jdbcType = JDBCType.valueOf(column[1]);
-            }
-            catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 LOG.warn("The column type {} does not map to JDBCType", column[1]);
                 continue;
             }
@@ -139,13 +134,12 @@ public class GetPrimaryKeyUtil
     /**
      * 依据不同数据库类型，返回对应的获取主键的SQL语句
      *
-     * @param schema schema
+     * @param schema    schema
      * @param tableName 要查询的表
-     * @param username username
+     * @param username  username
      * @return 获取主键 SQL 语句
      */
-    public static String getPrimaryKeyQuery(String schema, String tableName, String username)
-    {
+    public static String getPrimaryKeyQuery(String schema, String tableName, String username) {
         String sql = null;
         switch (dataBaseType) {
             case MySql:
@@ -229,8 +223,7 @@ public class GetPrimaryKeyUtil
      * @param schema schema name
      * @return schema name or get schema expression
      */
-    public static String getSchema(String schema)
-    {
+    public static String getSchema(String schema) {
         if (schema != null) {
             return "'" + schema + "'";
         }

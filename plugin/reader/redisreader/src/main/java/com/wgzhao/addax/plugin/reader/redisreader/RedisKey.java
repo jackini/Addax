@@ -21,12 +21,11 @@ package com.wgzhao.addax.plugin.reader.redisreader;
 import com.wgzhao.addax.common.base.Key;
 
 public class RedisKey
-    extends Key
-{
+        extends Key {
     public static final String URI = "uri";
     public static final String MODE = "mode";
     public static final String AUTH = "auth";
-    public static final String MASTER_NAME  = "masterName";
+    public static final String MASTER_NAME = "masterName";
     public static final String INCLUDE = "include";
     public static final String EXCLUDE = "exclude";
     public static final String DB = "db";

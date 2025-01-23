@@ -23,23 +23,21 @@ import com.wgzhao.addax.common.exception.AddaxException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-public final class OverFlowUtil
-{
+public final class OverFlowUtil {
     public static final BigInteger MAX_LONG = BigInteger.valueOf(Long.MAX_VALUE);
     public static final BigInteger MIN_LONG = BigInteger.valueOf(Long.MIN_VALUE);
     public static final BigDecimal MIN_DOUBLE_POSITIVE = new BigDecimal(String.valueOf(Double.MIN_VALUE));
     public static final BigDecimal MAX_DOUBLE_POSITIVE = new BigDecimal(String.valueOf(Double.MAX_VALUE));
 
-    private OverFlowUtil() {}
+    private OverFlowUtil() {
+    }
 
-    public static boolean isLongOverflow(final BigInteger integer)
-    {
+    public static boolean isLongOverflow(final BigInteger integer) {
         return (integer.compareTo(OverFlowUtil.MAX_LONG) > 0 || integer
                 .compareTo(OverFlowUtil.MIN_LONG) < 0);
     }
 
-    public static void validateLongNotOverFlow(final BigInteger integer)
-    {
+    public static void validateLongNotOverFlow(final BigInteger integer) {
         boolean isOverFlow = OverFlowUtil.isLongOverflow(integer);
 
         if (isOverFlow) {
@@ -49,8 +47,7 @@ public final class OverFlowUtil
         }
     }
 
-    public static boolean isDoubleOverFlow(final BigDecimal decimal)
-    {
+    public static boolean isDoubleOverFlow(final BigDecimal decimal) {
         if (decimal.signum() == 0) {
             return false;
         }
@@ -65,8 +62,7 @@ public final class OverFlowUtil
                 || newDecimal.compareTo(MAX_DOUBLE_POSITIVE) > 0);
     }
 
-    public static void validateDoubleNotOverFlow(final BigDecimal decimal)
-    {
+    public static void validateDoubleNotOverFlow(final BigDecimal decimal) {
         boolean isOverFlow = OverFlowUtil.isDoubleOverFlow(decimal);
         if (isOverFlow) {
             throw AddaxException.asAddaxException(

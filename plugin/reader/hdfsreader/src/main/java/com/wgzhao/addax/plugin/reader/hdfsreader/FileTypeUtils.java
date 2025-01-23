@@ -38,42 +38,36 @@ import java.util.Arrays;
 
 import static com.wgzhao.addax.common.spi.ErrorCode.EXECUTE_FAIL;
 
-public class FileTypeUtils
-{
+public class FileTypeUtils {
     private static final Logger LOG = LoggerFactory.getLogger(FileTypeUtils.class);
 
-    private static boolean isSequenceFile(Path filepath, FSDataInputStream in)
-    {
+    private static boolean isSequenceFile(Path filepath, FSDataInputStream in) {
         final byte[] seqMagic = {(byte) 'S', (byte) 'E', (byte) 'Q'};
         byte[] magic = new byte[seqMagic.length];
         try {
             in.seek(0);
             in.readFully(magic);
             return Arrays.equals(magic, seqMagic);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOG.info("The file [{}] is not Sequence file.", filepath);
         }
         return false;
     }
 
-    private static boolean isParquetFile(Path file)
-    {
+    private static boolean isParquetFile(Path file) {
         GroupReadSupport readSupport = new GroupReadSupport();
         ParquetReader.Builder<Group> reader = ParquetReader.builder(readSupport, file);
         try (ParquetReader<Group> build = reader.build()) {
             if (build.read() != null) {
                 return true;
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOG.info("The file [{}] is not parquet file.", file);
         }
         return false;
     }
 
-    private static boolean isRCFile(org.apache.hadoop.conf.Configuration hadoopConf, String filepath, FSDataInputStream in)
-    {
+    private static boolean isRCFile(org.apache.hadoop.conf.Configuration hadoopConf, String filepath, FSDataInputStream in) {
 
         // The first version of RCFile used the sequence file header.
         final byte[] originalMagic = {(byte) 'S', (byte) 'E', (byte) 'Q'};
@@ -100,8 +94,7 @@ public class FileTypeUtils
                     return false;
                 }
                 version = ORIGINAL_VERSION;
-            }
-            else {
+            } else {
                 if (!Arrays.equals(magic, rcMagic)) {
                     return false;
                 }
@@ -120,8 +113,7 @@ public class FileTypeUtils
                     if (!keyCls.equals(RCFile.KeyBuffer.class) || !valCls.equals(RCFile.ValueBuffer.class)) {
                         return false;
                     }
-                }
-                catch (ClassNotFoundException e) {
+                } catch (ClassNotFoundException e) {
                     return false;
                 }
             }
@@ -132,15 +124,13 @@ public class FileTypeUtils
                 return !blkCompressed;
             }
             return true;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOG.info("The file [{}] is not RC file.", filepath);
         }
         return false;
     }
 
-    private static boolean isORCFile(Path file, FileSystem fs, FSDataInputStream in)
-    {
+    private static boolean isORCFile(Path file, FileSystem fs, FSDataInputStream in) {
         final int DIRECTORY_SIZE_GUESS = 16 * 1024;
         try {
             // figure out the size of the file using the option or filesystem
@@ -167,8 +157,7 @@ public class FileTypeUtils
             // now look for the magic string at the end of the postscript.
             if (Text.decode(array, offset, len).equals(orcMagic)) {
                 return true;
-            }
-            else {
+            } else {
                 // If it isn't there, this may be the 0.11.0 version of ORC.
                 // Read the first 3 bytes of the file to check for the header
                 in.seek(0);
@@ -179,38 +168,31 @@ public class FileTypeUtils
                     return true;
                 }
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOG.info("The file [{}] is not ORC file.", file);
         }
         return false;
     }
 
-    public static boolean checkHdfsFileType(org.apache.hadoop.conf.Configuration hadoopConf, String filepath, String specifiedFileType)
-    {
+    public static boolean checkHdfsFileType(org.apache.hadoop.conf.Configuration hadoopConf, String filepath, String specifiedFileType) {
 
         Path file = new Path(filepath);
 
         try (FileSystem fs = FileSystem.get(hadoopConf); FSDataInputStream in = fs.open(file)) {
             if (StringUtils.equalsIgnoreCase(specifiedFileType, HdfsConstant.ORC)) {
                 return isORCFile(file, fs, in);
-            }
-            else if (StringUtils.equalsIgnoreCase(specifiedFileType, HdfsConstant.RC)) {
+            } else if (StringUtils.equalsIgnoreCase(specifiedFileType, HdfsConstant.RC)) {
                 return isRCFile(hadoopConf, filepath, in);
-            }
-            else if (StringUtils.equalsIgnoreCase(specifiedFileType, HdfsConstant.SEQ)) {
+            } else if (StringUtils.equalsIgnoreCase(specifiedFileType, HdfsConstant.SEQ)) {
 
                 return isSequenceFile(file, in);
-            }
-            else if (StringUtils.equalsIgnoreCase(specifiedFileType, HdfsConstant.PARQUET)) {
+            } else if (StringUtils.equalsIgnoreCase(specifiedFileType, HdfsConstant.PARQUET)) {
                 return isParquetFile(file);
-            }
-            else if (StringUtils.equalsIgnoreCase(specifiedFileType, HdfsConstant.CSV)
+            } else if (StringUtils.equalsIgnoreCase(specifiedFileType, HdfsConstant.CSV)
                     || StringUtils.equalsIgnoreCase(specifiedFileType, HdfsConstant.TEXT)) {
                 return true;
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             String message = String.format("Can not get the file format for [%s]，it only supports [%s].",
                     filepath, HdfsConstant.SUPPORT_FILE_TYPE);
             LOG.error(message);

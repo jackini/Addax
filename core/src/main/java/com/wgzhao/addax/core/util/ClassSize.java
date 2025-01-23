@@ -22,8 +22,7 @@ package com.wgzhao.addax.core.util;
 /**
  * Created by liqiang on 15/12/12.
  */
-public class ClassSize
-{
+public class ClassSize {
 
     public static final int DEFAULT_RECORD_HEAD;
     public static final int COLUMN_HEAD;
@@ -34,15 +33,14 @@ public class ClassSize
     public static final int ARRAY;
     public static final int ARRAYLIST;
 
-    private ClassSize() {}
+    private ClassSize() {
+    }
 
-    public static int align(int num)
-    {
+    public static int align(int num) {
         return (int) (align((long) num));
     }
 
-    public static long align(long num)
-    {
+    public static long align(long num) {
         //The 7 comes from that the alignSize is 8 which is the number of bytes
         //stored and sent together
         return ((num + 7) >> 3) << 3;

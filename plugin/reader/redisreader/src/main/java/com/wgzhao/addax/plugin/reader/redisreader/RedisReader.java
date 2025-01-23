@@ -79,23 +79,19 @@ import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class RedisReader
-        extends Reader
-{
+        extends Reader {
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
         private Configuration conf;
         private List<String> uris;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.conf = getPluginJobConf();
             validateParam();
         }
 
-        private void validateParam()
-        {
+        private void validateParam() {
             Configuration conConf = conf.getConfiguration(RedisKey.CONNECTION);
             uris = conConf.getList(RedisKey.URI, String.class);
             for (String uri : uris) {
@@ -114,16 +110,14 @@ public class RedisReader
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
 
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             // ignore adviceNumber
-            if (adviceNumber != uris.size() ) {
+            if (adviceNumber != uris.size()) {
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE, "adviceNumber is not equal to uri size");
             }
             if (adviceNumber == 1) {
@@ -144,8 +138,7 @@ public class RedisReader
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
 
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
 
@@ -178,8 +171,7 @@ public class RedisReader
         private int keyThresholdLength;
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             Configuration pluginJobConf = getPluginJobConf();
             Configuration connection = pluginJobConf.getConfiguration(RedisKey.CONNECTION);
             try {
@@ -189,11 +181,9 @@ public class RedisReader
                 File file = new File(UUID.randomUUID() + ".rdb");
                 if (uri.startsWith("http") || uri.startsWith("https")) {
                     Request.get(uri).execute().saveContent(file);
-                }
-                else if (uri.startsWith("tcp")) {
+                } else if (uri.startsWith("tcp")) {
                     this.dump(uriToHosts(uri), mode, connection.getString(RedisKey.AUTH), masterName, file);
-                }
-                else {
+                } else {
                     Files.copy(Paths.get(new URI(uri)), file.toPath());
                 }
 
@@ -223,8 +213,7 @@ public class RedisReader
                             record.addColumn(new BytesColumn(value));
                             recordSender.sendToWriter(record);
                         }
-                    }
-                    else {
+                    } else {
                         LOG.warn("The type is unsupported yet");
                     }
                 });
@@ -232,15 +221,13 @@ public class RedisReader
                 r.close();
                 // delete temporary local file
                 Files.deleteIfExists(Paths.get(file.getAbsolutePath()));
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
         }
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration pluginJobConf = this.getPluginJobConf();
             List<Object> include = pluginJobConf.getList(RedisKey.INCLUDE);
             List<Object> exclude = pluginJobConf.getList(RedisKey.EXCLUDE);
@@ -267,16 +254,14 @@ public class RedisReader
             }
         }
 
-        private void recordBigKey(Long db, int type, byte[] key, byte[] value)
-        {
+        private void recordBigKey(Long db, int type, byte[] key, byte[] value) {
             if (value.length > keyThresholdLength) {
                 bigKey.put(db + "\t" + new String(key, StandardCharsets.UTF_8), value.length);
             }
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             StringBuilder sb = new StringBuilder("Redis中较大的key:\n");
 
             for (Map.Entry<String, Integer> entry : bigKey.entrySet()) {
@@ -300,8 +285,7 @@ public class RedisReader
             LOG.info(sb.toString());
         }
 
-        private boolean matchKey(byte[] bytes)
-        {
+        private boolean matchKey(byte[] bytes) {
             if (includePatterns.isEmpty() && excludePatterns.isEmpty()) {
                 return true;
             }
@@ -331,32 +315,29 @@ public class RedisReader
          * @param db db index
          * @return true if match else false
          */
-        private boolean matchDB(int db)
-        {
+        private boolean matchDB(int db) {
             return this.includeDB.isEmpty() || this.includeDB.contains(db);
         }
 
         /**
          * 通过sync命令远程下载redis server rdb文件
          *
-         * @param hosts list of {@link HostAndPort}
-         * @param mode redis running mode, cluster, master/slave, sentinel or cluster
-         * @param auth auth password
+         * @param hosts      list of {@link HostAndPort}
+         * @param mode       redis running mode, cluster, master/slave, sentinel or cluster
+         * @param auth       auth password
          * @param masterName master name for sentinel mode
-         * @param outFile file which dump to
-         * @throws IOException file not found
+         * @param outFile    file which dump to
+         * @throws IOException        file not found
          * @throws URISyntaxException uri parser error
          */
         private void dump(List<HostAndPort> hosts, String mode, String auth, String masterName, File outFile)
-                throws IOException, URISyntaxException
-        {
+                throws IOException, URISyntaxException {
             LOG.info("mode = {}", mode);
             OutputStream out = new BufferedOutputStream(Files.newOutputStream(outFile.toPath()));
             RawByteListener rawByteListener = rawBytes -> {
                 try {
                     out.write(rawBytes);
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
             };
@@ -366,8 +347,7 @@ public class RedisReader
                     String[] auths = auth.split(":");
                     conf.setAuthUser(auths[0]);
                     conf.setAuthPassword(auths[1]);
-                }
-                else {
+                } else {
                     conf.setAuthPassword(auth);
                 }
             }
@@ -375,8 +355,7 @@ public class RedisReader
             if ("sentinel".equalsIgnoreCase(mode)) {
                 // convert uri to hosts
                 replicator = new SentinelReplicator(hosts, masterName, conf);
-            }
-            else {
+            } else {
                 // defaults to standalone
                 replicator = new RedisReplicator(hosts.get(0).getHost(), hosts.get(0).getPort(), conf);
             }
@@ -392,8 +371,7 @@ public class RedisReader
                     try {
                         out.close();
                         replicator1.close();
-                    }
-                    catch (IOException e) {
+                    } catch (IOException e) {
                         LOG.warn(e.getMessage(), e);
                     }
                 }
@@ -401,35 +379,30 @@ public class RedisReader
             replicator.open();
         }
 
-        private List<HostAndPort> uriToHosts(String uris)
-        {
+        private List<HostAndPort> uriToHosts(String uris) {
             List<HostAndPort> result = new ArrayList<>();
             try {
                 for (String uri : uris.split(",")) {
                     URI u = new URI(uri);
                     result.add(new HostAndPort(u.getHost(), u.getPort()));
                 }
-            }
-            catch (URISyntaxException e) {
+            } catch (URISyntaxException e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
             return result;
         }
 
-        private void collectType(int type)
-        {
+        private void collectType(int type) {
             String name = getTypeName(type);
             Long count = collectTypeMap.get(name);
             if (count == null) {
                 collectTypeMap.put(name, 1L);
-            }
-            else {
+            } else {
                 collectTypeMap.put(name, count + 1);
             }
         }
 
-        private String getTypeName(int type)
-        {
+        private String getTypeName(int type) {
             switch (type) {
                 case RDB_TYPE_STRING:
                     return "string";

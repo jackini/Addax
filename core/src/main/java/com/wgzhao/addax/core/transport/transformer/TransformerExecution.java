@@ -27,8 +27,7 @@ import java.util.Map;
  * 每个func对应一个实例.
  * Created by liqiang on 16/3/16.
  */
-public class TransformerExecution
-{
+public class TransformerExecution {
 
     private final TransformerExecutionParas transformerExecutionParas;
     private final TransformerInfo transformerInfo;
@@ -40,14 +39,12 @@ public class TransformerExecution
     private boolean isChecked = false;
 
     public TransformerExecution(TransformerInfo transformerInfo,
-            TransformerExecutionParas transformerExecutionParas)
-    {
+                                TransformerExecutionParas transformerExecutionParas) {
         this.transformerExecutionParas = transformerExecutionParas;
         this.transformerInfo = transformerInfo;
     }
 
-    public void genFinalParas()
-    {
+    public void genFinalParas() {
 
         /*
          * groovy不支持传参
@@ -67,62 +64,51 @@ public class TransformerExecution
                 System.arraycopy(transformerExecutionParas.getParas(),
                         0, finalParas, 1,
                         transformerExecutionParas.getParas().length);
-            }
-            else {
+            } else {
                 finalParas = new Object[1];
             }
             finalParas[0] = transformerExecutionParas.getColumnIndex();
-        }
-        else {
+        } else {
             if (transformerExecutionParas.getParas() != null) {
                 finalParas = transformerExecutionParas.getParas();
-            }
-            else {
+            } else {
                 finalParas = null;
             }
         }
     }
 
-    public Object[] getFinalParas()
-    {
+    public Object[] getFinalParas() {
         return finalParas;
     }
 
-    public void setIsChecked(boolean isChecked)
-    {
+    public void setIsChecked(boolean isChecked) {
         this.isChecked = isChecked;
     }
 
-    public boolean isChecked()
-    {
+    public boolean isChecked() {
         return isChecked;
     }
 
     /*
      * 一些代理方法
      */
-    public ClassLoader getClassLoader()
-    {
+    public ClassLoader getClassLoader() {
         return transformerInfo.getClassLoader();
     }
 
-    public Integer getColumnIndex()
-    {
+    public Integer getColumnIndex() {
         return transformerExecutionParas.getColumnIndex();
     }
 
-    public String getTransformerName()
-    {
+    public String getTransformerName() {
         return transformerInfo.getTransformer().getTransformerName();
     }
 
-    public ComplexTransformer getTransformer()
-    {
+    public ComplexTransformer getTransformer() {
         return transformerInfo.getTransformer();
     }
 
-    public Map<String, Object> getContext()
-    {
+    public Map<String, Object> getContext() {
         return transformerExecutionParas.getContext();
     }
 }

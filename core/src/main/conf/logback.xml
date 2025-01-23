@@ -19,22 +19,23 @@
   -->
 
 <configuration>
-    <property name="log.dir" value="${addax.log}/" />
+    <property name="log.dir" value="${addax.log}/"/>
     <!-- Suppress all internal status messages -->
-    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
-    <if condition='!isDefined("console.enabled") || "${console.enabled}" == "true"' >
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+    <if condition='!isDefined("console.enabled") || "${console.enabled}" == "true"'>
         <then>
             <!-- console output -->
             <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
                 <withJansi>true</withJansi>
                 <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
                     <pattern>
-                        %cyan(%d{yyyy-MM-dd HH:mm:ss.SSS}) %green([%12thread]) %highlight(%-5level) %magenta(%-20logger{0}) - %msg%n
+                        %cyan(%d{yyyy-MM-dd HH:mm:ss.SSS}) %green([%12thread]) %highlight(%-5level)
+                        %magenta(%-20logger{0}) - %msg%n
                     </pattern>
                 </encoder>
             </appender>
             <root level="${logLevel:-INFO}">
-                <appender-ref ref="STDOUT" />
+                <appender-ref ref="STDOUT"/>
             </root>
         </then>
     </if>
@@ -49,9 +50,9 @@
     </appender>
 
     <!-- disable mongodb driver monitor mass log -->
-    <logger name="org.mongodb.driver" level="WARN"> </logger>
+    <logger name="org.mongodb.driver" level="WARN"></logger>
 
     <root level="${loglevel:-INFO}">
-        <appender-ref ref="FILE" />
+        <appender-ref ref="FILE"/>
     </root>
 </configuration>

@@ -25,19 +25,16 @@ import java.util.concurrent.TimeUnit;
  * PerfTrace 记录 job（local模式），taskGroup（distribute模式），因为这2种都是jvm，即一个jvm里只需要有1个PerfTrace。
  */
 
-public class PerfTrace
-{
+public class PerfTrace {
 
     private static PerfTrace instance;
     //PHASE => PerfRecord
     private int channelNumber;
 
-    private PerfTrace()
-    {
+    private PerfTrace() {
     }
 
-    public static synchronized PerfTrace getInstance()
-    {
+    public static synchronized PerfTrace getInstance() {
         if (instance == null) {
             instance = new PerfTrace();
         }
@@ -45,18 +42,15 @@ public class PerfTrace
     }
 
     //缺省传入的时间是nano
-    public static String unitTime(long time)
-    {
+    public static String unitTime(long time) {
         return unitTime(time, TimeUnit.NANOSECONDS);
     }
 
-    public static String unitTime(long time, TimeUnit timeUnit)
-    {
+    public static String unitTime(long time, TimeUnit timeUnit) {
         return String.format("%,.3fs", ((float) timeUnit.toNanos(time)) / 1000000000);
     }
 
-    public void setChannelNumber(int needChannelNumber)
-    {
+    public void setChannelNumber(int needChannelNumber) {
         this.channelNumber = needChannelNumber;
     }
 }

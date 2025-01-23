@@ -21,8 +21,7 @@ package com.wgzhao.addax.common.plugin;
 
 import com.wgzhao.addax.common.element.Record;
 
-public interface RecordSender
-{
+public interface RecordSender {
 
     Record createRecord();
 

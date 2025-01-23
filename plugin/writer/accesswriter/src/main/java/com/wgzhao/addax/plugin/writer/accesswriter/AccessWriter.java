@@ -18,6 +18,7 @@ public class AccessWriter extends Writer {
         private Configuration originalConfig = null;
 
         private CommonRdbmsWriter.Job commonRdbmsWriterJob = null;
+
         @Override
         public void init() {
             this.originalConfig = getPluginJobConf();
@@ -29,6 +30,7 @@ public class AccessWriter extends Writer {
         public void preCheck() {
             this.commonRdbmsWriterJob.writerPreCheck(this.originalConfig, DATABASE_TYPE);
         }
+
         @Override
         public void prepare() {
             this.commonRdbmsWriterJob.prepare(this.originalConfig);

@@ -42,8 +42,7 @@ import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.IO_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.NOT_SUPPORT_TYPE;
 
-public abstract class HbaseAbstractTask
-{
+public abstract class HbaseAbstractTask {
     private static final Logger LOG = LoggerFactory.getLogger(HbaseAbstractTask.class);
 
     public NullModeType nullMode;
@@ -57,8 +56,7 @@ public abstract class HbaseAbstractTask
     public Boolean walFlag;
     public BufferedMutator bufferedMutator;
 
-    public HbaseAbstractTask(Configuration configuration)
-    {
+    public HbaseAbstractTask(Configuration configuration) {
         //this.htable = Hbase11xHelper.getTable(configuration)
         this.columns = configuration.getListConfiguration(HBaseKey.COLUMN);
         this.rowkeyColumn = configuration.getListConfiguration(HBaseKey.ROW_KEY_COLUMN);
@@ -69,49 +67,41 @@ public abstract class HbaseAbstractTask
         this.bufferedMutator = Hbase11xHelper.getBufferedMutator(configuration);
     }
 
-    public void startWriter(RecordReceiver lineReceiver, TaskPluginCollector taskPluginCollector)
-    {
+    public void startWriter(RecordReceiver lineReceiver, TaskPluginCollector taskPluginCollector) {
         Record record;
         try {
             while ((record = lineReceiver.getFromReader()) != null) {
                 Put put;
                 try {
                     put = convertRecordToPut(record);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     taskPluginCollector.collectDirtyRecord(record, e);
                     continue;
                 }
                 try {
                     this.bufferedMutator.mutate(put);
-                }
-                catch (IllegalArgumentException e) {
+                } catch (IllegalArgumentException e) {
                     if (e.getMessage().equals("No columns to insert") && nullMode.equals(NullModeType.SKIP)) {
                         LOG.info("The record is empty, it will ignore because the item nullMode is configured as skip. record[{}]", record);
-                    }
-                    else {
+                    } else {
                         taskPluginCollector.collectDirtyRecord(record, e);
                     }
                 }
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw AddaxException.asAddaxException(IO_ERROR, e);
-        }
-        finally {
+        } finally {
             Hbase11xHelper.closeBufferedMutator(this.bufferedMutator);
         }
     }
 
     public abstract Put convertRecordToPut(Record record);
 
-    public void close()
-    {
+    public void close() {
         Hbase11xHelper.closeBufferedMutator(this.bufferedMutator);
     }
 
-    public byte[] getColumnByte(ColumnType columnType, Column column)
-    {
+    public byte[] getColumnByte(ColumnType columnType, Column column) {
         byte[] bytes;
         if (column.getRawData() != null) {
             switch (columnType) {
@@ -139,8 +129,7 @@ public abstract class HbaseAbstractTask
                 default:
                     throw AddaxException.asAddaxException(ILLEGAL_VALUE, "The data type " + columnType + "is unsupported");
             }
-        }
-        else {
+        } else {
             switch (nullMode) {
                 case SKIP:
                     bytes = null;
@@ -155,8 +144,7 @@ public abstract class HbaseAbstractTask
         return bytes;
     }
 
-    public byte[] getValueByte(ColumnType columnType, String value)
-    {
+    public byte[] getValueByte(ColumnType columnType, String value) {
         byte[] bytes;
         if (value != null) {
             switch (columnType) {
@@ -184,8 +172,7 @@ public abstract class HbaseAbstractTask
                 default:
                     throw AddaxException.asAddaxException(NOT_SUPPORT_TYPE, "The data type " + columnType + "is unsupported");
             }
-        }
-        else {
+        } else {
             bytes = HConstants.EMPTY_BYTE_ARRAY;
         }
         return bytes;

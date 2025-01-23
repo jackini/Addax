@@ -48,11 +48,9 @@ import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
  * Created by zhongtian.hu on 19-8-8.
  */
 public class DbfReader
-        extends Reader
-{
+        extends Reader {
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
         private static final Logger LOG = LoggerFactory.getLogger(Job.class);
 
         private Configuration originConfig = null;
@@ -62,22 +60,19 @@ public class DbfReader
         private List<String> sourceFiles;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originConfig = this.getPluginJobConf();
             StorageReaderUtil.validateParameter(this.originConfig);
             this.validateParameter();
         }
 
-        private void validateParameter()
-        {
+        private void validateParameter() {
             // Compatible with the old version, path is a string before
             String pathInString = this.originConfig.getNecessaryValue(Key.PATH, REQUIRED_VALUE);
             if (!pathInString.startsWith("[") && !pathInString.endsWith("]")) {
                 path = new ArrayList<>();
                 path.add(pathInString);
-            }
-            else {
+            } else {
                 path = this.originConfig.getList(Key.PATH, String.class);
                 if (null == path || path.isEmpty()) {
                     throw AddaxException.asAddaxException(
@@ -88,8 +83,7 @@ public class DbfReader
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             LOG.debug("prepare() begin...");
 
             this.sourceFiles = FileHelper.buildSourceTargets(this.path);
@@ -98,21 +92,18 @@ public class DbfReader
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             //
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
 
         // warn: 如果源目录为空会报错，拖空目录意图=>空文件显示指定此意图
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             LOG.debug("split() begin...");
             List<Configuration> readerSplitConfigs = new ArrayList<>();
 
@@ -136,41 +127,35 @@ public class DbfReader
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
 
         private Configuration readerSliceConfig;
         private List<String> sourceFiles;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.readerSliceConfig = this.getPluginJobConf();
             this.sourceFiles = this.readerSliceConfig.getList(Key.SOURCE_FILES, String.class);
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             //
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             //
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             LOG.debug("begin reading dbf files...");
             String encode = readerSliceConfig.getString(Key.ENCODING);
             String nullFormat = readerSliceConfig.getString(Key.NULL_FORMAT);
@@ -200,19 +185,16 @@ public class DbfReader
                             // constant value ?
                             if (column.get(i) != null && column.get(i).getValue() != null) {
                                 sourceLine[i] = column.get(i).getValue();
-                            }
-                            else if (row.getString(i) != null && "date".equalsIgnoreCase(column.get(i).getType())) {
+                            } else if (row.getString(i) != null && "date".equalsIgnoreCase(column.get(i).getType())) {
                                 // DBase's date type does not include time part
                                 sourceLine[i] = new SimpleDateFormat("yyyy-MM-dd").format(row.getDate(i));
-                            }
-                            else {
+                            } else {
                                 sourceLine[i] = row.getString(i);
                             }
                         }
                         StorageReaderUtil.transportOneRecord(recordSender, column, sourceLine, nullFormat, this.getTaskPluginCollector());
                     }
-                }
-                catch (FileNotFoundException e) {
+                } catch (FileNotFoundException e) {
                     LOG.error("FileNotFoundException occurred: ", e);
                 }
             }
@@ -222,12 +204,11 @@ public class DbfReader
         /**
          * get column description from dbf file
          *
-         * @param fPath dbf file path
+         * @param fPath    dbf file path
          * @param encoding the dbf file encoding
          * @return list of column entry
          */
-        private List<ColumnEntry> getColumnInfo(String fPath, String encoding)
-        {
+        private List<ColumnEntry> getColumnInfo(String fPath, String encoding) {
             List<ColumnEntry> column = new ArrayList<>();
             DBFDataType type;
             try (DBFReader reader = new DBFReader(new FileInputStream(fPath), Charset.forName(encoding))) {
@@ -242,8 +223,7 @@ public class DbfReader
                         case NUMERIC:
                             if (reader.getField(i).getDecimalCount() > 0) {
                                 columnEntry.setType("double");
-                            }
-                            else {
+                            } else {
                                 columnEntry.setType("long");
                             }
                             break;
@@ -280,8 +260,7 @@ public class DbfReader
                     column.add(columnEntry);
                 }
                 return column;
-            }
-            catch (FileNotFoundException e) {
+            } catch (FileNotFoundException e) {
                 e.printStackTrace();
                 return null;
             }

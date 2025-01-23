@@ -39,8 +39,7 @@ import static com.wgzhao.addax.core.util.container.CoreConstant.CORE_TRANSPORT_E
  * 内存Channel的具体实现，底层其实是一个ArrayBlockingQueue
  */
 public class MemoryChannel
-        extends Channel
-{
+        extends Channel {
 
     private final int bufferSize;
 
@@ -53,8 +52,7 @@ public class MemoryChannel
     private final Condition notInsufficient;
     private final Condition notEmpty;
 
-    public MemoryChannel(Configuration configuration)
-    {
+    public MemoryChannel(Configuration configuration) {
         super(configuration);
         this.queue = new ArrayBlockingQueue<>(this.getCapacity());
         this.bufferSize = configuration.getInt(CORE_TRANSPORT_EXCHANGER_BUFFER_SIZE, 32);
@@ -65,40 +63,34 @@ public class MemoryChannel
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         super.close();
         try {
             this.queue.put(TerminateRecord.get());
-        }
-        catch (InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
     }
 
     @Override
-    public void clear()
-    {
+    public void clear() {
         this.queue.clear();
     }
 
     @Override
-    protected void doPush(Record r)
-    {
+    protected void doPush(Record r) {
         try {
             long startTime = System.nanoTime();
             this.queue.put(r);
             waitReaderTime.addAndGet(System.nanoTime() - startTime);
             memoryBytes.addAndGet(r.getMemorySize());
-        }
-        catch (InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
     }
 
     @Override
-    protected void doPushAll(Collection<Record> rs)
-    {
+    protected void doPushAll(Collection<Record> rs) {
         try {
             long startTime = System.nanoTime();
             lock.lockInterruptibly();
@@ -110,34 +102,29 @@ public class MemoryChannel
             waitReaderTime.addAndGet(System.nanoTime() - startTime);
             memoryBytes.addAndGet(bytes);
             notEmpty.signalAll();
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             throw AddaxException.asAddaxException(RUNTIME_ERROR, e);
-        }
-        finally {
+        } finally {
             lock.unlock();
         }
     }
 
     @Override
-    protected Record doPull()
-    {
+    protected Record doPull() {
         try {
             long startTime = System.nanoTime();
             Record r = this.queue.take();
             waitReaderTime.addAndGet(System.nanoTime() - startTime);
             memoryBytes.addAndGet(-r.getMemorySize());
             return r;
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         }
     }
 
     @Override
-    protected void doPullAll(Collection<Record> rs)
-    {
+    protected void doPullAll(Collection<Record> rs) {
         assert rs != null;
         rs.clear();
         try {
@@ -150,17 +137,14 @@ public class MemoryChannel
             int bytes = getRecordBytes(rs);
             memoryBytes.addAndGet(-bytes);
             notInsufficient.signalAll();
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             throw AddaxException.asAddaxException(RUNTIME_ERROR, e);
-        }
-        finally {
+        } finally {
             lock.unlock();
         }
     }
 
-    private int getRecordBytes(Collection<Record> rs)
-    {
+    private int getRecordBytes(Collection<Record> rs) {
         int bytes = 0;
         for (Record r : rs) {
             bytes += r.getMemorySize();
@@ -169,14 +153,12 @@ public class MemoryChannel
     }
 
     @Override
-    public int size()
-    {
+    public int size() {
         return this.queue.size();
     }
 
     @Override
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return this.queue.isEmpty();
     }
 }

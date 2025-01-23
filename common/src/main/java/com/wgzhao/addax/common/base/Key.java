@@ -25,8 +25,7 @@ package com.wgzhao.addax.common.base;
  * The common configuration items
  * If the plugin requires additional configuration items, you can create a new class to extend it
  */
-public class Key
-{
+public class Key {
     // The connection item name. string type
     public static final String CONNECTION = "connection";
     // The columns of reading or writing. list type
@@ -147,14 +146,13 @@ public class Key
     public static final String HEADER = "header";
     public static final String IS_TABLE_MODE = "isTableMode";
     public static final String EXTENDED_INSERT = "extendedInsert";
-    public static final String TABLE_NUMBER= "tableNumber";
+    public static final String TABLE_NUMBER = "tableNumber";
 
     public static final String PRE_SHELL = "preShell";
     public static final String POST_SHELL = "postShell";
     public static final String IGNORE_ERROR = "ignoreError";
 
-    public Key()
-    {
+    public Key() {
 
     }
 }

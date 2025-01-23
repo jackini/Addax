@@ -38,24 +38,21 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by jingxing on 14-9-9.
  */
 public class StdoutPluginCollector
-        extends AbstractTaskPluginCollector
-{
+        extends AbstractTaskPluginCollector {
     private static final Logger LOG = LoggerFactory.getLogger(StdoutPluginCollector.class);
 
     private static final int DEFAULT_MAX_DIRTY_NUM = 128;
     private final AtomicInteger currentLogNum = new AtomicInteger(0);
     private final AtomicInteger maxLogNum;
 
-    public StdoutPluginCollector(Configuration configuration, Communication communication, PluginType type)
-    {
+    public StdoutPluginCollector(Configuration configuration, Communication communication, PluginType type) {
         super(configuration, communication, type);
         maxLogNum = new AtomicInteger(configuration.getInt(
                 CoreConstant.CORE_STATISTICS_COLLECTOR_PLUGIN_MAX_DIRTY_NUMBER,
                 DEFAULT_MAX_DIRTY_NUM));
     }
 
-    private String formatDirty(final Record dirty, final Throwable t, final String msg)
-    {
+    private String formatDirty(final Record dirty, final Throwable t, final String msg) {
         Map<String, Object> msgGroup = new HashMap<>();
 
         msgGroup.put("type", super.getPluginType().toString());
@@ -73,8 +70,7 @@ public class StdoutPluginCollector
     }
 
     @Override
-    public void collectDirtyRecord(Record dirtyRecord, Throwable t, String errorMessage)
-    {
+    public void collectDirtyRecord(Record dirtyRecord, Throwable t, String errorMessage) {
         int logNum = currentLogNum.getAndIncrement();
         if (logNum == 0 && t != null) {
             LOG.error("", t);

@@ -20,8 +20,7 @@ package com.wgzhao.addax.plugin.reader.redisreader.impl;
 
 import redis.clients.jedis.HostAndPort;
 
-public interface SentinelListener
-{
+public interface SentinelListener {
 
     void onClose(Sentinel sentinel);
 

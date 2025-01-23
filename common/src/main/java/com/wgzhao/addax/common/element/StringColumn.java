@@ -33,25 +33,21 @@ import java.util.Date;
  */
 
 public class StringColumn
-        extends Column
-{
+        extends Column {
 
     private final String errorTemplate = "String type cannot be converted to %s.";
 
-    public StringColumn()
-    {
+    public StringColumn() {
         this(null);
     }
 
-    public StringColumn(final String rawData)
-    {
+    public StringColumn(final String rawData) {
         super(rawData, Column.Type.STRING, (null == rawData ? 0 : rawData
                 .length()));
     }
 
     @Override
-    public String asString()
-    {
+    public String asString() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -59,8 +55,7 @@ public class StringColumn
         return (String) this.getRawData();
     }
 
-    private void validateDoubleSpecific(final String data)
-    {
+    private void validateDoubleSpecific(final String data) {
         if ("NaN".equals(data) || "Infinity".equals(data)
                 || "-Infinity".equals(data)) {
             throw AddaxException.asAddaxException(
@@ -70,8 +65,7 @@ public class StringColumn
     }
 
     @Override
-    public BigInteger asBigInteger()
-    {
+    public BigInteger asBigInteger() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -80,8 +74,7 @@ public class StringColumn
 
         try {
             return this.asBigDecimal().toBigInteger();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     ErrorCode.CONVERT_NOT_SUPPORT, String.format(
                             "['%s'] cannot be converted to BigInteger.", this.asString()));
@@ -89,8 +82,7 @@ public class StringColumn
     }
 
     @Override
-    public Timestamp asTimestamp()
-    {
+    public Timestamp asTimestamp() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -98,8 +90,7 @@ public class StringColumn
     }
 
     @Override
-    public Long asLong()
-    {
+    public Long asLong() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -110,16 +101,14 @@ public class StringColumn
             BigInteger integer = this.asBigInteger();
             OverFlowUtil.validateLongNotOverFlow(integer);
             return integer.longValue();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     ErrorCode.CONVERT_NOT_SUPPORT, String.format(errorTemplate, "Long"));
         }
     }
 
     @Override
-    public BigDecimal asBigDecimal()
-    {
+    public BigDecimal asBigDecimal() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -128,16 +117,14 @@ public class StringColumn
 
         try {
             return new BigDecimal(this.asString());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     ErrorCode.CONVERT_NOT_SUPPORT, String.format(errorTemplate, "BigDecimal"));
         }
     }
 
     @Override
-    public Double asDouble()
-    {
+    public Double asDouble() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -162,8 +149,7 @@ public class StringColumn
     }
 
     @Override
-    public Boolean asBoolean()
-    {
+    public Boolean asBoolean() {
         if (null == this.getRawData()) {
             return null; //NOSONAR
         }
@@ -181,24 +167,20 @@ public class StringColumn
     }
 
     @Override
-    public Date asDate()
-    {
+    public Date asDate() {
         try {
             return ColumnCast.string2Date(this);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     ErrorCode.CONVERT_NOT_SUPPORT, String.format(errorTemplate, "Date"));
         }
     }
 
     @Override
-    public byte[] asBytes()
-    {
+    public byte[] asBytes() {
         try {
             return ColumnCast.string2Bytes(this);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     ErrorCode.CONVERT_NOT_SUPPORT, String.format(errorTemplate, "Bytes"));
         }

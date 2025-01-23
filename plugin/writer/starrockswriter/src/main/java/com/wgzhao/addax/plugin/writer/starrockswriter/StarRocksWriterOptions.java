@@ -12,8 +12,7 @@ import static com.wgzhao.addax.common.spi.ErrorCode.CONFIG_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class StarRocksWriterOptions
-        implements Serializable
-{
+        implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private static final long KILO_BYTES_SCALE = 1024L;
@@ -43,8 +42,7 @@ public class StarRocksWriterOptions
     private final List<String> userSetColumns;
     private boolean isWildcardColumn;
 
-    public StarRocksWriterOptions(Configuration options)
-    {
+    public StarRocksWriterOptions(Configuration options) {
         this.options = options;
         this.userSetColumns = options.getList(KEY_COLUMN, String.class).stream().map(str -> str.replace("`", "")).collect(Collectors.toList());
         if (1 == options.getList(KEY_COLUMN, String.class).size() && "*".trim().equals(options.getList(KEY_COLUMN, String.class).get(0))) {
@@ -52,106 +50,87 @@ public class StarRocksWriterOptions
         }
     }
 
-    public void doPretreatment()
-    {
+    public void doPretreatment() {
         validateRequired();
         validateStreamLoadUrl();
     }
 
-    public String getJdbcUrl()
-    {
+    public String getJdbcUrl() {
         return options.getString(KEY_JDBC_URL);
     }
 
-    public String getDatabase()
-    {
+    public String getDatabase() {
         return options.getString(KEY_DATABASE);
     }
 
-    public String getTable()
-    {
+    public String getTable() {
         return options.getString(KEY_TABLE);
     }
 
-    public String getUsername()
-    {
+    public String getUsername() {
         return options.getString(KEY_USERNAME);
     }
 
-    public String getPassword()
-    {
+    public String getPassword() {
         return options.getString(KEY_PASSWORD);
     }
 
-    public List<String> getLoadUrlList()
-    {
+    public List<String> getLoadUrlList() {
         return options.getList(KEY_LOAD_URL, String.class);
     }
 
-    public List<String> getColumns()
-    {
+    public List<String> getColumns() {
         if (isWildcardColumn) {
             return this.infoCchemaColumns;
         }
         return this.userSetColumns;
     }
 
-    public boolean isWildcardColumn()
-    {
+    public boolean isWildcardColumn() {
         return this.isWildcardColumn;
     }
 
-    public void setInfoCchemaColumns(List<String> cols)
-    {
+    public void setInfoCchemaColumns(List<String> cols) {
         this.infoCchemaColumns = cols;
     }
 
-    public List<String> getPreSqlList()
-    {
+    public List<String> getPreSqlList() {
         return options.getList(KEY_PRE_SQL, String.class);
     }
 
-    public List<String> getPostSqlList()
-    {
+    public List<String> getPostSqlList() {
         return options.getList(KEY_POST_SQL, String.class);
     }
 
-    public Map<String, Object> getLoadProps()
-    {
+    public Map<String, Object> getLoadProps() {
         return options.getMap(KEY_LOAD_PROPS);
     }
 
-    public int getMaxRetries()
-    {
+    public int getMaxRetries() {
         return MAX_RETRIES;
     }
 
-    public int getBatchRows()
-    {
+    public int getBatchRows() {
         Integer rows = options.getInt(KEY_MAX_BATCH_ROWS);
         return null == rows ? BATCH_ROWS : rows;
     }
 
-    public long getBatchSize()
-    {
+    public long getBatchSize() {
         Long size = options.getLong(KEY_MAX_BATCH_SIZE);
         return null == size ? BATCH_BYTES : size;
     }
 
-    public long getFlushInterval()
-    {
+    public long getFlushInterval() {
         Long interval = options.getLong(KEY_FLUSH_INTERVAL);
         return null == interval ? FLUSH_INTERVAL : interval;
     }
 
-    public int getFlushQueueLength()
-    {
+    public int getFlushQueueLength() {
         Integer len = options.getInt(KEY_FLUSH_QUEUE_LENGTH);
         return null == len ? 1 : len;
     }
 
-    public StreamLoadFormat getStreamLoadFormat()
-    {
+    public StreamLoadFormat getStreamLoadFormat() {
         Map<String, Object> loadProps = getLoadProps();
         if (null == loadProps) {
             return StreamLoadFormat.CSV;
@@ -163,8 +142,7 @@ public class StarRocksWriterOptions
         return StreamLoadFormat.CSV;
     }
 
-    private void validateStreamLoadUrl()
-    {
+    private void validateStreamLoadUrl() {
         List<String> urlList = getLoadUrlList();
         for (String host : urlList) {
             if (host.split(":").length < 2) {
@@ -174,9 +152,8 @@ public class StarRocksWriterOptions
         }
     }
 
-    private void validateRequired()
-    {
-        final String[] requiredOptionKeys = new String[] {
+    private void validateRequired() {
+        final String[] requiredOptionKeys = new String[]{
                 KEY_USERNAME,
                 KEY_DATABASE,
                 KEY_TABLE,
@@ -188,8 +165,7 @@ public class StarRocksWriterOptions
         }
     }
 
-    public enum StreamLoadFormat
-    {
+    public enum StreamLoadFormat {
         CSV, JSON
     }
 }

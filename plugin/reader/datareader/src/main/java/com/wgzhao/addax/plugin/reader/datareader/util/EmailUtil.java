@@ -27,8 +27,8 @@ import org.apache.commons.rng.simple.RandomSource;
 
 public class EmailUtil {
 
-    private static final String[] EMAIL_DOMAIN = {"gmail.com", "yahoo.com","aol.com","qq.com","163.com","sina.com",
-                                    "sina.com.cn","proton.me","outlook.com","hotmail.com","icloud.com"};
+    private static final String[] EMAIL_DOMAIN = {"gmail.com", "yahoo.com", "aol.com", "qq.com", "163.com", "sina.com",
+            "sina.com.cn", "proton.me", "outlook.com", "hotmail.com", "icloud.com"};
 
     private static final UniformRandomProvider rng = RandomSource.XO_RO_SHI_RO_128_PP.create();
     private static final int userLength = 10;
@@ -37,6 +37,6 @@ public class EmailUtil {
         return RandomStringUtils.secure().nextAlphanumeric(rng.nextInt(3, userLength))
                 + "@"
                 + CommonUtil.randChoose(EMAIL_DOMAIN);
-        
+
     }
 }

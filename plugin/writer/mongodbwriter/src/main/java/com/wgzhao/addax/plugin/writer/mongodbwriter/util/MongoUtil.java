@@ -32,31 +32,25 @@ import java.util.List;
 import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
 
-public class MongoUtil
-{
+public class MongoUtil {
 
-    public static MongoClient initMongoClient(List<Object> addressList)
-    {
+    public static MongoClient initMongoClient(List<Object> addressList) {
 
         if (addressList == null || addressList.isEmpty()) {
             throw AddaxException.asAddaxException(ILLEGAL_VALUE, "不合法参数");
         }
         try {
             return new MongoClient(parseServerAddress(addressList));
-        }
-        catch (UnknownHostException e) {
+        } catch (UnknownHostException e) {
             throw AddaxException.asAddaxException(ILLEGAL_VALUE, "不合法的地址");
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AddaxException.asAddaxException(ILLEGAL_VALUE, "不合法参数");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(RUNTIME_ERROR, "未知异常");
         }
     }
 
-    public static MongoClient initCredentialMongoClient(List<Object> addressList, String userName, String password, String database)
-    {
+    public static MongoClient initCredentialMongoClient(List<Object> addressList, String userName, String password, String database) {
 
         if (!isHostPortPattern(addressList)) {
             throw AddaxException.asAddaxException(ILLEGAL_VALUE, "不合法参数");
@@ -64,14 +58,11 @@ public class MongoUtil
         try {
             MongoCredential credential = MongoCredential.createCredential(userName, database, password.toCharArray());
             return new MongoClient(parseServerAddress(addressList), credential, new MongoClientOptions.Builder().build());
-        }
-        catch (UnknownHostException e) {
+        } catch (UnknownHostException e) {
             throw AddaxException.asAddaxException(ILLEGAL_VALUE, "不合法的地址");
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AddaxException.asAddaxException(ILLEGAL_VALUE, "不合法参数");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(RUNTIME_ERROR, "未知异常");
         }
     }
@@ -82,8 +73,7 @@ public class MongoUtil
      * @param addressList list of object
      * @return boolean
      */
-    private static boolean isHostPortPattern(List<Object> addressList)
-    {
+    private static boolean isHostPortPattern(List<Object> addressList) {
         for (Object address : addressList) {
             String regex = "(\\S+):([0-9]+)";
             if (!((String) address).matches(regex)) {
@@ -101,16 +91,14 @@ public class MongoUtil
      * @throws UnknownHostException host not reached
      */
     private static List<ServerAddress> parseServerAddress(List<Object> rawAddressList)
-            throws UnknownHostException
-    {
+            throws UnknownHostException {
         List<ServerAddress> addressList = new ArrayList<>();
         for (Object address : rawAddressList) {
             String[] tempAddress = ((String) address).split(":");
             try {
                 ServerAddress sa = new ServerAddress(tempAddress[0], Integer.parseInt(tempAddress[1]));
                 addressList.add(sa);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new UnknownHostException();
             }
         }

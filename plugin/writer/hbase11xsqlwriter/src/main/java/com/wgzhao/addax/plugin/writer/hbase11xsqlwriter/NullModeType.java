@@ -25,20 +25,17 @@ import java.util.Arrays;
 
 import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 
-public enum NullModeType
-{
+public enum NullModeType {
     SKIP("skip"),
     EMPTY("empty");
 
     private final String mode;
 
-    NullModeType(String mode)
-    {
+    NullModeType(String mode) {
         this.mode = mode.toLowerCase();
     }
 
-    public static NullModeType getByTypeName(String modeName)
-    {
+    public static NullModeType getByTypeName(String modeName) {
         for (NullModeType modeType : values()) {
             if (modeType.mode.equalsIgnoreCase(modeName)) {
                 return modeType;
@@ -48,8 +45,7 @@ public enum NullModeType
                 "The nullMode type " + modeName + " is unsupported, here are available nullMode:" + Arrays.asList(values()));
     }
 
-    public String getMode()
-    {
+    public String getMode() {
         return mode;
     }
 }

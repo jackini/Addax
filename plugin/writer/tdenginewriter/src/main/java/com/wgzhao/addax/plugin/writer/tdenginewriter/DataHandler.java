@@ -17,7 +17,6 @@ package com.wgzhao.addax.plugin.writer.tdenginewriter;
 import com.wgzhao.addax.common.plugin.RecordReceiver;
 import com.wgzhao.addax.common.plugin.TaskPluginCollector;
 
-public interface DataHandler
-{
+public interface DataHandler {
     int handle(RecordReceiver lineReceiver, TaskPluginCollector collector);
 }

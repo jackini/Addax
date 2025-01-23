@@ -36,19 +36,16 @@ import java.util.concurrent.TimeUnit;
 
 import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
 
-public abstract class AbstractScheduler
-{
+public abstract class AbstractScheduler {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractScheduler.class);
 
     private final AbstractContainerCommunicator containerCommunicator;
 
-    public AbstractScheduler(AbstractContainerCommunicator containerCommunicator)
-    {
+    public AbstractScheduler(AbstractContainerCommunicator containerCommunicator) {
         this.containerCommunicator = containerCommunicator;
     }
 
-    public void schedule(List<Configuration> configurations)
-    {
+    public void schedule(List<Configuration> configurations) {
         Validate.notNull(configurations, "The scheduler configuration cannot be empty");
         int jobReportIntervalInMillSec = configurations.get(0).getInt(
                 CoreConstant.CORE_CONTAINER_JOB_REPORT_INTERVAL, 30000);
@@ -108,8 +105,7 @@ public abstract class AbstractScheduler
             }
             try {
                 TimeUnit.MILLISECONDS.sleep(jobSleepIntervalInMillSec);
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 // 以 failed 状态退出
                 LOG.error("An InterruptedException was caught!", e);
                 throw AddaxException.asAddaxException(RUNTIME_ERROR, e);
@@ -123,8 +119,7 @@ public abstract class AbstractScheduler
 
     protected abstract void dealKillingStat(AbstractContainerCommunicator frameworkCollector, int totalTasks);
 
-    private int calculateTaskCount(List<Configuration> configurations)
-    {
+    private int calculateTaskCount(List<Configuration> configurations) {
         int totalTasks = 0;
         for (Configuration taskGroupConfiguration : configurations) {
             totalTasks += taskGroupConfiguration.getListConfiguration(

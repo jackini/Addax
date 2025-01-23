@@ -27,13 +27,12 @@ import org.apache.commons.lang3.Validate;
  * <p>
  * 对配置文件做整体检查
  */
-public class ConfigurationValidate
-{
+public class ConfigurationValidate {
 
-    private ConfigurationValidate() {}
+    private ConfigurationValidate() {
+    }
 
-    public static void doValidate(Configuration allConfig)
-    {
+    public static void doValidate(Configuration allConfig) {
         Validate.isTrue(allConfig != null, "");
 
         coreValidate(allConfig);
@@ -43,15 +42,12 @@ public class ConfigurationValidate
         jobValidate(allConfig);
     }
 
-    private static void coreValidate(Configuration allConfig)
-    {
+    private static void coreValidate(Configuration allConfig) {
     }
 
-    private static void pluginValidate(Configuration allConfig)
-    {
+    private static void pluginValidate(Configuration allConfig) {
     }
 
-    private static void jobValidate(Configuration allConfig)
-    {
+    private static void jobValidate(Configuration allConfig) {
     }
 }

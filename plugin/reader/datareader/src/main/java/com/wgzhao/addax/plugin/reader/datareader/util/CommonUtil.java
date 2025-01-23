@@ -23,8 +23,7 @@ package com.wgzhao.addax.plugin.reader.datareader.util;
 
 import java.util.Random;
 
-public class CommonUtil
-{
+public class CommonUtil {
     private static final Random RANDOM = new Random();
 
     /**
@@ -36,13 +35,11 @@ public class CommonUtil
      * @param length the number of digital
      * @return digital string with length, null will be returned if length less than 1
      */
-    public static String randomDigitalString(int length)
-    {
+    public static String randomDigitalString(int length) {
         return randomDigitalString(length, 0, 10);
     }
 
-    public static String randomDigitalString(int length, int origin, int bound)
-    {
+    public static String randomDigitalString(int length, int origin, int bound) {
         if (length < 1 || bound < origin) {
             return null;
         }
@@ -51,29 +48,24 @@ public class CommonUtil
         return sb.toString();
     }
 
-    public static String randChoose(String[] container)
-    {
+    public static String randChoose(String[] container) {
         return container[RANDOM.nextInt(container.length)];
     }
 
-    public static int randChoose(int[] container)
-    {
+    public static int randChoose(int[] container) {
         return container[RANDOM.nextInt(container.length)];
     }
 
-    public static long randChoose(long[] container)
-    {
+    public static long randChoose(long[] container) {
         return container[RANDOM.nextInt(container.length)];
     }
 
 
-    public static double randChoose(double[] container)
-    {
+    public static double randChoose(double[] container) {
         return container[RANDOM.nextInt(container.length)];
     }
 
-    public static String[] randChoose(String[][] container)
-    {
+    public static String[] randChoose(String[][] container) {
         return container[RANDOM.nextInt(container.length)];
     }
 }

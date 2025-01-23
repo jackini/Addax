@@ -41,21 +41,18 @@ import java.util.List;
 import static com.wgzhao.addax.common.base.Constant.DEFAULT_FETCH_SIZE;
 
 public class ClickHouseReader
-        extends Reader
-{
+        extends Reader {
 
     private static final DataBaseType DATABASE_TYPE = DataBaseType.ClickHouse;
 
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
 
         private Configuration originalConfig = null;
         private CommonRdbmsReader.Job commonRdbmsReaderJob;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = super.getPluginJobConf();
             this.originalConfig.set(Key.FETCH_SIZE, DEFAULT_FETCH_SIZE);
 
@@ -64,65 +61,54 @@ public class ClickHouseReader
         }
 
         @Override
-        public void preCheck()
-        {
+        public void preCheck() {
             this.commonRdbmsReaderJob.preCheck(this.originalConfig, DATABASE_TYPE);
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             return this.commonRdbmsReaderJob.split(this.originalConfig, adviceNumber);
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsReaderJob.post(this.originalConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsReaderJob.destroy(this.originalConfig);
         }
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
 
         private Configuration readerSliceConfig;
         private CommonRdbmsReader.Task commonRdbmsReaderTask;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.readerSliceConfig = super.getPluginJobConf();
-            this.commonRdbmsReaderTask = new CommonRdbmsReader.Task(DATABASE_TYPE, super.getTaskGroupId(), super.getTaskId())
-            {
+            this.commonRdbmsReaderTask = new CommonRdbmsReader.Task(DATABASE_TYPE, super.getTaskGroupId(), super.getTaskId()) {
                 @Override
                 protected Column createColumn(ResultSet rs, ResultSetMetaData metaData, int i)
-                        throws SQLException, UnsupportedEncodingException
-                {
+                        throws SQLException, UnsupportedEncodingException {
                     int dataType = metaData.getColumnType(i);
                     // Please to use java.time.LocalDateTime or java.time.OffsetDateTime instead of java.sql.Timestamp,
                     // and java.time.LocalDate instead of java.sql.Date.
                     // references https://github.com/ClickHouse/clickhouse-jdbc/tree/master/clickhouse-jdbc
                     if (dataType == Types.TIMESTAMP) {
                         return new TimestampColumn(Timestamp.valueOf((LocalDateTime) rs.getObject(i)));
-                    }
-                    else if (dataType == Types.OTHER) {
+                    } else if (dataType == Types.OTHER) {
                         // database-specific type, convert it to string as default
                         String dType = metaData.getColumnTypeName(i);
                         if (dType.startsWith("DateTime")) {
                             return new TimestampColumn(Timestamp.valueOf((LocalDateTime) rs.getObject(i)));
-                        }
-                        else {
+                        } else {
                             return new StringColumn(rs.getObject(i).toString());
                         }
-                    }
-                    else {
+                    } else {
                         return super.createColumn(rs, metaData, i);
                     }
                 }
@@ -131,8 +117,7 @@ public class ClickHouseReader
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             int fetchSize = this.readerSliceConfig.getInt(Key.FETCH_SIZE);
 
             this.commonRdbmsReaderTask.startRead(this.readerSliceConfig, recordSender,
@@ -140,14 +125,12 @@ public class ClickHouseReader
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsReaderTask.post(this.readerSliceConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsReaderTask.destroy(this.readerSliceConfig);
         }
     }

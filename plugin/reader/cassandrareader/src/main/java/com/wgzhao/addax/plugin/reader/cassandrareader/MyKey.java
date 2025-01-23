@@ -25,8 +25,7 @@ import com.wgzhao.addax.common.base.Key;
  * Created by mazhenlin on 2019/8/19.
  */
 public class MyKey
-        extends Key
-{
+        extends Key {
 
     public final static String HOST = "host";
     public final static String PORT = "port";
@@ -58,5 +57,7 @@ public class MyKey
     public static final String KEY_CONFIG = "key";
     public static final String VALUE_CONFIG = "value";
 
-    public MyKey() {super();}
+    public MyKey() {
+        super();
+    }
 }

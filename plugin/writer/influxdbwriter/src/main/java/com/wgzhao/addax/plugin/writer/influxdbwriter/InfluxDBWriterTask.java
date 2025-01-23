@@ -40,23 +40,23 @@ import java.util.concurrent.TimeUnit;
 import static com.wgzhao.addax.common.spi.ErrorCode.CONFIG_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
 
-public class InfluxDBWriterTask
-{
+public class InfluxDBWriterTask {
     private static final Logger LOG = LoggerFactory.getLogger(InfluxDBWriterTask.class);
 
     private static final int CONNECT_TIMEOUT_SECONDS_DEFAULT = 15;
     private static final int READ_TIMEOUT_SECONDS_DEFAULT = 20;
     private static final int WRITE_TIMEOUT_SECONDS_DEFAULT = 20;
 
-    static class PointColumnDefine
-    {
+    static class PointColumnDefine {
         PointColumnDefine() {
             isTime = false;
         }
+
         public String name;
         public String type;
         public boolean isTime;
     }
+
     protected List<PointColumnDefine> columns = new ArrayList<>();
 
     private final int columnNumber;
@@ -75,17 +75,16 @@ public class InfluxDBWriterTask
     private final int readTimeout;
     private final int writeTimeout;
 
-    public InfluxDBWriterTask(Configuration configuration)
-    {
+    public InfluxDBWriterTask(Configuration configuration) {
         Configuration conn = configuration.getConfiguration(InfluxDBKey.CONNECTION);
         this.endpoint = conn.getString(InfluxDBKey.ENDPOINT);
         this.table = conn.getString(InfluxDBKey.TABLE);
         this.database = conn.getString(InfluxDBKey.DATABASE);
 
-        List<Configuration>  columns = configuration.getListConfiguration(InfluxDBKey.COLUMN);
+        List<Configuration> columns = configuration.getListConfiguration(InfluxDBKey.COLUMN);
         this.columnNumber = columns.size();
         boolean foundTimeColumn = false;
-        for(Configuration column : columns) {
+        for (Configuration column : columns) {
             String name = column.getString("name");
             String type = column.getString("type");
 
@@ -121,8 +120,7 @@ public class InfluxDBWriterTask
         this.retentionPolicy = configuration.getConfiguration(InfluxDBKey.RETENTION_POLICY);
     }
 
-    public void init()
-    {
+    public void init() {
         OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient().newBuilder()
                 .connectTimeout(connTimeout, TimeUnit.SECONDS)
                 .readTimeout(readTimeout, TimeUnit.SECONDS)
@@ -139,18 +137,16 @@ public class InfluxDBWriterTask
             String duration = this.retentionPolicy.getString(InfluxDBKey.RP_DURATION, "1d");
             int replication = this.retentionPolicy.getInt(InfluxDBKey.RP_REPLICATION, 1);
             influxDB.query(new Query("CREATE RETENTION POLICY " + rpName
-                    + " ON " + database + " DURATION " + duration + " REPLICATION " + replication ));
+                    + " ON " + database + " DURATION " + duration + " REPLICATION " + replication));
             influxDB.setRetentionPolicy(rpName);
         }
     }
 
-    public void prepare()
-    {
+    public void prepare() {
         //
     }
 
-    public void post()
-    {
+    public void post() {
 
         if (!postSqls.isEmpty()) {
             for (String sql : postSqls) {
@@ -159,13 +155,11 @@ public class InfluxDBWriterTask
         }
     }
 
-    public void destroy()
-    {
+    public void destroy() {
         this.influxDB.close();
     }
 
-    public void startWrite(RecordReceiver recordReceiver, TaskPluginCollector taskPluginCollector)
-    {
+    public void startWrite(RecordReceiver recordReceiver, TaskPluginCollector taskPluginCollector) {
         Record record = null;
         try {
             while ((record = recordReceiver.getFromReader()) != null) {
@@ -221,8 +215,7 @@ public class InfluxDBWriterTask
             if (influxDB.isBatchEnabled()) {
                 influxDB.flush();
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             taskPluginCollector.collectDirtyRecord(record, e);
             throw AddaxException.asAddaxException(RUNTIME_ERROR, e);
         }

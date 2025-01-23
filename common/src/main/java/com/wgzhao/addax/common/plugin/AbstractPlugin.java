@@ -24,8 +24,7 @@ import com.wgzhao.addax.common.util.Configuration;
 
 public abstract class AbstractPlugin
         extends BaseObject
-        implements Pluginable
-{
+        implements Pluginable {
     //作业的config
     private Configuration pluginJobConf;
 
@@ -38,87 +37,72 @@ public abstract class AbstractPlugin
     private String peerPluginName;
 
     @Override
-    public String getPluginName()
-    {
+    public String getPluginName() {
         assert null != this.pluginConf;
         return this.pluginConf.getString("name");
     }
 
     @Override
-    public String getDeveloper()
-    {
+    public String getDeveloper() {
         assert null != this.pluginConf;
         return this.pluginConf.getString("developer");
     }
 
     @Override
-    public String getDescription()
-    {
+    public String getDescription() {
         assert null != this.pluginConf;
         return this.pluginConf.getString("description");
     }
 
     @Override
-    public Configuration getPluginJobConf()
-    {
+    public Configuration getPluginJobConf() {
         return pluginJobConf;
     }
 
     @Override
-    public void setPluginJobConf(Configuration pluginJobConf)
-    {
+    public void setPluginJobConf(Configuration pluginJobConf) {
         this.pluginJobConf = pluginJobConf;
     }
 
     @Override
-    public void setPluginConf(Configuration pluginConf)
-    {
+    public void setPluginConf(Configuration pluginConf) {
         this.pluginConf = pluginConf;
     }
 
     @Override
-    public Configuration getPeerPluginJobConf()
-    {
+    public Configuration getPeerPluginJobConf() {
         return peerPluginJobConf;
     }
 
     @Override
-    public void setPeerPluginJobConf(Configuration peerPluginJobConf)
-    {
+    public void setPeerPluginJobConf(Configuration peerPluginJobConf) {
         this.peerPluginJobConf = peerPluginJobConf;
     }
 
     @Override
-    public String getPeerPluginName()
-    {
+    public String getPeerPluginName() {
         return peerPluginName;
     }
 
     @Override
-    public void setPeerPluginName(String peerPluginName)
-    {
+    public void setPeerPluginName(String peerPluginName) {
         this.peerPluginName = peerPluginName;
     }
 
-    public void preCheck()
-    {
+    public void preCheck() {
     }
 
-    public void prepare()
-    {
+    public void prepare() {
     }
 
-    public void post()
-    {
+    public void post() {
     }
 
-    public void preHandler(Configuration jobConfiguration)
-    {
+    public void preHandler(Configuration jobConfiguration) {
 
     }
 
-    public void postHandler(Configuration jobConfiguration)
-    {
+    public void postHandler(Configuration jobConfiguration) {
 
     }
 }

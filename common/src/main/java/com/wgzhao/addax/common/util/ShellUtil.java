@@ -28,12 +28,10 @@ import org.slf4j.LoggerFactory;
 import static com.wgzhao.addax.common.spi.ErrorCode.EXECUTE_FAIL;
 import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
 
-public class ShellUtil
-{
+public class ShellUtil {
     private static final Logger LOG = LoggerFactory.getLogger(ShellUtil.class);
 
-    public static void exec(String command, boolean ignoreError)
-    {
+    public static void exec(String command, boolean ignoreError) {
         CommandLine cmdLine = CommandLine.parse(command);
         DefaultExecutor executor = DefaultExecutor.builder().get();
         LOG.info("Running command: {}", command);
@@ -42,24 +40,20 @@ public class ShellUtil
             if (ret != 0) {
                 if (ignoreError) {
                     LOG.warn("Command failed with return code: {}", ret);
-                }
-                else {
+                } else {
                     throw AddaxException.asAddaxException(EXECUTE_FAIL, "Command failed with return code: " + ret);
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             if (ignoreError) {
                 LOG.warn("Error running command: {}", command, e);
-            }
-            else {
+            } else {
                 throw AddaxException.asAddaxException(RUNTIME_ERROR, e);
             }
         }
     }
 
-    public static void exec(String command)
-    {
+    public static void exec(String command) {
         exec(command, false);
     }
 }

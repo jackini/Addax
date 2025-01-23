@@ -37,8 +37,7 @@ import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
  */
 
 public class DefaultRecord
-        implements Record
-{
+        implements Record {
 
     private static final int RECORD_AVERAGE_COLUMN_NUMBER = 16;
 
@@ -51,21 +50,18 @@ public class DefaultRecord
 
     private Map<String, String> meta;
 
-    public DefaultRecord()
-    {
+    public DefaultRecord() {
         this.columns = new ArrayList<>(RECORD_AVERAGE_COLUMN_NUMBER);
     }
 
     @Override
-    public void addColumn(Column column)
-    {
+    public void addColumn(Column column) {
         columns.add(column);
         incrByteSize(column);
     }
 
     @Override
-    public Column getColumn(int i)
-    {
+    public Column getColumn(int i) {
         if (i < 0 || i >= columns.size()) {
             return null;
         }
@@ -73,8 +69,7 @@ public class DefaultRecord
     }
 
     @Override
-    public void setColumn(int i, Column column)
-    {
+    public void setColumn(int i, Column column) {
         if (i < 0) {
             throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                     "Cannot set a value for a column with an index less than 0");
@@ -90,8 +85,7 @@ public class DefaultRecord
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         Map<String, Object> json = new HashMap<>();
         json.put("size", this.getColumnNumber());
         json.put("data", this.columns);
@@ -99,36 +93,30 @@ public class DefaultRecord
     }
 
     @Override
-    public int getColumnNumber()
-    {
+    public int getColumnNumber() {
         return this.columns.size();
     }
 
     @Override
-    public int getByteSize()
-    {
+    public int getByteSize() {
         return byteSize;
     }
 
-    public int getMemorySize()
-    {
+    public int getMemorySize() {
         return memorySize;
     }
 
     @Override
-    public void setMeta(Map<String, String> meta)
-    {
+    public void setMeta(Map<String, String> meta) {
         this.meta = meta;
     }
 
     @Override
-    public Map<String, String> getMeta()
-    {
+    public Map<String, String> getMeta() {
         return this.meta;
     }
 
-    private void decrByteSize(Column column)
-    {
+    private void decrByteSize(Column column) {
         if (null == column) {
             return;
         }
@@ -139,8 +127,7 @@ public class DefaultRecord
         memorySize = memorySize - ClassSize.COLUMN_HEAD - column.getByteSize();
     }
 
-    private void incrByteSize(Column column)
-    {
+    private void incrByteSize(Column column) {
         if (null == column) {
             return;
         }
@@ -151,8 +138,7 @@ public class DefaultRecord
         memorySize = memorySize + ClassSize.COLUMN_HEAD + column.getByteSize();
     }
 
-    private void expandCapacity(int totalSize)
-    {
+    private void expandCapacity(int totalSize) {
         if (totalSize <= 0) {
             return;
         }

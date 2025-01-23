@@ -51,8 +51,7 @@ import java.util.List;
 
 import static com.wgzhao.addax.common.spi.ErrorCode.IO_ERROR;
 
-public class MyOrcReader
-{
+public class MyOrcReader {
     private static final Logger LOG = LoggerFactory.getLogger(MyOrcReader.class);
 
     private final org.apache.hadoop.conf.Configuration hadoopConf;
@@ -60,16 +59,14 @@ public class MyOrcReader
     private final List<ColumnEntry> columnEntries;
     private final Path path;
 
-    public MyOrcReader(org.apache.hadoop.conf.Configuration hadoopConf, Path path, String nullFormat, List<ColumnEntry> columns)
-    {
+    public MyOrcReader(org.apache.hadoop.conf.Configuration hadoopConf, Path path, String nullFormat, List<ColumnEntry> columns) {
         this.hadoopConf = hadoopConf;
         this.nullFormat = nullFormat;
         this.path = path;
         this.columnEntries = columns;
     }
 
-    public void reader(RecordSender recordSender, TaskPluginCollector taskPluginCollector)
-    {
+    public void reader(RecordSender recordSender, TaskPluginCollector taskPluginCollector) {
         try (Reader reader = OrcFile.createReader(path, OrcFile.readerOptions(hadoopConf))) {
             TypeDescription schema = reader.getSchema();
             assert columnEntries != null;
@@ -87,8 +84,7 @@ public class MyOrcReader
             while (rowIterator.nextBatch(rowBatch)) {
                 buildRecord(rowBatch, recordSender, taskPluginCollector, nullFormat);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             String message = String.format("Exception occurred while reading the file [%s].", path);
             LOG.error(message);
             throw AddaxException.asAddaxException(IO_ERROR, message);
@@ -96,8 +92,7 @@ public class MyOrcReader
     }
 
     private void buildRecord(VectorizedRowBatch rowBatch, RecordSender recordSender,
-            TaskPluginCollector taskPluginCollector, String nullFormat)
-    {
+                             TaskPluginCollector taskPluginCollector, String nullFormat) {
         Record record;
         for (int row = 0; row < rowBatch.size; row++) {
             record = recordSender.createRecord();
@@ -107,8 +102,7 @@ public class MyOrcReader
                     if (column.getValue() != null) {
                         if (!"null".equals(column.getValue())) {
                             columnGenerated = new StringColumn(column.getValue());
-                        }
-                        else {
+                        } else {
                             columnGenerated = new StringColumn(nullFormat);
                         }
                         record.addColumn(columnGenerated);
@@ -157,8 +151,7 @@ public class MyOrcReader
                     record.addColumn(columnGenerated);
                 }
                 recordSender.sendToWriter(record);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 if (e instanceof AddaxException) {
                     throw (AddaxException) e;
                 }

@@ -35,8 +35,7 @@ import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
  * no comments.
  * Created by liqiang on 16/3/9.
  */
-public abstract class TransformerExchanger
-{
+public abstract class TransformerExchanger {
 
     protected final TaskPluginCollector pluginCollector;
 
@@ -51,9 +50,8 @@ public abstract class TransformerExchanger
     private long totalFailedRecords = 0;
 
     public TransformerExchanger(int taskGroupId, int taskId, Communication communication,
-            List<TransformerExecution> transformerExecs,
-            TaskPluginCollector pluginCollector)
-    {
+                                List<TransformerExecution> transformerExecs,
+                                TaskPluginCollector pluginCollector) {
 
         this.transformerExecs = transformerExecs;
         this.pluginCollector = pluginCollector;
@@ -62,8 +60,7 @@ public abstract class TransformerExchanger
         this.currentCommunication = communication;
     }
 
-    public Record doTransformer(Record record)
-    {
+    public Record doTransformer(Record record) {
         if (transformerExecs == null || transformerExecs.isEmpty()) {
             return record;
         }
@@ -101,8 +98,7 @@ public abstract class TransformerExchanger
                         .getTransformer()
                         .evaluate(result, transformerInfoExec.getContext(),
                                 transformerInfoExec.getFinalParas());
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 errorMsg = String.format("The transformer(%s) has encountered an exception(%s)",
                         transformerInfoExec.getTransformerName(),
                         e.getMessage());
@@ -111,8 +107,7 @@ public abstract class TransformerExchanger
                 // transformerInfoExec.addFailedRecords(1);
                 //脏数据不再进行后续transformer处理，按脏数据处理，并过滤该record。
                 break;
-            }
-            finally {
+            } finally {
                 if (transformerInfoExec.getClassLoader() != null) {
                     classLoaderSwapper.restoreCurrentThreadClassLoader();
                 }
@@ -137,15 +132,13 @@ public abstract class TransformerExchanger
             totalFailedRecords++;
             this.pluginCollector.collectDirtyRecord(record, errorMsg);
             return null;
-        }
-        else {
+        } else {
             totalSuccessRecords++;
             return result;
         }
     }
 
-    public void doStat()
-    {
+    public void doStat() {
         // TODO: For multiple transformers, the individual statistics of each transformer are displayed.
         //  Finally, the total time consumption of the entire transformer is summarized
 //        if (transformers.size() > 1) {

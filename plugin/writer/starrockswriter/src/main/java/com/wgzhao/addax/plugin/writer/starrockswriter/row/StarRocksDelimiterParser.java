@@ -4,14 +4,12 @@ import com.google.common.base.Strings;
 
 import java.io.StringWriter;
 
-public class StarRocksDelimiterParser
-{
+public class StarRocksDelimiterParser {
 
     private static final String HEX_STRING = "0123456789ABCDEF";
 
     public static String parse(String sp, String dSp)
-            throws RuntimeException
-    {
+            throws RuntimeException {
         if (Strings.isNullOrEmpty(sp)) {
             return dSp;
         }
@@ -39,8 +37,7 @@ public class StarRocksDelimiterParser
         return writer.toString();
     }
 
-    private static byte[] hexStrToBytes(String hexStr)
-    {
+    private static byte[] hexStrToBytes(String hexStr) {
         String upperHexStr = hexStr.toUpperCase();
         int length = upperHexStr.length() / 2;
         char[] hexChars = upperHexStr.toCharArray();
@@ -52,8 +49,7 @@ public class StarRocksDelimiterParser
         return bytes;
     }
 
-    private static byte charToByte(char c)
-    {
+    private static byte charToByte(char c) {
         return (byte) HEX_STRING.indexOf(c);
     }
 }

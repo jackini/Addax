@@ -26,8 +26,7 @@ import org.apache.commons.rng.simple.RandomSource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class GeoUtil
-{
+public class GeoUtil {
     private static final String[][] LAND_COORDS = {
             {"42.50729", "1.53414", "les Escaldes", "AD", "Europe/Andorra"},
             {"36.21544", "65.93249", "Sar-e Pul", "AF", "Asia/Kabul"},
@@ -994,32 +993,27 @@ public class GeoUtil
      *
      * @return a BigDecimal number
      */
-    private static BigDecimal coordinate()
-    {
+    private static BigDecimal coordinate() {
         return BigDecimal.valueOf((
-            RandomSource.XO_RO_SHI_RO_128_PP.create().nextDouble(0, 360000000) - 180000000) / 1000000.0)
+                        RandomSource.XO_RO_SHI_RO_128_PP.create().nextDouble(0, 360000000) - 180000000) / 1000000.0)
                 .setScale(7, RoundingMode.HALF_UP);
     }
 
-    public static BigDecimal latitude()
-    {
+    public static BigDecimal latitude() {
         // Latitude has a range of -90 to 90, so divide by two.
         return GeoUtil.coordinate().divide(new BigDecimal(2), RoundingMode.CEILING);
     }
 
-    public static BigDecimal longitude()
-    {
+    public static BigDecimal longitude() {
         return GeoUtil.coordinate();
     }
 
-    public static BigDecimal[] nextLatlng()
-    {
-        return new BigDecimal[] {GeoUtil.latitude(), GeoUtil.longitude()};
+    public static BigDecimal[] nextLatlng() {
+        return new BigDecimal[]{GeoUtil.latitude(), GeoUtil.longitude()};
     }
 
-    public static BigDecimal[] nextLatlngOnLand()
-    {
+    public static BigDecimal[] nextLatlngOnLand() {
         String[] res = CommonUtil.randChoose(LAND_COORDS);
-        return new BigDecimal[] {new BigDecimal(res[0]), new BigDecimal(res[1])};
+        return new BigDecimal[]{new BigDecimal(res[0]), new BigDecimal(res[1])};
     }
 }

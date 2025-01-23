@@ -45,22 +45,18 @@ import static com.wgzhao.addax.plugin.writer.kafkawriter.KafkaKey.PROPERTIES;
 import static com.wgzhao.addax.plugin.writer.kafkawriter.KafkaKey.TOPIC;
 
 public class KafkaWriter
-        extends Writer
-{
+        extends Writer {
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
         private Configuration config = null;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.config = this.getPluginJobConf();
             validateParameter();
         }
 
-        private void validateParameter()
-        {
+        private void validateParameter() {
             config.getNecessaryValue(BROKER_LIST, REQUIRED_VALUE);
             config.getNecessaryValue(TOPIC, REQUIRED_VALUE);
             List<String> columns = config.getList(COLUMN, String.class);
@@ -71,22 +67,19 @@ public class KafkaWriter
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
 
         }
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             // only one split
             return Collections.singletonList(config.clone());
         }
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
 
         private final static String CLIENT_ID = "addax-kafka-writer";
 
@@ -96,8 +89,7 @@ public class KafkaWriter
         private List<String> columns;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.configuration = getPluginJobConf();
             String brokeLists = configuration.getString(BROKER_LIST);
             this.topic = configuration.getString(TOPIC);
@@ -120,14 +112,12 @@ public class KafkaWriter
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
 
         @Override
-        public void startWrite(RecordReceiver lineReceiver)
-        {
+        public void startWrite(RecordReceiver lineReceiver) {
             Record record;
             ProducerRecord<String, Object> producerRecord;
             while ((record = lineReceiver.getFromReader()) != null) {

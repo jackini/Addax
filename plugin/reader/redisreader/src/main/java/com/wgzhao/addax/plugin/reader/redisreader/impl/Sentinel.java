@@ -22,8 +22,7 @@ import java.io.Closeable;
 import java.io.IOException;
 
 public interface Sentinel
-        extends Closeable
-{
+        extends Closeable {
 
     void open()
             throws IOException;

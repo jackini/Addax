@@ -49,8 +49,7 @@ import static com.wgzhao.addax.common.spi.ErrorCode.NOT_SUPPORT_TYPE;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class HdfsReader
-        extends Reader
-{
+        extends Reader {
 
     /**
      * Job 中的方法仅执行一次，Task 中方法会由框架启动多个 Task 线程并行执行。
@@ -64,8 +63,7 @@ public class HdfsReader
      * </pre>
      */
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
         private static final Logger LOG = LoggerFactory.getLogger(Job.class);
 
         private Configuration readerOriginConfig = null;
@@ -75,8 +73,7 @@ public class HdfsReader
         private List<String> path = null;
 
         @Override
-        public void init()
-        {
+        public void init() {
 
             LOG.info("init() begin...");
             this.readerOriginConfig = getPluginJobConf();
@@ -85,16 +82,14 @@ public class HdfsReader
             LOG.info("init() ok and end...");
         }
 
-        public void validate()
-        {
+        public void validate() {
             readerOriginConfig.getNecessaryValue(Key.DEFAULT_FS, CONFIG_ERROR);
 
             // path check
             String pathInString = readerOriginConfig.getNecessaryValue(Key.PATH, REQUIRED_VALUE);
             if (!pathInString.startsWith("[") && !pathInString.endsWith("]")) {
                 path = Collections.singletonList(pathInString);
-            }
-            else {
+            } else {
                 path = readerOriginConfig.getList(Key.PATH, String.class);
                 if (null == path || path.isEmpty()) {
                     throw AddaxException.asAddaxException(REQUIRED_VALUE, "The item path is required.");
@@ -118,13 +113,11 @@ public class HdfsReader
 
             try {
                 Charsets.toCharset(encoding);
-            }
-            catch (UnsupportedCharsetException uce) {
+            } catch (UnsupportedCharsetException uce) {
                 throw AddaxException.asAddaxException(
                         ILLEGAL_VALUE,
-                        "The encoding [" +  encoding + "] is unsupported.", uce);
-            }
-            catch (Exception e) {
+                        "The encoding [" + encoding + "] is unsupported.", uce);
+            } catch (Exception e) {
                 throw AddaxException.asAddaxException(
                         ILLEGAL_VALUE, "Exception occurred", e);
             }
@@ -146,16 +139,14 @@ public class HdfsReader
             }
         }
 
-        private void validateColumns()
-        {
+        private void validateColumns() {
 
             // 检测是column 是否为 ["*"] 若是则填为空
             List<Configuration> column = this.readerOriginConfig.getListConfiguration(COLUMN);
             if (null != column && 1 == column.size()
                     && ("\"*\"".equals(column.get(0).toString()) || "'*'".equals(column.get(0).toString()))) {
                 readerOriginConfig.set(COLUMN, new ArrayList<String>());
-            }
-            else {
+            } else {
                 // column: 1. index type 2.value type 3.when type is Data, may be dateFormat value
                 List<Configuration> columns = readerOriginConfig.getListConfiguration(COLUMN);
 
@@ -184,16 +175,14 @@ public class HdfsReader
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             LOG.info("prepare(), start to getAllFiles...");
             this.sourceFiles = (HashSet<String>) dfsUtil.getAllFiles(path, specifiedFileType);
             LOG.info("It will reading #{} file(s), including [{}}.", sourceFiles.size(), sourceFiles);
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
 
             LOG.info("split() begin...");
             List<Configuration> readerSplitConfigs = new ArrayList<>();
@@ -216,21 +205,18 @@ public class HdfsReader
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             //
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
 
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
         private Configuration taskConfig;
@@ -239,8 +225,7 @@ public class HdfsReader
         private DFSUtil dfsUtil = null;
 
         @Override
-        public void init()
-        {
+        public void init() {
 
             this.taskConfig = getPluginJobConf();
             this.sourceFiles = taskConfig.getList(HdfsConstant.SOURCE_FILES, String.class);
@@ -249,14 +234,12 @@ public class HdfsReader
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             //
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
 
             LOG.info("Being to read.");
             for (String sourceFile : this.sourceFiles) {
@@ -265,23 +248,18 @@ public class HdfsReader
                 if (specifiedFileType.equalsIgnoreCase(HdfsConstant.TEXT) || specifiedFileType.equalsIgnoreCase(HdfsConstant.CSV)) {
                     InputStream inputStream = dfsUtil.getInputStream(sourceFile);
                     StorageReaderUtil.readFromStream(inputStream, sourceFile, taskConfig, recordSender, getTaskPluginCollector());
-                }
-                else if (specifiedFileType.equalsIgnoreCase(HdfsConstant.ORC)) {
+                } else if (specifiedFileType.equalsIgnoreCase(HdfsConstant.ORC)) {
 
                     dfsUtil.orcFileStartRead(sourceFile, taskConfig, recordSender, getTaskPluginCollector());
-                }
-                else if (specifiedFileType.equalsIgnoreCase(HdfsConstant.SEQ)) {
+                } else if (specifiedFileType.equalsIgnoreCase(HdfsConstant.SEQ)) {
 
                     dfsUtil.sequenceFileStartRead(sourceFile, taskConfig, recordSender, getTaskPluginCollector());
-                }
-                else if (specifiedFileType.equalsIgnoreCase(HdfsConstant.RC)) {
+                } else if (specifiedFileType.equalsIgnoreCase(HdfsConstant.RC)) {
 
                     dfsUtil.rcFileStartRead(sourceFile, taskConfig, recordSender, getTaskPluginCollector());
-                }
-                else if (specifiedFileType.equalsIgnoreCase(HdfsConstant.PARQUET)) {
+                } else if (specifiedFileType.equalsIgnoreCase(HdfsConstant.PARQUET)) {
                     dfsUtil.parquetFileStartRead(sourceFile, taskConfig, recordSender, getTaskPluginCollector());
-                }
-                else {
+                } else {
                     throw AddaxException.asAddaxException(NOT_SUPPORT_TYPE,
                             "The specifiedFileType: [" + specifiedFileType + "] is unsupported. "
                                     + "HdfsReader only support TEXT, CSV, ORC, SEQUENCE, RC, PARQUET now.");
@@ -296,14 +274,12 @@ public class HdfsReader
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             //
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }

@@ -42,8 +42,7 @@ import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
  *
  * @author yanghan.y
  */
-public class HbaseSQLWriterConfig
-{
+public class HbaseSQLWriterConfig {
     private static final Logger LOG = LoggerFactory.getLogger(HbaseSQLWriterConfig.class);
     private Configuration originalConfig;   // 原始的配置数据
 
@@ -71,16 +70,14 @@ public class HbaseSQLWriterConfig
     /**
      * 禁止直接实例化本类，必须调用{@link #parse}接口来初始化
      */
-    private HbaseSQLWriterConfig()
-    {
+    private HbaseSQLWriterConfig() {
     }
 
     /**
      * @param jobConf configuration json
      * @return hbase writer class
      */
-    public static HbaseSQLWriterConfig parse(Configuration jobConf)
-    {
+    public static HbaseSQLWriterConfig parse(Configuration jobConf) {
         assert jobConf != null;
         HbaseSQLWriterConfig cfg = new HbaseSQLWriterConfig();
         cfg.originalConfig = jobConf;
@@ -108,8 +105,7 @@ public class HbaseSQLWriterConfig
         return cfg;
     }
 
-    private static void parseClusterConfig(HbaseSQLWriterConfig cfg, Configuration jobConf)
-    {
+    private static void parseClusterConfig(HbaseSQLWriterConfig cfg, Configuration jobConf) {
         // 获取hbase集群的连接信息字符串
         String hbaseCfg = jobConf.getString(HBaseKey.HBASE_CONFIG);
         if (StringUtils.isBlank(hbaseCfg)) {
@@ -137,14 +133,12 @@ public class HbaseSQLWriterConfig
                         "The items 'hbase.thin.connect.namespace|username|password' must be configured if you want to use thinClient mode");
             }
             cfg.connectionString = thinConnectStr;
-        }
-        else {
+        } else {
             // 解析zk服务器和znode信息
             Pair<String, String> zkCfg;
             try {
                 zkCfg = HbaseSQLHelper.getHbaseConfig(hbaseCfg);
-            }
-            catch (Throwable t) {
+            } catch (Throwable t) {
                 // 解析hbase配置错误
                 throw AddaxException.asAddaxException(
                         REQUIRED_VALUE,
@@ -163,8 +157,7 @@ public class HbaseSQLWriterConfig
         }
     }
 
-    private static void parseTableConfig(HbaseSQLWriterConfig cfg, Configuration jobConf)
-    {
+    private static void parseTableConfig(HbaseSQLWriterConfig cfg, Configuration jobConf) {
         // 解析并检查表名
         cfg.tableName = jobConf.getString(HBaseKey.TABLE);
 
@@ -174,11 +167,10 @@ public class HbaseSQLWriterConfig
         }
         try {
             TableName.valueOf(cfg.tableName);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     ILLEGAL_VALUE,
-                    "The table " +  cfg.tableName + " you configured has illegal symbols.");
+                    "The table " + cfg.tableName + " you configured has illegal symbols.");
         }
 
         // 解析列配置
@@ -192,94 +184,79 @@ public class HbaseSQLWriterConfig
     /**
      * @return 获取原始配置
      */
-    public Configuration getOriginalConfig()
-    {
+    public Configuration getOriginalConfig() {
         return originalConfig;
     }
 
     /**
      * @return 获取连接字符串，使用ZK模式
      */
-    public String getConnectionString()
-    {
+    public String getConnectionString() {
         return connectionString;
     }
 
     /**
      * @return 获取表名
      */
-    public String getTableName()
-    {
+    public String getTableName() {
         return tableName;
     }
 
     /**
      * @return 返回所有的列，包括主键列和非主键列，但不包括version列
      */
-    public List<String> getColumns()
-    {
+    public List<String> getColumns() {
         return columns;
     }
 
-    public NullModeType getNullMode()
-    {
+    public NullModeType getNullMode() {
         return nullMode;
     }
 
     /**
      * @return 批量写入的最大行数
      */
-    public int  getBatchSize()
-    {
+    public int getBatchSize() {
         return batchSize;
     }
 
     /**
      * @return 在writer初始化的时候是否要清空目标表
      */
-    public boolean truncate()
-    {
+    public boolean truncate() {
         return truncate;
     }
 
-    public boolean isThinClient()
-    {
+    public boolean isThinClient() {
         return isThinClient;
     }
 
-    public String getNamespace()
-    {
+    public String getNamespace() {
         return namespace;
     }
 
-    public String getPassword()
-    {
+    public String getPassword() {
         return password;
     }
 
-    public String getUsername()
-    {
+    public String getUsername() {
         return username;
     }
 
-    public boolean haveKerberos()
-    {
+    public boolean haveKerberos() {
         return haveKerberos;
     }
 
-    public String getKerberosKeytabFilePath()
-    {
+    public String getKerberosKeytabFilePath() {
         return kerberosKeytabFilePath;
     }
 
-    public String getKerberosPrincipal()
-    {
+    public String getKerberosPrincipal() {
         return kerberosPrincipal;
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         StringBuilder ret = new StringBuilder();
         // 集群配置
         ret.append("\n[jdbc]");

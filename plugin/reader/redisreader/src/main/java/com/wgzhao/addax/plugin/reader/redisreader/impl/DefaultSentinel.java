@@ -47,8 +47,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static redis.clients.jedis.Protocol.Command.UNSUBSCRIBE;
 
 public class DefaultSentinel
-        implements Sentinel
-{
+        implements Sentinel {
 
     protected static final Logger logger = LoggerFactory.getLogger(DefaultSentinel.class);
 
@@ -61,40 +60,34 @@ public class DefaultSentinel
     protected final List<SentinelListener> listeners = new CopyOnWriteArrayList<>();
     protected final ScheduledExecutorService schedule = newSingleThreadScheduledExecutor();
 
-    public DefaultSentinel(List<HostAndPort> hosts, String masterName, Configuration configuration)
-    {
+    public DefaultSentinel(List<HostAndPort> hosts, String masterName, Configuration configuration) {
         this.hosts = hosts;
         this.masterName = masterName;
         this.configuration = configuration;
     }
 
     @Override
-    public void open()
-    {
+    public void open() {
         await(schedule.scheduleWithFixedDelay(this::pulse, 0, 10, SECONDS));
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         unsubscribe(channel);
         terminateQuietly(schedule, 0, MILLISECONDS);
     }
 
     @Override
-    public boolean addSentinelListener(SentinelListener listener)
-    {
+    public boolean addSentinelListener(SentinelListener listener) {
         return this.listeners.add(listener);
     }
 
     @Override
-    public boolean removeSentinelListener(SentinelListener listener)
-    {
+    public boolean removeSentinelListener(SentinelListener listener) {
         return this.listeners.remove(listener);
     }
 
-    protected void doCloseListener()
-    {
+    protected void doCloseListener() {
         if (listeners.isEmpty()) {
             return;
         }
@@ -103,8 +96,7 @@ public class DefaultSentinel
         }
     }
 
-    protected void doSwitchListener(HostAndPort host)
-    {
+    protected void doSwitchListener(HostAndPort host) {
         if (listeners.isEmpty()) {
             return;
         }
@@ -113,8 +105,7 @@ public class DefaultSentinel
         }
     }
 
-    protected void pulse()
-    {
+    protected void pulse() {
         for (HostAndPort sentinel : hosts) {
             if (!this.running.get()) {
                 continue;
@@ -130,27 +121,23 @@ public class DefaultSentinel
                 this.jedis = jedis;
                 logger.info("subscribe sentinel {}", sentinel);
                 jedis.subscribe(new PubSub(), this.channel);
-            }
-            catch (Throwable cause) {
+            } catch (Throwable cause) {
                 logger.warn("suspend sentinel {}, cause: {}", sentinel, cause);
             }
         }
     }
 
     protected class PubSub
-            extends JedisPubSub
-    {
+            extends JedisPubSub {
 
         @Override
-        public void onUnsubscribe(String channel, int channels)
-        {
+        public void onUnsubscribe(String channel, int channels) {
             running.set(false);
             doCloseListener();
         }
 
         @Override
-        public void onMessage(String channel, String response)
-        {
+        public void onMessage(String channel, String response) {
             try {
                 final String[] messages = response.split(" ");
                 if (messages.length <= 3) {
@@ -166,15 +153,13 @@ public class DefaultSentinel
                 final String host = messages[3];
                 final int port = parseInt(messages[4]);
                 doSwitchListener(new HostAndPort(host, port));
-            }
-            catch (Throwable cause) {
+            } catch (Throwable cause) {
                 logger.error("failed to subscribe: {}, cause: {}", response, cause);
             }
         }
     }
 
-    protected void unsubscribe(String channel)
-    {
+    protected void unsubscribe(String channel) {
         for (int retry = 0; retry < 5; retry++) {
             if (!running.get()) {
                 break;
@@ -187,52 +172,40 @@ public class DefaultSentinel
         }
     }
 
-    protected <T> T run(Callable<T> callable)
-    {
+    protected <T> T run(Callable<T> callable) {
         try {
             return callable.call();
-        }
-        catch (Exception ignore) {
+        } catch (Exception ignore) {
             return null;
         }
     }
 
-    protected void sleep(long time, TimeUnit unit)
-    {
+    protected void sleep(long time, TimeUnit unit) {
         try {
             unit.sleep(time);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     }
 
-    protected void await(Future<?> future)
-    {
+    protected void await(Future<?> future) {
         try {
             future.get();
-        }
-        catch (ExecutionException e) {
+        } catch (ExecutionException e) {
             throw new RuntimeException(e);
-        }
-        catch (CancellationException ignored) {
-        }
-        catch (InterruptedException e) {
+        } catch (CancellationException ignored) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     }
 
-    protected void await(Future<?> future, long timeout, TimeUnit unit)
-    {
+    protected void await(Future<?> future, long timeout, TimeUnit unit) {
         try {
             future.get(timeout, unit);
-        }
-        catch (TimeoutException | ExecutionException e) {
+        } catch (TimeoutException | ExecutionException e) {
             throw new RuntimeException(e);
-        }
-        catch (CancellationException ignored) {
-        }
-        catch (InterruptedException e) {
+        } catch (CancellationException ignored) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     }

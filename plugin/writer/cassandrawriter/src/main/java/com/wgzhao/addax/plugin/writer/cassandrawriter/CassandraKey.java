@@ -24,8 +24,7 @@ import com.wgzhao.addax.common.base.Key;
 /**
  * Created by mazhenlin on 2019/8/19.
  */
-public final class CassandraKey extends Key
-{
+public final class CassandraKey extends Key {
     public final static String HOST = "host";
     public final static String PORT = "port";
     public final static String USE_SSL = "useSSL";

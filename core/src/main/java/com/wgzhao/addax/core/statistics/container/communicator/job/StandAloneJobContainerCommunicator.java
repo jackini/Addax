@@ -33,33 +33,28 @@ import java.util.List;
 import java.util.Map;
 
 public class StandAloneJobContainerCommunicator
-        extends AbstractContainerCommunicator
-{
+        extends AbstractContainerCommunicator {
     private static final Logger LOG = LoggerFactory
             .getLogger(StandAloneJobContainerCommunicator.class);
 
-    public StandAloneJobContainerCommunicator(Configuration configuration)
-    {
+    public StandAloneJobContainerCommunicator(Configuration configuration) {
         super(configuration);
         setCollector(new ProcessInnerCollector());
         setReporter(new ProcessInnerReporter());
     }
 
     @Override
-    public void registerCommunication(List<Configuration> configurationList)
-    {
+    public void registerCommunication(List<Configuration> configurationList) {
         getCollector().registerTGCommunication(configurationList);
     }
 
     @Override
-    public Communication collect()
-    {
+    public Communication collect() {
         return getCollector().collectFromTaskGroup();
     }
 
     @Override
-    public State collectState()
-    {
+    public State collectState() {
         return this.collect().getState();
     }
 
@@ -67,8 +62,7 @@ public class StandAloneJobContainerCommunicator
      * 和 DistributeJobContainerCollector 的 report 实现一样
      */
     @Override
-    public void report(Communication communication)
-    {
+    public void report(Communication communication) {
         getReporter().reportJobCommunication(communication);
 
         LOG.info(CommunicationTool.Stringify.getSnapshot(communication));
@@ -76,14 +70,12 @@ public class StandAloneJobContainerCommunicator
     }
 
     @Override
-    public Communication getCommunication(Integer taskGroupId)
-    {
+    public Communication getCommunication(Integer taskGroupId) {
         return getCollector().getTGCommunication(taskGroupId);
     }
 
     @Override
-    public Map<Integer, Communication> getCommunicationMap()
-    {
+    public Map<Integer, Communication> getCommunicationMap() {
         return getCollector().getTGCommunicationMap();
     }
 }

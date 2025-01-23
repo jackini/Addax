@@ -17,7 +17,6 @@ package com.wgzhao.addax.plugin.writer.tdenginewriter;
 import com.wgzhao.addax.common.base.Key;
 
 public class TDKey
-        extends Key
-{
+        extends Key {
     public static final String IGNORE_TAGS_UNMATCHED = "ignoreTagsUnmatched";
 }

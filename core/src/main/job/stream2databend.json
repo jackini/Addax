@@ -19,10 +19,15 @@
           "database": "example_db",
           "table": "table1",
           "jdbcUrl": "jdbc:mysql://127.0.0.1:3307/example_db",
-          "loadUrl": ["127.0.0.1:8000","127.0.0.1:8000"],
+          "loadUrl": [
+            "127.0.0.1:8000",
+            "127.0.0.1:8000"
+          ],
           "fieldDelimiter": "\\x01",
           "lineDelimiter": "\\x02",
-          "column": ["*"],
+          "column": [
+            "*"
+          ],
           "format": "csv"
         }
       },

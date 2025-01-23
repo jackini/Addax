@@ -2,11 +2,9 @@ package com.wgzhao.addax.plugin.writer.starrockswriter.row;
 
 import com.wgzhao.addax.common.element.Column;
 
-public class StarRocksBaseSerializer
-{
+public class StarRocksBaseSerializer {
 
-    protected String fieldConvertion(Column col)
-    {
+    protected String fieldConvertion(Column col) {
         if (null == col.getRawData() || Column.Type.NULL == col.getType()) {
             return null;
         }

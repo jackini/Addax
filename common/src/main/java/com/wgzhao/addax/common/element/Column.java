@@ -26,48 +26,40 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.Date;
 
-public abstract class Column
-{
+public abstract class Column {
     private Type type;
 
     private Object rawData;
 
     private int byteSize;
 
-    public Column(Object object, Type type, int byteSize)
-    {
+    public Column(Object object, Type type, int byteSize) {
         this.rawData = object;
         this.type = type;
         this.byteSize = byteSize;
     }
 
-    public Object getRawData()
-    {
+    public Object getRawData() {
         return this.rawData;
     }
 
-    protected void setRawData(Object rawData)
-    {
+    protected void setRawData(Object rawData) {
         this.rawData = rawData;
     }
 
-    public Type getType()
-    {
+    public Type getType() {
         return this.type;
     }
 
-    protected void setType(Type type)
-    {
+    protected void setType(Type type) {
         this.type = type;
     }
 
-    public int getByteSize()
-    {
+    public int getByteSize() {
         return this.byteSize;
     }
 
-    protected void setByteSize(int byteSize)
-    {
+    protected void setByteSize(int byteSize) {
         this.byteSize = byteSize;
     }
 
@@ -90,13 +82,11 @@ public abstract class Column
     public abstract Timestamp asTimestamp();
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return JSON.toJSONString(this);
     }
 
-    public enum Type
-    {
+    public enum Type {
         BAD, NULL, INT, LONG, DOUBLE, STRING, BOOL, DATE, BYTES, ARRAY, JAVA_OBJECT, TIMESTAMP
     }
 }

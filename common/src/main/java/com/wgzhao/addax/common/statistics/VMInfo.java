@@ -35,8 +35,7 @@ import java.util.Map;
 /**
  * Created by liqiang on 15/11/12.
  */
-public class VMInfo
-{
+public class VMInfo {
     static final long MB = 1024L * 1024L;
     static final long GB = 1024 * 1024 * 1024L;
     private static final Logger LOG = LoggerFactory.getLogger(VMInfo.class);
@@ -67,8 +66,7 @@ public class VMInfo
     //nano
     private long lastProcessCpuTime = 0;
 
-    private VMInfo()
-    {
+    private VMInfo() {
         //初始化静态信息
         osMXBean = ManagementFactory.getOperatingSystemMXBean();
         runtimeMXBean = ManagementFactory.getRuntimeMXBean();
@@ -115,37 +113,32 @@ public class VMInfo
      *
      * @return null or vmInfo. null is something error, job no care it.
      */
-    public static synchronized VMInfo getVmInfo()
-    {
+    public static synchronized VMInfo getVmInfo() {
         if (vmInfo == null) {
             vmInfo = new VMInfo();
         }
         return vmInfo;
     }
 
-    public static boolean isSunOsMBean(OperatingSystemMXBean operatingSystem)
-    {
+    public static boolean isSunOsMBean(OperatingSystemMXBean operatingSystem) {
         final String className = operatingSystem.getClass().getName();
 
         return "com.sun.management.UnixOperatingSystem".equals(className);
     }
 
-    public static long getLongFromOperatingSystem(OperatingSystemMXBean operatingSystem, String methodName)
-    {
+    public static long getLongFromOperatingSystem(OperatingSystemMXBean operatingSystem, String methodName) {
         try {
             final Method method = operatingSystem.getClass().getMethod(methodName, (Class<?>[]) null);
             method.setAccessible(true);
             return (Long) method.invoke(operatingSystem, (Object[]) null);
-        }
-        catch (final Exception e) {
+        } catch (final Exception e) {
             LOG.info("OperatingSystemMXBean {} failed, Exception = {} ", methodName, e.getMessage());
         }
 
         return -1;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return "The machine info  => \n\n"
                 + "\tosInfo: \t" + osInfo + "\n"
                 + "\tjvmInfo:\t" + jvmInfo + "\n"
@@ -155,13 +148,11 @@ public class VMInfo
                 + processMemoryStatus + "\n";
     }
 
-    public String totalString()
-    {
+    public String totalString() {
         return (processCpuStatus.getTotalString() + processGCStatus.getTotalString());
     }
 
-    public synchronized void getDelta(boolean print)
-    {
+    public synchronized void getDelta(boolean print) {
 
         try {
             if (VMInfo.isSunOsMBean(osMXBean)) {
@@ -213,21 +204,18 @@ public class VMInfo
             if (print) {
                 LOG.info("{}{}{}", processCpuStatus.getDeltaString(), processMemoryStatus.getDeltaString(), processGCStatus.getDeltaString());
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LOG.warn("no need care, the fail is ignored : vmInfo getDelta failed {}", e.getMessage(), e);
         }
     }
 
-    private static class PhyOSStatus
-    {
+    private static class PhyOSStatus {
         long totalPhysicalMemory = -1;
         long freePhysicalMemory = -1;
         long maxFileDescriptorCount = -1;
         long currentOpenFileDescriptorCount = -1;
 
-        public String toString()
-        {
+        public String toString() {
             return String.format("\ttotalPhysicalMemory:\t%,.2fG%n"
                             + "\tfreePhysicalMemory:\t%,.2fG%n"
                             + "\tmaxFileDescriptorCount:\t%s%n"
@@ -236,17 +224,14 @@ public class VMInfo
         }
     }
 
-    private static class ProcessGCStatus
-    {
+    private static class ProcessGCStatus {
         final Map<String, GCStatus> gcStatusMap = new HashMap<>();
 
-        public String toString()
-        {
+        public String toString() {
             return "\tGC Names\t" + gcStatusMap.keySet() + "\n";
         }
 
-        public String getDeltaString()
-        {
+        public String getDeltaString() {
             StringBuilder sb = new StringBuilder();
             sb.append("\n [delta gc info] => \n");
             sb.append("\t");
@@ -265,8 +250,7 @@ public class VMInfo
             return sb.toString();
         }
 
-        public String getTotalString()
-        {
+        public String getTotalString() {
             StringBuilder sb = new StringBuilder();
             sb.append("\n [total gc info] => \n");
             sb.append("\t");
@@ -284,12 +268,10 @@ public class VMInfo
         }
     }
 
-    private static class ProcessMemoryStatus
-    {
+    private static class ProcessMemoryStatus {
         final Map<String, MemoryStatus> memoryStatusMap = new HashMap<>();
 
-        public String toString()
-        {
+        public String toString() {
             StringBuilder sb = new StringBuilder();
             sb.append("\t");
             sb.append(String.format("%-30s | %-14s | %-8s %n", "MEMORY_NAME", "allocation(MB)", "init(MB)"));
@@ -300,8 +282,7 @@ public class VMInfo
             return sb.toString();
         }
 
-        public String getDeltaString()
-        {
+        public String getDeltaString() {
             StringBuilder sb = new StringBuilder();
             sb.append("\n [delta memory info] => \n");
             sb.append("\t");
@@ -316,8 +297,7 @@ public class VMInfo
         }
     }
 
-    private static class GCStatus
-    {
+    private static class GCStatus {
         String name;
         long maxDeltaGCCount = -1;
         long minDeltaGCCount = -1;
@@ -328,8 +308,7 @@ public class VMInfo
         long curDeltaGCTime;
         long totalGCTime = 0;
 
-        public void setCurTotalGcCount(long curTotalGcCount)
-        {
+        public void setCurTotalGcCount(long curTotalGcCount) {
             this.curDeltaGCCount = curTotalGcCount - totalGCCount;
             this.totalGCCount = curTotalGcCount;
 
@@ -342,8 +321,7 @@ public class VMInfo
             }
         }
 
-        public void setCurTotalGcTime(long curTotalGcTime)
-        {
+        public void setCurTotalGcTime(long curTotalGcTime) {
             this.curDeltaGCTime = curTotalGcTime - totalGCTime;
             this.totalGCTime = curTotalGcTime;
 
@@ -357,8 +335,7 @@ public class VMInfo
         }
     }
 
-    private static class MemoryStatus
-    {
+    private static class MemoryStatus {
         String name;
         long initSize;
         long maxSize;
@@ -368,16 +345,14 @@ public class VMInfo
         long maxUsedSize = -1;
         float maxPercent = 0;
 
-        void setMaxMinUsedSize(long curUsedSize)
-        {
+        void setMaxMinUsedSize(long curUsedSize) {
             if (maxUsedSize < curUsedSize) {
                 maxUsedSize = curUsedSize;
             }
             this.usedSize = curUsedSize;
         }
 
-        void setMaxMinPercent(float curPercent)
-        {
+        void setMaxMinPercent(float curPercent) {
             if (maxPercent < curPercent) {
                 maxPercent = curPercent;
             }
@@ -385,16 +360,14 @@ public class VMInfo
         }
     }
 
-    private class ProcessCpuStatus
-    {
+    private class ProcessCpuStatus {
         // 百分比的值 比如30.0 表示30.0%
         float maxDeltaCpu = -1;
         float minDeltaCpu = -1;
         float curDeltaCpu = -1;
         float averageCpu = -1;
 
-        public void setMaxMinCpu(float curCpu)
-        {
+        public void setMaxMinCpu(float curCpu) {
             this.curDeltaCpu = curCpu;
             if (maxDeltaCpu < curCpu) {
                 maxDeltaCpu = curCpu;
@@ -405,8 +378,7 @@ public class VMInfo
             }
         }
 
-        public String getDeltaString()
-        {
+        public String getDeltaString() {
 
             return "\n [delta cpu info] => \n" +
                     "\t" +
@@ -419,8 +391,7 @@ public class VMInfo
                             String.format("%,.2f%%%n", processCpuStatus.minDeltaCpu));
         }
 
-        public String getTotalString()
-        {
+        public String getTotalString() {
 
             return "\n [total cpu info] => \n" +
                     "\t" +

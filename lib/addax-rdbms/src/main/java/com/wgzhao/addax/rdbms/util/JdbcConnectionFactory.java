@@ -27,8 +27,7 @@ import java.sql.Connection;
  * Date: 15/3/16 下午3:12
  */
 public class JdbcConnectionFactory
-        implements ConnectionFactory
-{
+        implements ConnectionFactory {
 
     private final DataBaseType dataBaseType;
 
@@ -38,8 +37,7 @@ public class JdbcConnectionFactory
 
     private final String password;
 
-    public JdbcConnectionFactory(DataBaseType dataBaseType, String jdbcUrl, String userName, String password)
-    {
+    public JdbcConnectionFactory(DataBaseType dataBaseType, String jdbcUrl, String userName, String password) {
         this.dataBaseType = dataBaseType;
         this.jdbcUrl = jdbcUrl;
         this.userName = userName;
@@ -47,20 +45,17 @@ public class JdbcConnectionFactory
     }
 
     @Override
-    public Connection getConnection()
-    {
+    public Connection getConnection() {
         return DBUtil.getConnection(dataBaseType, jdbcUrl, userName, password);
     }
 
     @Override
-    public Connection getConnectionWithoutRetry()
-    {
+    public Connection getConnectionWithoutRetry() {
         return DBUtil.getConnectionWithoutRetry(dataBaseType, jdbcUrl, userName, password);
     }
 
     @Override
-    public String getConnectionInfo()
-    {
+    public String getConnectionInfo() {
         return "jdbcUrl:" + jdbcUrl;
     }
 }

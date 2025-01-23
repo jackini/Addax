@@ -59,11 +59,9 @@ import static com.wgzhao.addax.plugin.reader.ftpreader.FtpKey.TIME_OUT;
 import static com.wgzhao.addax.plugin.reader.ftpreader.FtpKey.USE_KEY;
 
 public class FtpReader
-        extends Reader
-{
+        extends Reader {
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
         private static final Logger LOG = LoggerFactory.getLogger(Job.class);
 
         private Configuration originConfig = null;
@@ -87,8 +85,7 @@ public class FtpReader
         private FtpHelper ftpHelper = null;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originConfig = this.getPluginJobConf();
             this.sourceFiles = new HashSet<>();
 
@@ -100,16 +97,14 @@ public class FtpReader
             if ("sftp".equals(protocol)) {
                 this.port = originConfig.getInt(PORT, DEFAULT_SFTP_PORT);
                 this.ftpHelper = new SftpHelper();
-            }
-            else if ("ftp".equals(protocol)) {
+            } else if ("ftp".equals(protocol)) {
                 this.port = originConfig.getInt(PORT, DEFAULT_FTP_PORT);
                 this.ftpHelper = new StandardFtpHelper();
             }
             ftpHelper.loginFtpServer(host, username, password, port, keyPath, keyPass, timeout, connectPattern);
         }
 
-        private void validateParameter()
-        {
+        private void validateParameter() {
             this.protocol = this.originConfig.getNecessaryValue(PROTOCOL, REQUIRED_VALUE).toLowerCase();
             if (!protocol.equals("ftp") && !protocol.equals("sftp")) {
                 throw AddaxException.asAddaxException(NOT_SUPPORT_TYPE,
@@ -126,8 +121,7 @@ public class FtpReader
             if (!pathInString.startsWith("[") && !pathInString.endsWith("]")) {
                 path = new ArrayList<>();
                 path.add(pathInString);
-            }
-            else {
+            } else {
                 path = this.originConfig.getList(Key.PATH, String.class);
                 if (null == path || path.isEmpty()) {
                     throw AddaxException.asAddaxException(REQUIRED_VALUE, "the path is required");
@@ -146,12 +140,10 @@ public class FtpReader
                 if (!connectPatternTag) {
                     throw AddaxException.asAddaxException(NOT_SUPPORT_TYPE,
                             "Only PORT and PASV are accepted, the " + connectPattern + " is not supported.");
-                }
-                else {
+                } else {
                     this.originConfig.set(CONNECT_PATTERN, connectPattern);
                 }
-            }
-            else if (originConfig.getBool(USE_KEY, false)) {
+            } else if (originConfig.getBool(USE_KEY, false)) {
                 String privateKey = originConfig.getString(KEY_PATH, DEFAULT_PRIVATE_KEY)
                         .replaceFirst("^~", System.getProperty("user.home"));
                 // check privateKey does exist or not
@@ -159,8 +151,7 @@ public class FtpReader
                 if (!file.isFile()) {
                     throw AddaxException.asAddaxException(CONFIG_ERROR,
                             "The private ssh key " + privateKey + " does not exist.");
-                }
-                else if (!file.canRead()) {
+                } else if (!file.canRead()) {
                     throw AddaxException.asAddaxException(PERMISSION_ERROR,
                             "The private ssh key " + privateKey + " is not readable.");
                 }
@@ -169,8 +160,7 @@ public class FtpReader
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             LOG.debug("prepare() begin...");
 
             this.sourceFiles = (HashSet<String>) ftpHelper.getAllFiles(path, 0, maxTraversalLevel);
@@ -182,20 +172,17 @@ public class FtpReader
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             try {
                 this.ftpHelper.logoutFtpServer();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 LOG.error("Failed to logout (s)Ftp Server", e);
             }
         }
 
         // warn: 如果源目录为空会报错，拖空目录意图=>空文件显示指定此意图
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             LOG.debug("split() begin...");
             List<Configuration> readerSplitConfigs = new ArrayList<>();
 
@@ -212,8 +199,7 @@ public class FtpReader
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
 
         private Configuration readerSliceConfig;
@@ -222,8 +208,7 @@ public class FtpReader
         private FtpHelper ftpHelper = null;
 
         @Override
-        public void init()
-        {
+        public void init() {
             int port;
             String connectPattern = null;
             this.readerSliceConfig = getPluginJobConf();
@@ -239,8 +224,7 @@ public class FtpReader
             if ("sftp".equals(protocol)) {
                 port = readerSliceConfig.getInt(PORT, DEFAULT_SFTP_PORT);
                 this.ftpHelper = new SftpHelper();
-            }
-            else  {
+            } else {
                 port = readerSliceConfig.getInt(PORT, DEFAULT_FTP_PORT);
                 connectPattern = readerSliceConfig.getString(CONNECT_PATTERN, DEFAULT_FTP_CONNECT_PATTERN);// 默认为被动模式
                 this.ftpHelper = new StandardFtpHelper();
@@ -249,19 +233,16 @@ public class FtpReader
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             try {
                 this.ftpHelper.logoutFtpServer();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 LOG.error("Failed to close connection", e);
             }
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             LOG.debug("start read source files...");
             InputStream inputStream;
             for (String fileName : sourceFiles) {

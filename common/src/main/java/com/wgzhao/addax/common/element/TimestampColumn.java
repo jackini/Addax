@@ -9,41 +9,35 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 public class TimestampColumn
-    extends Column
-{
+        extends Column {
     private final String errorTemplate = "Timestamp type cannot be converted to %s.";
-    public TimestampColumn(Object object, Type type, int byteSize)
-    {
+
+    public TimestampColumn(Object object, Type type, int byteSize) {
         super(object, type, byteSize);
     }
 
     public TimestampColumn() {
-        this((Timestamp)null);
+        this((Timestamp) null);
     }
 
-    public TimestampColumn(Timestamp ts)
-    {
+    public TimestampColumn(Timestamp ts) {
         super(ts, Type.TIMESTAMP, (ts == null ? 0 : 12));
     }
 
-    public TimestampColumn(Long ts)
-    {
+    public TimestampColumn(Long ts) {
         this(new Timestamp(ts));
     }
 
-    public TimestampColumn(String ts)
-    {
+    public TimestampColumn(String ts) {
         this(Timestamp.valueOf(ts));
     }
 
-    public TimestampColumn(Date ts)
-    {
+    public TimestampColumn(Date ts) {
         this(Timestamp.from(ts.toInstant()));
     }
 
     @Override
-    public Long asLong()
-    {
+    public Long asLong() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -51,26 +45,23 @@ public class TimestampColumn
         return this.asTimestamp().getTime();
     }
 
-    public Timestamp asTimestamp()
-    {
+    public Timestamp asTimestamp() {
         if (null == this.getRawData()) {
             return null;
         }
-        return (Timestamp)  this.getRawData();
+        return (Timestamp) this.getRawData();
     }
 
     @Override
-    public Double asDouble()
-    {
-       if (null == this.getRawData()) {
-           return null;
-       }
-       return (Double) this.getRawData();
+    public Double asDouble() {
+        if (null == this.getRawData()) {
+            return null;
+        }
+        return (Double) this.getRawData();
     }
 
     @Override
-    public String asString()
-    {
+    public String asString() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -80,8 +71,7 @@ public class TimestampColumn
     }
 
     @Override
-    public Date asDate()
-    {
+    public Date asDate() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -89,26 +79,22 @@ public class TimestampColumn
     }
 
     @Override
-    public byte[] asBytes()
-    {
+    public byte[] asBytes() {
         throw AddaxException.asAddaxException(ErrorCode.CONVERT_NOT_SUPPORT, String.format(errorTemplate, "Bytes"));
     }
 
     @Override
-    public Boolean asBoolean()
-    {
+    public Boolean asBoolean() {
         throw AddaxException.asAddaxException(ErrorCode.CONVERT_NOT_SUPPORT, String.format(errorTemplate, "Boolean"));
     }
 
     @Override
-    public BigDecimal asBigDecimal()
-    {
+    public BigDecimal asBigDecimal() {
         throw AddaxException.asAddaxException(ErrorCode.CONVERT_NOT_SUPPORT, String.format(errorTemplate, "BigDecimal"));
     }
 
     @Override
-    public BigInteger asBigInteger()
-    {
+    public BigInteger asBigInteger() {
         throw AddaxException.asAddaxException(ErrorCode.CONVERT_NOT_SUPPORT, String.format(errorTemplate, "BigInteger"));
     }
 }

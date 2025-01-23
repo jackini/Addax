@@ -47,10 +47,8 @@ import static com.wgzhao.addax.common.spi.ErrorCode.IO_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.PERMISSION_ERROR;
 
 public class StreamWriter
-        extends Writer
-{
-    private static String buildFilePath(String path, String fileName)
-    {
+        extends Writer {
+    private static String buildFilePath(String path, String fileName) {
         boolean isEndWithSeparator = false;
         switch (IOUtils.DIR_SEPARATOR) {
             case IOUtils.DIR_SEPARATOR_UNIX:
@@ -71,14 +69,12 @@ public class StreamWriter
     }
 
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
 
         private Configuration originalConfig;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = getPluginJobConf();
 
             String path = this.originalConfig.getString(StreamKey.PATH, null);
@@ -89,8 +85,7 @@ public class StreamWriter
             }
         }
 
-        private void validateParameter(String path, String fileName)
-        {
+        private void validateParameter(String path, String fileName) {
             try {
                 // warn: 这里用户需要配一个目录
                 File dir = new File(path);
@@ -118,15 +113,13 @@ public class StreamWriter
                 if (newFile.exists()) {
                     try {
                         FileUtils.forceDelete(newFile);
-                    }
-                    catch (IOException e) {
+                    } catch (IOException e) {
                         throw AddaxException.asAddaxException(
                                 IO_ERROR,
                                 String.format("删除文件失败 : [%s] ", fileFullPath), e);
                     }
                 }
-            }
-            catch (SecurityException se) {
+            } catch (SecurityException se) {
                 throw AddaxException.asAddaxException(
                         PERMISSION_ERROR,
                         String.format("您没有权限创建文件路径 : [%s] ", path), se);
@@ -134,8 +127,7 @@ public class StreamWriter
         }
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             List<Configuration> writerSplitConfigs = new ArrayList<>();
             for (int i = 0; i < mandatoryNumber; i++) {
                 writerSplitConfigs.add(this.originalConfig);
@@ -145,15 +137,13 @@ public class StreamWriter
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
         private static final String NEWLINE_FLAG = System.getProperty("line.separator", "\n");
 
@@ -169,8 +159,7 @@ public class StreamWriter
         private String nullFormat;
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration writerSliceConfig = getPluginJobConf();
 
             this.fieldDelimiter = writerSliceConfig.getString(StreamKey.FIELD_DELIMITER, "\t");
@@ -190,13 +179,11 @@ public class StreamWriter
         }
 
         @Override
-        public void startWrite(RecordReceiver recordReceiver)
-        {
+        public void startWrite(RecordReceiver recordReceiver) {
 
             if (StringUtils.isNoneBlank(path) && StringUtils.isNoneBlank(fileName)) {
                 writeToFile(recordReceiver, path, fileName, recordNumBeforeSleep, sleepTime);
-            }
-            else if (this.print) {
+            } else if (this.print) {
                 try {
                     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out, StandardCharsets.UTF_8));
 
@@ -205,16 +192,14 @@ public class StreamWriter
                         writer.write(recordToString(record));
                     }
                     writer.flush();
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     throw AddaxException.asAddaxException(IO_ERROR, e);
                 }
             }
         }
 
         private void writeToFile(RecordReceiver recordReceiver, String path, String fileName,
-                long recordNumBeforeSleep, long sleepTime)
-        {
+                                 long recordNumBeforeSleep, long sleepTime) {
 
             LOG.info("begin do write...");
             String fileFullPath = buildFilePath(path, fileName);
@@ -228,26 +213,23 @@ public class StreamWriter
                     if (recordNumBeforeSleep > 0 && sleepTime > 0 && count == recordNumBeforeSleep) {
                         LOG.info("StreamWriter start to sleep ... recordNumBeforeSleep={},sleepTime={}", recordNumBeforeSleep, sleepTime);
                         TimeUnit.SECONDS.sleep(sleepTime);
-                        count=0;
+                        count = 0;
                     }
                     writer.write(recordToString(record));
                     count++;
                 }
                 writer.flush();
-            }
-            catch (IOException | InterruptedException e) {
+            } catch (IOException | InterruptedException e) {
                 throw AddaxException.asAddaxException(IO_ERROR, e);
             }
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
 
-        private String recordToString(Record record)
-        {
+        private String recordToString(Record record) {
             int recordLength = record.getColumnNumber();
             if (0 == recordLength) {
                 return NEWLINE_FLAG;
@@ -259,8 +241,7 @@ public class StreamWriter
                 column = record.getColumn(i);
                 if (column != null && column.getRawData() != null) {
                     sb.append(column.asString());
-                }
-                else {
+                } else {
                     // use NULL FLAG to replace null value
                     sb.append(nullFormat);
                 }

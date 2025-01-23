@@ -38,42 +38,35 @@ import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
  * Created by shf on 16/3/7.
  */
 public class Hbase20xReader
-        extends Reader
-{
+        extends Reader {
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
         private Configuration originConfig = null;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originConfig = this.getPluginJobConf();
             Hbase20xHelper.validateParameter(this.originConfig);
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             return Hbase20xHelper.split(this.originConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
         private HbaseAbstractTask hbaseTaskProxy;
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration taskConfig = super.getPluginJobConf();
             String mode = taskConfig.getString(HBaseKey.MODE);
             ModeType modeType = ModeType.getByTypeName(mode);
@@ -91,26 +84,22 @@ public class Hbase20xReader
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             try {
                 this.hbaseTaskProxy.prepare();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw AddaxException.asAddaxException(RUNTIME_ERROR, e);
             }
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             Record record = recordSender.createRecord();
             boolean fetchOK;
             while (true) {
                 try {
                     fetchOK = this.hbaseTaskProxy.fetchLine(record);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     LOG.info("Exception", e);
                     super.getTaskPluginCollector().collectDirtyRecord(record, e);
                     record = recordSender.createRecord();
@@ -119,8 +108,7 @@ public class Hbase20xReader
                 if (fetchOK) {
                     recordSender.sendToWriter(record);
                     record = recordSender.createRecord();
-                }
-                else {
+                } else {
                     break;
                 }
             }
@@ -128,8 +116,7 @@ public class Hbase20xReader
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             if (this.hbaseTaskProxy != null) {
                 this.hbaseTaskProxy.close();
             }

@@ -41,16 +41,13 @@ import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
  * Created by liqiang on 16/3/4.
  */
 public class FilterTransformer
-        extends Transformer
-{
-    public FilterTransformer()
-    {
+        extends Transformer {
+    public FilterTransformer() {
         setTransformerName("dx_filter");
     }
 
     @Override
-    public Record evaluate(Record record, Object... paras)
-    {
+    public Record evaluate(Record record, Object... paras) {
 
         int columnIndex;
         String code;
@@ -68,8 +65,7 @@ public class FilterTransformer
             if (StringUtils.isEmpty(value)) {
                 throw new RuntimeException("The second parameter of dx_filter cannot be null");
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                     "paras:" + Arrays.asList(paras) + " => " + e.getMessage());
         }
@@ -98,15 +94,13 @@ public class FilterTransformer
                 default:
                     throw new RuntimeException("dx_filter code:" + code + " is unsupported");
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     RUNTIME_ERROR, e.getMessage(), e);
         }
     }
 
-    private Record doGreat(Record record, String value, Column column, boolean hasEqual)
-    {
+    private Record doGreat(Record record, String value, Column column, boolean hasEqual) {
 
         //如果字段为空，直接不参与比较。即空也属于无穷小
         if (column.getRawData() == null) {
@@ -119,70 +113,57 @@ public class FilterTransformer
             if (hasEqual) {
                 if (ori >= val) {
                     return null;
-                }
-                else {
+                } else {
                     return record;
                 }
-            }
-            else {
+            } else {
                 if (ori > val) {
                     return null;
-                }
-                else {
+                } else {
                     return record;
                 }
             }
-        }
-        else if (column instanceof LongColumn || column instanceof DateColumn) {
+        } else if (column instanceof LongColumn || column instanceof DateColumn) {
             Long ori = column.asLong();
             long val = Long.parseLong(value);
 
             if (hasEqual) {
                 if (ori >= val) {
                     return null;
-                }
-                else {
+                } else {
                     return record;
                 }
-            }
-            else {
+            } else {
                 if (ori > val) {
                     return null;
-                }
-                else {
+                } else {
                     return record;
                 }
             }
-        }
-        else if (column instanceof StringColumn
+        } else if (column instanceof StringColumn
                 || column instanceof BytesColumn
                 || column instanceof BoolColumn) {
             String ori = column.asString();
             if (hasEqual) {
                 if (ori.compareTo(value) >= 0) {
                     return null;
-                }
-                else {
+                } else {
                     return record;
                 }
-            }
-            else {
+            } else {
                 if (ori.compareTo(value) > 0) {
                     return null;
-                }
-                else {
+                } else {
                     return record;
                 }
             }
-        }
-        else {
+        } else {
             throw new RuntimeException(">=,> can't support this columnType:"
                     + column.getClass().getSimpleName());
         }
     }
 
-    private Record doLess(Record record, String value, Column column, boolean hasEqual)
-    {
+    private Record doLess(Record record, String value, Column column, boolean hasEqual) {
 
         //如果字段为空，直接不参与比较。即空也属于无穷大
         if (column.getRawData() == null) {
@@ -196,63 +177,51 @@ public class FilterTransformer
             if (hasEqual) {
                 if (ori <= val) {
                     return null;
-                }
-                else {
+                } else {
                     return record;
                 }
-            }
-            else {
+            } else {
                 if (ori < val) {
                     return null;
-                }
-                else {
+                } else {
                     return record;
                 }
             }
-        }
-        else if (column instanceof LongColumn || column instanceof DateColumn) {
+        } else if (column instanceof LongColumn || column instanceof DateColumn) {
             Long ori = column.asLong();
             long val = Long.parseLong(value);
 
             if (hasEqual) {
                 if (ori <= val) {
                     return null;
-                }
-                else {
+                } else {
                     return record;
                 }
-            }
-            else {
+            } else {
                 if (ori < val) {
                     return null;
-                }
-                else {
+                } else {
                     return record;
                 }
             }
-        }
-        else if (column instanceof StringColumn
+        } else if (column instanceof StringColumn
                 || column instanceof BytesColumn
                 || column instanceof BoolColumn) {
             String ori = column.asString();
             if (hasEqual) {
                 if (ori.compareTo(value) <= 0) {
                     return null;
-                }
-                else {
+                } else {
                     return record;
                 }
-            }
-            else {
+            } else {
                 if (ori.compareTo(value) < 0) {
                     return null;
-                }
-                else {
+                } else {
                     return record;
                 }
             }
-        }
-        else {
+        } else {
             throw new RuntimeException("<=,< can't support this columnType:"
                     + column.getClass().getSimpleName());
         }
@@ -262,19 +231,17 @@ public class FilterTransformer
      * DateColumn将比较long值，StringColumn，ByteColumn以及BooleanColumn比较其String值
      *
      * @param record message record
-     * @param value value to compared
+     * @param value  value to compared
      * @param column the column of record
      * @return Record
      */
-    private Record doEqual(Record record, String value, Column column)
-    {
+    private Record doEqual(Record record, String value, Column column) {
 
         //如果字段为空，只比较目标字段为"null"，否则null字段均不过滤
         if (column.getRawData() == null) {
             if ("null".equalsIgnoreCase(value)) {
                 return null;
-            }
-            else {
+            } else {
                 return record;
             }
         }
@@ -285,34 +252,28 @@ public class FilterTransformer
 
             if (ori == val) {
                 return null;
-            }
-            else {
+            } else {
                 return record;
             }
-        }
-        else if (column instanceof LongColumn || column instanceof DateColumn) {
+        } else if (column instanceof LongColumn || column instanceof DateColumn) {
             Long ori = column.asLong();
             long val = Long.parseLong(value);
 
             if (ori == val) {
                 return null;
-            }
-            else {
+            } else {
                 return record;
             }
-        }
-        else if (column instanceof StringColumn
+        } else if (column instanceof StringColumn
                 || column instanceof BytesColumn
                 || column instanceof BoolColumn) {
             String ori = column.asString();
             if (ori.compareTo(value) == 0) {
                 return null;
-            }
-            else {
+            } else {
                 return record;
             }
-        }
-        else {
+        } else {
             throw new RuntimeException("== can't support this columnType:"
                     + column.getClass().getSimpleName());
         }
@@ -322,19 +283,17 @@ public class FilterTransformer
      * DateColumn将比较long值，StringColumn，ByteColumn以及BooleanColumn比较其String值
      *
      * @param record message record
-     * @param value value to compared
+     * @param value  value to compared
      * @param column the column of record
      * @return Record
      */
-    private Record doNotEqual(Record record, String value, Column column)
-    {
+    private Record doNotEqual(Record record, String value, Column column) {
 
         //如果字段为空，只比较目标字段为"null", 否则null字段均过滤。
         if (column.getRawData() == null) {
             if ("null".equalsIgnoreCase(value)) {
                 return record;
-            }
-            else {
+            } else {
                 return null;
             }
         }
@@ -345,57 +304,47 @@ public class FilterTransformer
 
             if (ori != val) {
                 return null;
-            }
-            else {
+            } else {
                 return record;
             }
-        }
-        else if (column instanceof LongColumn || column instanceof DateColumn) {
+        } else if (column instanceof LongColumn || column instanceof DateColumn) {
             Long ori = column.asLong();
             long val = Long.parseLong(value);
 
             if (ori != val) {
                 return null;
-            }
-            else {
+            } else {
                 return record;
             }
-        }
-        else if (column instanceof StringColumn
+        } else if (column instanceof StringColumn
                 || column instanceof BytesColumn
                 || column instanceof BoolColumn) {
             String ori = column.asString();
             if (ori.compareTo(value) != 0) {
                 return null;
-            }
-            else {
+            } else {
                 return record;
             }
-        }
-        else {
+        } else {
             throw new RuntimeException("== can't support this columnType:"
                     + column.getClass().getSimpleName());
         }
     }
 
-    private Record doLike(Record record, String value, Column column)
-    {
+    private Record doLike(Record record, String value, Column column) {
         String originalValue = column.asString();
         if (originalValue != null && originalValue.matches(value)) {
             return null;
-        }
-        else {
+        } else {
             return record;
         }
     }
 
-    private Record doNotLike(Record record, String value, Column column)
-    {
+    private Record doNotLike(Record record, String value, Column column) {
         String originalValue = column.asString();
         if (originalValue != null && originalValue.matches(value)) {
             return record;
-        }
-        else {
+        } else {
             return null;
         }
     }

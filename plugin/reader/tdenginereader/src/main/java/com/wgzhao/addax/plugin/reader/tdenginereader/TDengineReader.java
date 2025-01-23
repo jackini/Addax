@@ -41,21 +41,18 @@ import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class TDengineReader
-        extends Reader
-{
+        extends Reader {
 
     private static final DataBaseType DATABASE_TYPE = DataBaseType.TDengine;
 
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
 
         private Configuration originalConfig = null;
         private CommonRdbmsReader.Job commonRdbmsReaderJob;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = getPluginJobConf();
 
             this.commonRdbmsReaderJob = new CommonRdbmsReader.Job(DATABASE_TYPE);
@@ -63,8 +60,7 @@ public class TDengineReader
         }
 
         @Override
-        public void preCheck()
-        {
+        public void preCheck() {
             this.commonRdbmsReaderJob.preCheck(this.originalConfig, DATABASE_TYPE);
 
             SimpleDateFormat format = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
@@ -76,8 +72,7 @@ public class TDengineReader
             long start;
             try {
                 start = format.parse(beginDatetime).getTime();
-            }
-            catch (ParseException e) {
+            } catch (ParseException e) {
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE, "The parameter [" + TDKey.BEGIN_DATETIME +
                         "] needs to conform to the [" + DEFAULT_DATE_FORMAT + "] format.");
             }
@@ -90,8 +85,7 @@ public class TDengineReader
             long end;
             try {
                 end = format.parse(endDatetime).getTime();
-            }
-            catch (ParseException e) {
+            } catch (ParseException e) {
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE, "The parameter [" + TDKey.END_DATETIME + "] " +
                         "needs to conform to the [" + DEFAULT_DATE_FORMAT + "] format.");
             }
@@ -109,8 +103,7 @@ public class TDengineReader
             }
             try {
                 split = parseSplitInterval(splitInterval);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE, "The parameter [" + TDKey.SPLIT_INTERVAL +
                         "] should be like: \"123d|h|m|s\", error: " + e.getMessage());
             }
@@ -121,14 +114,13 @@ public class TDengineReader
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             List<Configuration> configurations = new ArrayList<>();
             // do split
             Long start = this.originalConfig.getLong(TDKey.BEGIN_DATETIME);
             Long end = this.originalConfig.getLong(TDKey.END_DATETIME);
             Long split = this.originalConfig.getLong(TDKey.SPLIT_INTERVAL);
-            
+
             for (Long ts = start; ts < end; ts += split) {
                 Configuration clone = this.originalConfig.clone();
                 clone.remove(TDKey.SPLIT_INTERVAL);
@@ -141,50 +133,43 @@ public class TDengineReader
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsReaderJob.post(this.originalConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsReaderJob.destroy(this.originalConfig);
         }
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
 
         private Configuration readerSliceConfig;
         private CommonRdbmsReader.Task commonRdbmsReaderTask;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.readerSliceConfig = getPluginJobConf();
             this.commonRdbmsReaderTask = new CommonRdbmsReader.Task(DATABASE_TYPE, getTaskGroupId(), getTaskId());
             this.commonRdbmsReaderTask.init(this.readerSliceConfig);
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             // TDengine does not support fetch size
             int fetchSize = this.readerSliceConfig.getInt(FETCH_SIZE, DEFAULT_FETCH_SIZE);
             this.commonRdbmsReaderTask.startRead(this.readerSliceConfig, recordSender, getTaskPluginCollector(), fetchSize);
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsReaderTask.post(this.readerSliceConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsReaderTask.destroy(this.readerSliceConfig);
         }
     }
@@ -195,8 +180,7 @@ public class TDengineReader
     private static final long day = 24 * hour;
 
     private static Long parseSplitInterval(String splitInterval)
-            throws Exception
-    {
+            throws Exception {
         Pattern compile = Pattern.compile("^(\\d+)([dhms])$");
         Matcher matcher = compile.matcher(splitInterval);
         while (matcher.find()) {

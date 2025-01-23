@@ -6,12 +6,14 @@
           "name": "oraclewriter",
           "parameter": {
             "column": [
-              "id","name","mesg", "class"
+              "id",
+              "name",
+              "mesg",
+              "class"
             ],
             "connection": [
               {
-                "jdbcUrl": "jdbc:oracle:thin:@10.60.168.62:1521/ORCL"
-                ,
+                "jdbcUrl": "jdbc:oracle:thin:@10.60.168.62:1521/ORCL",
                 "table": [
                   "ini.test"
                 ]

@@ -22,15 +22,12 @@ package com.wgzhao.addax.plugin.writer.doriswriter.codec;
 
 import com.wgzhao.addax.plugin.writer.doriswriter.DorisKey;
 
-public class DorisCodecFactory
-{
-    public DorisCodecFactory()
-    {
+public class DorisCodecFactory {
+    public DorisCodecFactory() {
 
     }
 
-    public static DorisCodec createCodec(DorisKey writerOptions)
-    {
+    public static DorisCodec createCodec(DorisKey writerOptions) {
         if (DorisKey.StreamLoadFormat.CSV.equals(writerOptions.getStreamLoadFormat())) {
             return new DorisCsvCodec(writerOptions.getColumnSeparator());
         }

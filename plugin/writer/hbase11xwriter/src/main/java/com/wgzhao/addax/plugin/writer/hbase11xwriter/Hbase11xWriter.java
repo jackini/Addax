@@ -35,23 +35,19 @@ import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
  * Created by shf on 16/3/17.
  */
 public class Hbase11xWriter
-        extends Writer
-{
+        extends Writer {
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
         private Configuration originConfig = null;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originConfig = this.getPluginJobConf();
             Hbase11xHelper.validateParameter(this.originConfig);
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             boolean truncate = originConfig.getBool(HBaseKey.TRUNCATE, false);
             if (truncate) {
                 Hbase11xHelper.truncateTable(this.originConfig);
@@ -59,8 +55,7 @@ public class Hbase11xWriter
         }
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             List<Configuration> splitResultConfigs = new ArrayList<>();
             for (int j = 0; j < mandatoryNumber; j++) {
                 splitResultConfigs.add(originConfig.clone());
@@ -69,41 +64,35 @@ public class Hbase11xWriter
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
         private HbaseAbstractTask hbaseTaskProxy;
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration taskConfig = super.getPluginJobConf();
             String mode = taskConfig.getString(HBaseKey.MODE);
             ModeType modeType = ModeType.getByTypeName(mode);
 
             if (modeType == ModeType.NORMAL) {
                 this.hbaseTaskProxy = new NormalTask(taskConfig);
-            }
-            else {
+            } else {
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE, "The mode " + modeType + "is unsupported");
             }
         }
 
         @Override
-        public void startWrite(RecordReceiver lineReceiver)
-        {
+        public void startWrite(RecordReceiver lineReceiver) {
             this.hbaseTaskProxy.startWriter(lineReceiver, super.getTaskPluginCollector());
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             if (this.hbaseTaskProxy != null) {
                 this.hbaseTaskProxy.close();
             }

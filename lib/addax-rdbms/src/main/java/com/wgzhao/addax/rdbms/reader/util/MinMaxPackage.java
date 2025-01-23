@@ -21,10 +21,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class MinMaxPackage
-{
-    public enum PkType
-    {
+public class MinMaxPackage {
+    public enum PkType {
         LONG,
         STRING,
         MONTE_CARLO,
@@ -35,65 +33,53 @@ public class MinMaxPackage
     private Object max;
     private PkType type;
 
-    public MinMaxPackage()
-    {
+    public MinMaxPackage() {
         this.min = null;
         this.max = null;
         this.type = null;
     }
 
-    public Object getMin()
-    {
+    public Object getMin() {
         return min;
     }
 
-    public void setMin(Object min)
-    {
+    public void setMin(Object min) {
         this.min = min;
     }
 
-    public Object getMax()
-    {
+    public Object getMax() {
         return max;
     }
 
-    public void setMax(Object max)
-    {
+    public void setMax(Object max) {
         this.max = max;
     }
 
-    public Object getType()
-    {
+    public Object getType() {
         return type;
     }
 
-    public void setType(PkType type)
-    {
+    public void setType(PkType type) {
         this.type = type;
     }
 
-    public boolean isLong()
-    {
+    public boolean isLong() {
         return type == PkType.LONG;
     }
 
-    public boolean isFloat()
-    {
+    public boolean isFloat() {
         return type == PkType.FLOAT;
     }
 
-    public boolean isNumeric()
-    {
+    public boolean isNumeric() {
         return isLong() || isFloat();
     }
 
-    public boolean isString()
-    {
+    public boolean isString() {
         return type == PkType.STRING;
     }
 
-    public List<Object> genSplitPoint(int splitNum)
-    {
+    public List<Object> genSplitPoint(int splitNum) {
         if (splitNum < 2) {
             return Collections.emptyList();
         }
@@ -107,15 +93,13 @@ public class MinMaxPackage
                 result.add(min + i * step);
             }
             return result;
-        }
-        else if (isFloat()) {
+        } else if (isFloat()) {
             return genFloatSplitPoint(splitNum);
         }
         return result;
     }
 
-    public List<Object> genFloatSplitPoint(int splitNum)
-    {
+    public List<Object> genFloatSplitPoint(int splitNum) {
         if (splitNum < 2) {
             return Collections.emptyList();
         }
@@ -134,8 +118,7 @@ public class MinMaxPackage
         return result;
     }
 
-    public boolean isSameValue()
-    {
+    public boolean isSameValue() {
         return Objects.equals(min, max);
     }
 }

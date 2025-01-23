@@ -22,8 +22,7 @@ package com.wgzhao.addax.plugin.reader.mongodbreader;
 import com.wgzhao.addax.common.base.Key;
 
 public class KeyConstant
-        extends Key
-{
+        extends Key {
 
     /**
      * mongodb 的 host 地址
@@ -56,5 +55,6 @@ public class KeyConstant
     public static final int MONGO_ILLEGAL_OP_ERR_CODE = 20;
     public static final int MONGO_COMMAND_NOT_FOUND_CODE = 59;
 
-    private KeyConstant() {}
+    private KeyConstant() {
+    }
 }

@@ -40,8 +40,7 @@ import java.time.ZoneOffset;
 
 import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 
-public class InfluxDBReaderTask
-{
+public class InfluxDBReaderTask {
     private static final Logger LOG = LoggerFactory.getLogger(InfluxDBReaderTask.class);
 
     private static final int CONNECT_TIMEOUT_SECONDS_DEFAULT = 15;
@@ -55,8 +54,7 @@ public class InfluxDBReaderTask
 
     private final int connTimeout;
 
-    public InfluxDBReaderTask(Configuration configuration)
-    {
+    public InfluxDBReaderTask(Configuration configuration) {
         Configuration conn = configuration.getConfiguration(InfluxDBKey.CONNECTION);
         this.querySql = configuration.getString(InfluxDBKey.QUERY_SQL, null);
         this.database = conn.getString(InfluxDBKey.DATABASE);
@@ -72,18 +70,15 @@ public class InfluxDBReaderTask
         this.connTimeout = configuration.getInt(InfluxDBKey.CONNECT_TIMEOUT_SECONDS, CONNECT_TIMEOUT_SECONDS_DEFAULT);
     }
 
-    public void post()
-    {
+    public void post() {
         //
     }
 
-    public void destroy()
-    {
+    public void destroy() {
         //
     }
 
-    public void startRead(RecordSender recordSender, TaskPluginCollector taskPluginCollector)
-    {
+    public void startRead(RecordSender recordSender, TaskPluginCollector taskPluginCollector) {
         LOG.info("connect influxdb: {} with username: {}", endpoint, username);
         String result;
         try {
@@ -91,8 +86,7 @@ public class InfluxDBReaderTask
                     .connectTimeout(Timeout.ofSeconds(connTimeout))
                     .execute()
                     .returnContent().asString();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
         if (StringUtils.isBlank(result)) {
@@ -114,28 +108,24 @@ public class InfluxDBReaderTask
                         for (Object s : rowArray) {
                             if (null != s) {
                                 record.addColumn(new StringColumn(s.toString()));
-                            }
-                            else {
+                            } else {
                                 record.addColumn(new StringColumn());
                             }
                         }
                         recordSender.sendToWriter(record);
                     }
                 }
-            }
-            else if (resultsMap.containsKey("error")) {
+            } else if (resultsMap.containsKey("error")) {
                 throw AddaxException.asAddaxException(
                         ILLEGAL_VALUE, "Error occurred in data sets！", null);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     ILLEGAL_VALUE, "Failed to send data", e);
         }
     }
 
-    private String combineUrl()
-    {
+    private String combineUrl() {
         String enc = "utf-8";
         try {
             String url = endpoint + "/query?db=" + URLEncoder.encode(database, enc);
@@ -150,16 +140,14 @@ public class InfluxDBReaderTask
             }
             url += "&q=" + URLEncoder.encode(querySql, enc);
             return url;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     ILLEGAL_VALUE, "Failed to get data point！", e);
         }
     }
 
     @SuppressWarnings("JavaTimeDefaultTimeZone")
-    private String getLastMinute()
-    {
+    private String getLastMinute() {
         long lastMinuteMilli = LocalDateTime.now().plusMinutes(-1).toInstant(ZoneOffset.of("+8")).toEpochMilli();
         return String.valueOf(lastMinuteMilli);
     }

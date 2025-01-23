@@ -29,8 +29,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class StrUtil
-{
+public class StrUtil {
 
     private static final long KB_IN_BYTES = 1024L;
 
@@ -46,31 +45,24 @@ public class StrUtil
 
     private static String systemEncoding = Charset.defaultCharset().displayName();
 
-    private StrUtil()
-    {
+    private StrUtil() {
     }
 
-    public static String stringify(long byteNumber)
-    {
+    public static String stringify(long byteNumber) {
         if (byteNumber / TB_IN_BYTES > 0) {
             return df.format((double) byteNumber / (double) TB_IN_BYTES) + "TB";
-        }
-        else if (byteNumber / GB_IN_BYTES > 0) {
+        } else if (byteNumber / GB_IN_BYTES > 0) {
             return df.format((double) byteNumber / (double) GB_IN_BYTES) + "GB";
-        }
-        else if (byteNumber / MB_IN_BYTES > 0) {
+        } else if (byteNumber / MB_IN_BYTES > 0) {
             return df.format((double) byteNumber / (double) MB_IN_BYTES) + "MB";
-        }
-        else if (byteNumber / KB_IN_BYTES > 0) {
+        } else if (byteNumber / KB_IN_BYTES > 0) {
             return df.format((double) byteNumber / (double) KB_IN_BYTES) + "KB";
-        }
-        else {
+        } else {
             return byteNumber + "B";
         }
     }
 
-    public static String replaceVariable(final String param)
-    {
+    public static String replaceVariable(final String param) {
         Map<String, String> mapping = new HashMap<>();
 
         Matcher matcher = VARIABLE_PATTERN.matcher(param);
@@ -84,15 +76,14 @@ public class StrUtil
         }
 
         String retString = param;
-        for (Map.Entry<String, String> entry: mapping.entrySet()) {
+        for (Map.Entry<String, String> entry : mapping.entrySet()) {
             retString = retString.replace(entry.getKey(), entry.getValue());
         }
 
         return retString;
     }
 
-    public static String compressMiddle(String s, int headLength, int tailLength)
-    {
+    public static String compressMiddle(String s, int headLength, int tailLength) {
         Validate.notNull(s, "Input string must not be null");
         Validate.isTrue(headLength > 0, "Head length must be larger than 0");
         Validate.isTrue(tailLength > 0, "Tail length must be larger than 0");

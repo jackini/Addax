@@ -32,19 +32,16 @@ import java.util.List;
 import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 
 public class SqlServerWriter
-        extends Writer
-{
+        extends Writer {
     private static final DataBaseType DATABASE_TYPE = DataBaseType.SQLServer;
 
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
         private Configuration originalConfig = null;
         private CommonRdbmsWriter.Job commonRdbmsWriterJob;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = getPluginJobConf();
 
             String writeMode = this.originalConfig.getString(Key.WRITE_MODE);
@@ -60,39 +57,33 @@ public class SqlServerWriter
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             this.commonRdbmsWriterJob.prepare(this.originalConfig);
         }
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             return this.commonRdbmsWriterJob.split(this.originalConfig, mandatoryNumber);
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsWriterJob.post(this.originalConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsWriterJob.destroy(this.originalConfig);
         }
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
         private Configuration writerSliceConfig;
         private CommonRdbmsWriter.Task commonRdbmsWriterTask;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.writerSliceConfig = getPluginJobConf();
             this.commonRdbmsWriterTask = new CommonRdbmsWriter.Task(DATABASE_TYPE);
 
@@ -100,26 +91,22 @@ public class SqlServerWriter
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             this.commonRdbmsWriterTask.prepare(this.writerSliceConfig);
         }
 
-        public void startWrite(RecordReceiver recordReceiver)
-        {
+        public void startWrite(RecordReceiver recordReceiver) {
             this.commonRdbmsWriterTask.startWrite(recordReceiver,
                     this.writerSliceConfig, getTaskPluginCollector());
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsWriterTask.post(this.writerSliceConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsWriterTask.destroy(this.writerSliceConfig);
         }
     }

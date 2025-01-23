@@ -41,8 +41,7 @@ import static com.wgzhao.addax.common.spi.ErrorCode.CONFIG_ERROR;
 
 public class BufferedRecordTransformerExchanger
         extends TransformerExchanger
-        implements RecordSender, RecordReceiver
-{
+        implements RecordSender, RecordReceiver {
 
     private static Class<? extends Record> RECORD_CLASS;
     protected final int byteCapacity;
@@ -55,10 +54,9 @@ public class BufferedRecordTransformerExchanger
 
     @SuppressWarnings("unchecked")
     public BufferedRecordTransformerExchanger(int taskGroupId, int taskId,
-            Channel channel, Communication communication,
-            TaskPluginCollector pluginCollector,
-            List<TransformerExecution> tInfoExecs)
-    {
+                                              Channel channel, Communication communication,
+                                              TaskPluginCollector pluginCollector,
+                                              List<TransformerExecution> tInfoExecs) {
         super(taskGroupId, taskId, communication, tInfoExecs, pluginCollector);
         assert null != channel;
         assert null != channel.getConfiguration();
@@ -78,26 +76,22 @@ public class BufferedRecordTransformerExchanger
                     .forName(configuration.getString(
                             CoreConstant.CORE_TRANSPORT_RECORD_CLASS,
                             "com.wgzhao.addax.core.transport.record.DefaultRecord")));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(CONFIG_ERROR, e);
         }
     }
 
     @Override
-    public Record createRecord()
-    {
+    public Record createRecord() {
         try {
             return BufferedRecordTransformerExchanger.RECORD_CLASS.getConstructor().newInstance();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(CONFIG_ERROR, e);
         }
     }
 
     @Override
-    public void sendToWriter(Record record)
-    {
+    public void sendToWriter(Record record) {
         if (shutdown) {
             throw AddaxException.asAddaxException(ErrorCode.SHUT_DOWN_TASK, "");
         }
@@ -128,8 +122,7 @@ public class BufferedRecordTransformerExchanger
     }
 
     @Override
-    public void flush()
-    {
+    public void flush() {
         if (shutdown) {
             throw AddaxException.asAddaxException(ErrorCode.SHUT_DOWN_TASK, "");
         }
@@ -142,8 +135,7 @@ public class BufferedRecordTransformerExchanger
     }
 
     @Override
-    public void terminate()
-    {
+    public void terminate() {
         if (shutdown) {
             throw AddaxException.asAddaxException(ErrorCode.SHUT_DOWN_TASK, "");
         }
@@ -152,8 +144,7 @@ public class BufferedRecordTransformerExchanger
     }
 
     @Override
-    public Record getFromReader()
-    {
+    public Record getFromReader() {
         if (shutdown) {
             throw AddaxException.asAddaxException(ErrorCode.SHUT_DOWN_TASK, "");
         }
@@ -170,20 +161,17 @@ public class BufferedRecordTransformerExchanger
     }
 
     @Override
-    public void shutdown()
-    {
+    public void shutdown() {
         shutdown = true;
         try {
             buffer.clear();
             channel.clear();
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace();
         }
     }
 
-    private void receive()
-    {
+    private void receive() {
         this.channel.pullAll(this.buffer);
         this.bufferIndex = 0;
         this.bufferSize = this.buffer.size();

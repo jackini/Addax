@@ -54,16 +54,14 @@ import static com.wgzhao.addax.common.spi.ErrorCode.LOGIN_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.NOT_SUPPORT_TYPE;
 import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
 
-public class HdfsHelper
-{
+public class HdfsHelper {
     private static final Logger LOG = LoggerFactory.getLogger(HdfsHelper.class);
 
     protected FileSystem fileSystem = null;
     protected JobConf conf = null;
     protected org.apache.hadoop.conf.Configuration hadoopConf = null;
 
-    protected void getFileSystem(Configuration taskConfig)
-    {
+    protected void getFileSystem(Configuration taskConfig) {
         hadoopConf = new org.apache.hadoop.conf.Configuration();
         String defaultFS = taskConfig.getString(Key.DEFAULT_FS);
         Configuration hadoopSiteParams = taskConfig.getConfiguration(Key.HADOOP_CONFIG);
@@ -94,28 +92,24 @@ public class HdfsHelper
         conf = new JobConf(hadoopConf);
         try {
             this.fileSystem = FileSystem.get(conf);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             String message = String.format("Network IO exception occurred while obtaining Filesystem with defaultFS: [%s]",
                     defaultFS);
             LOG.error(message);
             throw AddaxException.asAddaxException(IO_ERROR, e);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             String message = String.format("Failed to obtain Filesystem with defaultFS: [%s]", defaultFS);
             LOG.error(message);
             throw AddaxException.asAddaxException(RUNTIME_ERROR, e);
         }
     }
 
-    private void kerberosAuthentication(String kerberosPrincipal, String kerberosKeytabFilePath)
-    {
+    private void kerberosAuthentication(String kerberosPrincipal, String kerberosKeytabFilePath) {
         if (StringUtils.isNotBlank(kerberosPrincipal) && StringUtils.isNotBlank(kerberosKeytabFilePath)) {
             UserGroupInformation.setConfiguration(hadoopConf);
             try {
                 UserGroupInformation.loginUserFromKeytab(kerberosPrincipal, kerberosKeytabFilePath);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 String message = String.format("kerberos authentication failed, keytab file: [%s], principal: [%s]",
                         kerberosKeytabFilePath, kerberosPrincipal);
                 LOG.error(message);
@@ -131,8 +125,7 @@ public class HdfsHelper
      * @return 文件数组，文件是全路径，
      * eg：hdfs://10.101.204.12:9000/user/hive/warehouse/writer.db/text/test.txt
      */
-    public Path[] hdfsDirList(String dir)
-    {
+    public Path[] hdfsDirList(String dir) {
         Path path = new Path(dir);
         Path[] files;
         try {
@@ -141,8 +134,7 @@ public class HdfsHelper
             for (int i = 0; i < status.length; i++) {
                 files[i] = status[i].getPath();
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             String message = String.format("Network IO exception occurred while fetching file list for directory [%s]", dir);
             LOG.error(message);
             throw AddaxException.asAddaxException(IO_ERROR, e);
@@ -150,36 +142,31 @@ public class HdfsHelper
         return files;
     }
 
-    public boolean isPathExists(String filePath)
-    {
+    public boolean isPathExists(String filePath) {
         Path path = new Path(filePath);
         boolean exist;
         try {
             exist = fileSystem.exists(path);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOG.error("Network IO exception occurred while checking if file path [{}] exists", filePath);
             throw AddaxException.asAddaxException(IO_ERROR, e);
         }
         return exist;
     }
 
-    public boolean isPathDir(String filePath)
-    {
+    public boolean isPathDir(String filePath) {
         Path path = new Path(filePath);
         boolean isDir;
         try {
             isDir = fileSystem.getFileStatus(path).isDirectory();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOG.error("Network IO exception occurred while checking if path [{}] is directory or not.", filePath);
             throw AddaxException.asAddaxException(IO_ERROR, e);
         }
         return isDir;
     }
 
-    public void deleteFilesFromDir(Path dir, boolean skipTrash)
-    {
+    public void deleteFilesFromDir(Path dir, boolean skipTrash) {
         try {
             final RemoteIterator<LocatedFileStatus> files = fileSystem.listFiles(dir, false);
             if (skipTrash) {
@@ -188,8 +175,7 @@ public class HdfsHelper
                     LOG.info("Delete the file [{}]", next.getPath());
                     fileSystem.delete(next.getPath(), false);
                 }
-            }
-            else {
+            } else {
                 if (hadoopConf.getInt(CommonConfigurationKeys.FS_TRASH_INTERVAL_KEY, 0) == 0) {
                     hadoopConf.set(CommonConfigurationKeys.FS_TRASH_INTERVAL_KEY, "10080"); // 7 days
                 }
@@ -200,24 +186,20 @@ public class HdfsHelper
                     trash.moveToTrash(next.getPath());
                 }
             }
-        }
-        catch (FileNotFoundException fileNotFoundException) {
+        } catch (FileNotFoundException fileNotFoundException) {
             throw new AddaxException(CONFIG_ERROR, fileNotFoundException.getMessage());
-        }
-        catch (IOException ioException) {
+        } catch (IOException ioException) {
             throw new AddaxException(IO_ERROR, ioException.getMessage());
         }
     }
 
-    public void deleteDir(Path path)
-    {
+    public void deleteDir(Path path) {
         LOG.info("Begin to delete temporary dir [{}] .", path);
         try {
             if (isPathExists(path.toString())) {
                 fileSystem.delete(path, true);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOG.error("IO exception occurred while delete temporary directory [{}].", path);
             throw AddaxException.asAddaxException(IO_ERROR, e);
         }
@@ -230,8 +212,7 @@ public class HdfsHelper
      * @param sourceDir the source directory
      * @param targetDir the target directory
      */
-    public void moveFilesToDest(Path sourceDir, Path targetDir)
-    {
+    public void moveFilesToDest(Path sourceDir, Path targetDir) {
         try {
             final FileStatus[] fileStatuses = fileSystem.listStatus(sourceDir);
             for (FileStatus file : fileStatuses) {
@@ -240,28 +221,24 @@ public class HdfsHelper
                     fileSystem.rename(file.getPath(), new Path(targetDir, file.getPath().getName()));
                 }
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw AddaxException.asAddaxException(IO_ERROR, e);
         }
         LOG.info("Finish moving file(s).");
     }
 
     //关闭FileSystem
-    public void closeFileSystem()
-    {
+    public void closeFileSystem() {
         try {
             fileSystem.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOG.error("IO exception occurred while closing Filesystem.");
             throw AddaxException.asAddaxException(IO_ERROR, e);
         }
     }
 
     // compress 已经转为大写
-    public Class<? extends CompressionCodec> getCompressCodec(String compress)
-    {
+    public Class<? extends CompressionCodec> getCompressCodec(String compress) {
         compress = compress.toUpperCase();
         Class<? extends CompressionCodec> codecClass;
         switch (compress) {

@@ -32,48 +32,40 @@ import static com.wgzhao.addax.common.base.Constant.DEFAULT_DATE_FORMAT;
  * Created by liqiang on 15/8/23.
  */
 public class PerfRecord
-        implements Comparable<PerfRecord>
-{
+        implements Comparable<PerfRecord> {
     private final int taskGroupId;
     private final int taskId;
     private final PHASE phase;
     private volatile Date startTime;
     private final AtomicLong count = new AtomicLong(0);
-//    private volatile long size = 0;
+    //    private volatile long size = 0;
     private final AtomicLong size = new AtomicLong(0);
 
-    public PerfRecord(int taskGroupId, int taskId, PHASE phase)
-    {
+    public PerfRecord(int taskGroupId, int taskId, PHASE phase) {
         this.taskGroupId = taskGroupId;
         this.taskId = taskId;
         this.phase = phase;
     }
 
-    public void start()
-    {
+    public void start() {
     }
 
-    public void addCount(long count)
-    {
+    public void addCount(long count) {
         this.count.addAndGet(count);
     }
 
-    public void addSize(long size)
-    {
+    public void addSize(long size) {
         this.size.addAndGet(size);
     }
 
-    public void end()
-    {
+    public void end() {
     }
 
-    public void end(long elapsedTimeInNs)
-    {
+    public void end(long elapsedTimeInNs) {
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         long elapsedTimeInNs = -1;
         return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s"
                 , getInstId(), taskGroupId, taskId, phase,
@@ -81,8 +73,7 @@ public class PerfRecord
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         int result = 0;
         result = 31 * result + taskGroupId;
         result = 31 * result + taskId;
@@ -92,8 +83,7 @@ public class PerfRecord
     }
 
     @Override
-    public boolean equals(Object o)
-    {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
@@ -118,52 +108,43 @@ public class PerfRecord
         return Objects.equals(startTime, dst.startTime);
     }
 
-    public int getTaskGroupId()
-    {
+    public int getTaskGroupId() {
         return taskGroupId;
     }
 
-    public int getTaskId()
-    {
+    public int getTaskId() {
         return taskId;
     }
 
-    public PHASE getPhase()
-    {
+    public PHASE getPhase() {
         return phase;
     }
 
-    public long getCount()
-    {
+    public long getCount() {
         return count.get();
     }
 
-    public long getSize()
-    {
+    public long getSize() {
         return size.get();
     }
 
-    public long getInstId()
-    {
+    public long getInstId() {
         return 0;
     }
 
-    public String getHostIP()
-    {
+    public String getHostIP() {
         return HostUtils.IP;
     }
 
     @Override
-    public int compareTo(PerfRecord o)
-    {
+    public int compareTo(PerfRecord o) {
         if (o == null) {
             return 1;
         }
         return 0;
     }
 
-    public enum PHASE
-    {
+    public enum PHASE {
         /**
          * task total运行的时间，前10为框架统计，后面为部分插件的个性统计
          */
@@ -198,13 +179,11 @@ public class PerfRecord
 
         private final int val;
 
-        PHASE(int val)
-        {
+        PHASE(int val) {
             this.val = val;
         }
 
-        public int toInt()
-        {
+        public int toInt() {
             return val;
         }
     }

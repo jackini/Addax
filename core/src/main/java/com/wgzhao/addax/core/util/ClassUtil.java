@@ -21,32 +21,28 @@ package com.wgzhao.addax.core.util;
 
 import java.lang.reflect.Constructor;
 
-public final class ClassUtil
-{
+public final class ClassUtil {
 
     /**
      * 通过反射构造类对象
      *
      * @param className 反射的类名称
-     * @param t 反射类的类型Class对象
-     * @param <T> class type
-     * @param args 构造参数
+     * @param t         反射类的类型Class对象
+     * @param <T>       class type
+     * @param args      构造参数
      * @return T
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static <T> T instantiate(String className, Class<T> t, Object... args)
-    {
+    public static <T> T instantiate(String className, Class<T> t, Object... args) {
         try {
             Constructor constructor = Class.forName(className).getConstructor(ClassUtil.toClassType(args));
             return (T) constructor.newInstance(args);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
     }
 
-    private static Class<?>[] toClassType(Object[] args)
-    {
+    private static Class<?>[] toClassType(Object[] args) {
         Class<?>[] clazzs = new Class<?>[args.length];
 
         for (int i = 0, length = args.length; i < length; i++) {

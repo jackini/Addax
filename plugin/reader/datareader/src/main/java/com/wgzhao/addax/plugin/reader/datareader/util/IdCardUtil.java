@@ -30,8 +30,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 
-public class IdCardUtil
-{
+public class IdCardUtil {
     // http://www.stats.gov.cn/tjsj/tjbz/xzqhdm/201504/t20150415_712722.html
     private static final String[] AREA_CODES = {
             "110000", "110100", "110101", "110102", "110105", "110106", "110107", "110108", "110109", "110111", "110112", "110113",
@@ -334,11 +333,10 @@ public class IdCardUtil
     private static final String[] FEMALE_NUM = {"0", "2", "4", "6", "8"};
     private static final String[] MALE_NUM = {"1", "3", "5", "7", "9"};
 
-    private static Date randomBirth()
-    {
+    private static Date randomBirth() {
         Date minAge = Date.from(Instant.now().minus(Duration.ofDays(MAX_AGE * 365)));
-        return DateUtils.addDays(minAge, 
-        RandomSource.XO_RO_SHI_RO_128_PP.create().nextInt(MIN_AGE, MAX_AGE) * 365);
+        return DateUtils.addDays(minAge,
+                RandomSource.XO_RO_SHI_RO_128_PP.create().nextInt(MIN_AGE, MAX_AGE) * 365);
     }
 
     /**
@@ -347,8 +345,7 @@ public class IdCardUtil
      * @param s id card without checksum
      * @return checksum
      */
-    private static String checkSum(String s)
-    {
+    private static String checkSum(String s) {
         int[] c = {7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2};
         char[] r = {'1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'};
         int[] n = new int[17];
@@ -362,8 +359,7 @@ public class IdCardUtil
         return r[result % 11] + "";
     }
 
-    public static String nextIdCard()
-    {
+    public static String nextIdCard() {
         StringBuilder sb = new StringBuilder();
         sb.append(CommonUtil.randChoose(AREA_CODES));
         Date birth = IdCardUtil.randomBirth();
@@ -374,8 +370,7 @@ public class IdCardUtil
 
         if (rng.nextInt(0, 1) <= 0.5) {
             sb.append(CommonUtil.randChoose(FEMALE_NUM));
-        }
-        else {
+        } else {
             sb.append(CommonUtil.randChoose(MALE_NUM));
         }
         sb.append(rng.nextInt(0, 10)).append(rng.nextInt(0, 10));

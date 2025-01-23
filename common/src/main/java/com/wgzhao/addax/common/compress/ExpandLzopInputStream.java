@@ -52,12 +52,10 @@ import java.util.zip.CRC32;
  * Created by mingya.wmy on 16/8/26.
  */
 public class ExpandLzopInputStream
-        extends LzopInputStream
-{
+        extends LzopInputStream {
 
     public ExpandLzopInputStream(@Nonnull InputStream in)
-            throws IOException
-    {
+            throws IOException {
         super(in);
     }
 
@@ -67,10 +65,9 @@ public class ExpandLzopInputStream
      */
     @Override
     protected int readHeader()
-            throws IOException
-    {
+            throws IOException {
         short lzoLibraryVersion = 0x2060;
-        Logger log =  LoggerFactory.getLogger(ExpandLzopInputStream.class);
+        Logger log = LoggerFactory.getLogger(ExpandLzopInputStream.class);
         byte[] lzopMagic = {-119, 'L', 'Z', 'O', 0, '\r', '\n', '\032', '\n'};
         byte[] buf = new byte[9];
         readBytes(buf, 0, 9);
@@ -154,8 +151,7 @@ public class ExpandLzopInputStream
     }
 
     private int readHeaderItem(@Nonnull byte[] buf, @Nonnegative int len, @Nonnull Adler32 adler, @Nonnull CRC32 crc32)
-            throws IOException
-    {
+            throws IOException {
         int ret = readInt(buf, len);
         adler.update(buf, 0, len);
         crc32.update(buf, 0, len);
@@ -173,8 +169,7 @@ public class ExpandLzopInputStream
      * @throws IOException read exception
      */
     private int readInt(@Nonnull byte[] buf, @Nonnegative int len)
-            throws IOException
-    {
+            throws IOException {
         readBytes(buf, 0, len);
         int ret = (0xFF & buf[0]) << 24;
         ret |= (0xFF & buf[1]) << 16;

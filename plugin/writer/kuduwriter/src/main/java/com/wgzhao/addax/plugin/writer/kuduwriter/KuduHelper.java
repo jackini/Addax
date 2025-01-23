@@ -35,84 +35,70 @@ import java.util.List;
 import static com.wgzhao.addax.common.spi.ErrorCode.CONNECT_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
 
-public class KuduHelper
-{
+public class KuduHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(KuduHelper.class);
     private final KuduClient kuduClient;
     private KuduTable kuduTable;
 
-    public KuduHelper(String masterAddress)
-    {
+    public KuduHelper(String masterAddress) {
         this(masterAddress, 100 * 1000L);
     }
 
-    public KuduHelper(String masterAddress, long timeout)
-    {
+    public KuduHelper(String masterAddress, long timeout) {
         try {
             this.kuduClient = new KuduClient.KuduClientBuilder(masterAddress)
                     .defaultOperationTimeoutMs(timeout)
                     .build();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(CONNECT_ERROR, e);
         }
     }
 
-    public KuduTable getKuduTable(String tableName)
-    {
+    public KuduTable getKuduTable(String tableName) {
         if (tableName == null) {
             return null;
-        }
-        else {
+        } else {
             try {
                 kuduTable = kuduClient.openTable(tableName);
                 return kuduTable;
-            }
-            catch (KuduException e) {
+            } catch (KuduException e) {
                 throw AddaxException.asAddaxException(RUNTIME_ERROR, e);
             }
         }
     }
 
-    public boolean isTableExists(String tableName)
-    {
+    public boolean isTableExists(String tableName) {
         if (tableName == null) {
             return false;
         }
         try {
             return kuduClient.tableExists(tableName);
-        }
-        catch (KuduException e) {
+        } catch (KuduException e) {
             throw AddaxException.asAddaxException(RUNTIME_ERROR, e);
         }
     }
 
-    public void closeClient()
-    {
+    public void closeClient() {
         try {
             if (kuduClient != null) {
                 kuduClient.close();
             }
-        }
-        catch (KuduException e) {
+        } catch (KuduException e) {
             LOG.warn("The \"kudu client\" was not stopped gracefully. !");
         }
     }
 
-    public Schema getSchema(String tableName)
-    {
+    public Schema getSchema(String tableName) {
         if (kuduTable != null) {
             return kuduTable.getSchema();
-        }
-        else {
+        } else {
             kuduTable = getKuduTable(tableName);
             return kuduTable.getSchema();
         }
     }
 
-    public List<String> getAllColumns(String tableName)
-    {
+    public List<String> getAllColumns(String tableName) {
         List<String> columns = new ArrayList<>();
         Schema schema = getSchema(tableName);
         for (ColumnSchema column : schema.getColumns()) {
@@ -121,8 +107,7 @@ public class KuduHelper
         return columns;
     }
 
-    public KuduSession getSession()
-    {
+    public KuduSession getSession() {
         return kuduClient.newSession();
     }
 }

@@ -40,8 +40,7 @@ import static com.wgzhao.addax.core.util.container.CoreConstant.CORE_TRANSPORT_R
 
 public class RecordExchanger
         extends TransformerExchanger
-        implements RecordSender, RecordReceiver
-{
+        implements RecordSender, RecordReceiver {
 
     private static Class<? extends Record> RECORD_CLASS;
     private final Channel channel;
@@ -49,8 +48,7 @@ public class RecordExchanger
 
     @SuppressWarnings("unchecked")
     public RecordExchanger(int taskGroupId, int taskId, Channel channel, Communication communication,
-            List<TransformerExecution> transformerExecs, TaskPluginCollector pluginCollector)
-    {
+                           List<TransformerExecution> transformerExecs, TaskPluginCollector pluginCollector) {
         super(taskGroupId, taskId, communication, transformerExecs, pluginCollector);
         assert channel != null;
         this.channel = channel;
@@ -59,19 +57,16 @@ public class RecordExchanger
             String cls = configuration.getString(CORE_TRANSPORT_RECORD_CLASS, null);
             if (!StringUtils.isBlank(cls)) {
                 RECORD_CLASS = (Class<? extends Record>) Class.forName(cls);
-            }
-            else {
+            } else {
                 RecordExchanger.RECORD_CLASS = DefaultRecord.class;
             }
-        }
-        catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             throw AddaxException.asAddaxException(CONFIG_ERROR, e);
         }
     }
 
     @Override
-    public Record getFromReader()
-    {
+    public Record getFromReader() {
         if (shutdown) {
             throw AddaxException.asAddaxException(SHUT_DOWN_TASK, "");
         }
@@ -80,19 +75,16 @@ public class RecordExchanger
     }
 
     @Override
-    public Record createRecord()
-    {
+    public Record createRecord() {
         try {
             return RECORD_CLASS.getConstructor().newInstance();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(CONFIG_ERROR, e);
         }
     }
 
     @Override
-    public void sendToWriter(Record record)
-    {
+    public void sendToWriter(Record record) {
         if (shutdown) {
             throw AddaxException.asAddaxException(SHUT_DOWN_TASK, "");
         }
@@ -106,13 +98,11 @@ public class RecordExchanger
     }
 
     @Override
-    public void flush()
-    {
+    public void flush() {
     }
 
     @Override
-    public void terminate()
-    {
+    public void terminate() {
         if (shutdown) {
             throw AddaxException.asAddaxException(SHUT_DOWN_TASK, "");
         }
@@ -122,8 +112,7 @@ public class RecordExchanger
     }
 
     @Override
-    public void shutdown()
-    {
+    public void shutdown() {
         shutdown = true;
     }
 }

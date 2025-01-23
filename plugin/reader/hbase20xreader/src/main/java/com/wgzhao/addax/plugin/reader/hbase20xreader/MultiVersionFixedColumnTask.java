@@ -27,17 +27,14 @@ import org.apache.hadoop.hbase.util.Bytes;
 import java.util.Map;
 
 public class MultiVersionFixedColumnTask
-        extends MultiVersionTask
-{
+        extends MultiVersionTask {
 
-    public MultiVersionFixedColumnTask(Configuration configuration)
-    {
+    public MultiVersionFixedColumnTask(Configuration configuration) {
         super(configuration);
     }
 
     @Override
-    public void initScan(Scan scan)
-    {
+    public void initScan(Scan scan) {
         for (Map<String, String> aColumn : column) {
             String columnName = aColumn.get(HBaseKey.NAME);
             if (!Hbase20xHelper.isRowkeyColumn(columnName)) {

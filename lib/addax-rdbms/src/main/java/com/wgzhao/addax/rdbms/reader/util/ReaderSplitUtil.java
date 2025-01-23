@@ -32,13 +32,12 @@ import java.util.List;
 
 import static com.wgzhao.addax.common.base.Constant.LOAD_BALANCE_RESOURCE_MARK;
 
-public final class ReaderSplitUtil
-{
+public final class ReaderSplitUtil {
 
-    private ReaderSplitUtil() {}
+    private ReaderSplitUtil() {
+    }
 
-    public static List<Configuration> doSplit(Configuration originalSliceConfig, int adviceNumber)
-    {
+    public static List<Configuration> doSplit(Configuration originalSliceConfig, int adviceNumber) {
         boolean isTableMode = originalSliceConfig.getBool(Key.IS_TABLE_MODE);
         boolean isUserSpecifyEachTableSplitSize = originalSliceConfig.getInt(Key.EACH_TABLE_SPLIT_SIZE, -1) != -1;
         int eachTableShouldSplitNumber = -1;
@@ -50,8 +49,7 @@ public final class ReaderSplitUtil
                 // eachTableShouldSplitNumber是单表应该切分的份数, 向上取整可能和adviceNumber没有比例关系了已经
                 eachTableShouldSplitNumber = calculateEachTableShouldSplitNumber(
                         adviceNumber, originalSliceConfig.getInt(Key.TABLE_NUMBER));
-            }
-            else {
+            } else {
                 eachTableShouldSplitNumber = originalSliceConfig.getInt(Key.EACH_TABLE_SPLIT_SIZE, -1);
             }
         }
@@ -103,8 +101,7 @@ public final class ReaderSplitUtil
 
                     splitConfigs.addAll(splitSlices);
                 }
-            }
-            else {
+            } else {
                 for (String table : tables) {
                     tempSlice = sliceConfig.clone();
                     tempSlice.set(Key.TABLE, table);
@@ -113,8 +110,7 @@ public final class ReaderSplitUtil
                     splitConfigs.add(tempSlice);
                 }
             }
-        }
-        else {
+        } else {
             // 说明是配置的 querySql 方式
             List<String> sqls = connConf.getList(Key.QUERY_SQL, String.class);
 
@@ -128,8 +124,7 @@ public final class ReaderSplitUtil
         return splitConfigs;
     }
 
-    public static Configuration doPreCheckSplit(Configuration originalSliceConfig)
-    {
+    public static Configuration doPreCheckSplit(Configuration originalSliceConfig) {
         Configuration queryConfig = originalSliceConfig.clone();
         boolean isTableMode = originalSliceConfig.getBool(Key.IS_TABLE_MODE);
 
@@ -157,8 +152,7 @@ public final class ReaderSplitUtil
             }
             connConf.set(Key.QUERY_SQL, queries);
             queryConfig.set(Key.CONNECTION, connConf);
-        }
-        else {
+        } else {
             // 说明是配置的 querySql 方式
             List<String> sqls = connConf.getList(Key.QUERY_SQL, String.class);
             queries.addAll(sqls);
@@ -169,8 +163,7 @@ public final class ReaderSplitUtil
         return queryConfig;
     }
 
-    private static int calculateEachTableShouldSplitNumber(int adviceNumber, int tableNumber)
-    {
+    private static int calculateEachTableShouldSplitNumber(int adviceNumber, int tableNumber) {
         double tempNum = 1.0 * adviceNumber / tableNumber;
 
         return (int) Math.ceil(tempNum);

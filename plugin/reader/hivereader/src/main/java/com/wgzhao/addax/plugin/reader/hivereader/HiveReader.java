@@ -46,22 +46,19 @@ import static com.wgzhao.addax.common.base.Key.KERBEROS_KEYTAB_FILE_PATH;
 import static com.wgzhao.addax.common.base.Key.KERBEROS_PRINCIPAL;
 
 public class HiveReader
-        extends Reader
-{
+        extends Reader {
 
     private static final DataBaseType DATABASE_TYPE = DataBaseType.Hive;
 
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
         private static final Logger LOG = LoggerFactory.getLogger(Job.class);
 
         private Configuration originalConfig = null;
         private CommonRdbmsReader.Job commonRdbmsReaderJob;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = getPluginJobConf();
 
             boolean haveKerberos = originalConfig.getBool(HAVE_KERBEROS, false);
@@ -78,37 +75,31 @@ public class HiveReader
         }
 
         @Override
-        public void preCheck()
-        {
+        public void preCheck() {
             this.commonRdbmsReaderJob.preCheck(originalConfig, DATABASE_TYPE);
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             return this.commonRdbmsReaderJob.split(originalConfig, adviceNumber);
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsReaderJob.post(originalConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsReaderJob.destroy(originalConfig);
         }
 
-        private void kerberosAuthentication(String kerberosPrincipal, String kerberosKeytabFilePath, org.apache.hadoop.conf.Configuration hadoopConf)
-        {
+        private void kerberosAuthentication(String kerberosPrincipal, String kerberosKeytabFilePath, org.apache.hadoop.conf.Configuration hadoopConf) {
             if (StringUtils.isNotBlank(kerberosPrincipal) && StringUtils.isNotBlank(kerberosKeytabFilePath)) {
                 UserGroupInformation.setConfiguration(hadoopConf);
                 try {
                     UserGroupInformation.loginUserFromKeytab(kerberosPrincipal, kerberosKeytabFilePath);
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }
@@ -116,23 +107,19 @@ public class HiveReader
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
 
         private Configuration readerSliceConfig;
         private CommonRdbmsReader.Task commonRdbmsReaderTask;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.readerSliceConfig = getPluginJobConf();
-            this.commonRdbmsReaderTask = new CommonRdbmsReader.Task(DATABASE_TYPE, getTaskGroupId(), getTaskId())
-            {
+            this.commonRdbmsReaderTask = new CommonRdbmsReader.Task(DATABASE_TYPE, getTaskGroupId(), getTaskId()) {
 
                 @Override
                 protected Column createColumn(ResultSet rs, ResultSetMetaData metaData, int i)
-                        throws SQLException, UnsupportedEncodingException
-                {
+                        throws SQLException, UnsupportedEncodingException {
                     if (metaData.getColumnType(i) == Types.TIMESTAMP) {
                         // hive HiveBaseResultSet#getTimestamp(String columnName, Calendar cal) not support
                         return new TimestampColumn(rs.getTimestamp(i));
@@ -145,21 +132,18 @@ public class HiveReader
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             int fetchSize = readerSliceConfig.getInt(FETCH_SIZE, DEFAULT_FETCH_SIZE);
             commonRdbmsReaderTask.startRead(readerSliceConfig, recordSender, getTaskPluginCollector(), fetchSize);
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsReaderTask.post(readerSliceConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsReaderTask.destroy(readerSliceConfig);
         }
     }

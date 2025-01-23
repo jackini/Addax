@@ -22,10 +22,10 @@
 package com.wgzhao.addax.common.base;
 
 public final class HBaseKey
-        extends Key
-{
+        extends Key {
 
-    private HBaseKey() {}
+    private HBaseKey() {
+    }
 
     public static final String HBASE_CONFIG = "hbaseConfig";
 

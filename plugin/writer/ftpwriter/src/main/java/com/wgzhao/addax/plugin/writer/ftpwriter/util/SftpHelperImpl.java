@@ -46,27 +46,23 @@ import static com.wgzhao.addax.common.spi.ErrorCode.IO_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.LOGIN_ERROR;
 
 public class SftpHelperImpl
-        implements IFtpHelper
-{
+        implements IFtpHelper {
     private static final Logger LOG = LoggerFactory.getLogger(SftpHelperImpl.class);
 
     private Session session = null;
     private ChannelSftp channelSftp = null;
 
     @Override
-    public void loginFtpServer(String host, int port, String username, String password, String keyPath, String keyPass, int timeout)
-    {
+    public void loginFtpServer(String host, int port, String username, String password, String keyPath, String keyPass, int timeout) {
         JSch jsch = new JSch();
         if (keyPath != null) {
             try {
                 if (keyPass != null) {
                     jsch.addIdentity(keyPath, keyPass);
-                }
-                else {
+                } else {
                     jsch.addIdentity(keyPath);
                 }
-            }
-            catch (JSchException e) {
+            } catch (JSchException e) {
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE, "Failed to use private key", e);
             }
         }
@@ -87,8 +83,7 @@ public class SftpHelperImpl
 
             this.channelSftp = (ChannelSftp) this.session.openChannel("sftp");
             this.channelSftp.connect();
-        }
-        catch (JSchException e) {
+        } catch (JSchException e) {
             String message = String.format("Failed to connect %s:%s because: %s", host, port, e.getMessage());
             LOG.error(message);
             throw AddaxException.asAddaxException(LOGIN_ERROR, message, e);
@@ -96,8 +91,7 @@ public class SftpHelperImpl
     }
 
     @Override
-    public void logoutFtpServer()
-    {
+    public void logoutFtpServer() {
         if (this.channelSftp != null) {
             this.channelSftp.disconnect();
             this.channelSftp = null;
@@ -109,15 +103,13 @@ public class SftpHelperImpl
     }
 
     @Override
-    public void mkdir(String directoryPath)
-    {
+    public void mkdir(String directoryPath) {
         boolean isDirExist = false;
         try {
             this.printWorkingDirectory();
             SftpATTRS sftpATTRS = this.channelSftp.lstat(directoryPath);
             isDirExist = sftpATTRS.isDir();
-        }
-        catch (SftpException e) {
+        } catch (SftpException e) {
             if (e.getMessage().equalsIgnoreCase("no such file")) {
                 LOG.warn("The directory {} does not exists, try to create it", directoryPath);
             }
@@ -126,8 +118,7 @@ public class SftpHelperImpl
             try {
                 // warn 检查mkdir -p
                 this.channelSftp.mkdir(directoryPath);
-            }
-            catch (SftpException e) {
+            } catch (SftpException e) {
                 LOG.error("IOException occurred while create folder {}, {}", directoryPath, e);
                 throw AddaxException.asAddaxException(IO_ERROR, e);
             }
@@ -135,15 +126,13 @@ public class SftpHelperImpl
     }
 
     @Override
-    public void mkDirRecursive(String directoryPath)
-    {
+    public void mkDirRecursive(String directoryPath) {
         boolean isDirExist = false;
         try {
             this.printWorkingDirectory();
             SftpATTRS sftpATTRS = this.channelSftp.lstat(directoryPath);
             isDirExist = sftpATTRS.isDir();
-        }
-        catch (SftpException e) {
+        } catch (SftpException e) {
             if (e.getMessage().equalsIgnoreCase("no such file")) {
                 LOG.warn("The directory {} does not exists, try to create it", directoryPath);
             }
@@ -158,8 +147,7 @@ public class SftpHelperImpl
                     mkDirSingleHierarchy(dirPath.toString());
                     dirPath.append(IOUtils.DIR_SEPARATOR_UNIX);
                 }
-            }
-            catch (SftpException e) {
+            } catch (SftpException e) {
                 LOG.error("IOException occurred while create folder {}, {}", directoryPath, e);
                 throw AddaxException.asAddaxException(IO_ERROR, e);
             }
@@ -167,14 +155,12 @@ public class SftpHelperImpl
     }
 
     public void mkDirSingleHierarchy(String directoryPath)
-            throws SftpException
-    {
+            throws SftpException {
         boolean isDirExist = false;
         try {
             SftpATTRS sftpATTRS = this.channelSftp.lstat(directoryPath);
             isDirExist = sftpATTRS.isDir();
-        }
-        catch (SftpException e) {
+        } catch (SftpException e) {
             LOG.info(String.format("正在逐级创建目录 [%s]", directoryPath));
             this.channelSftp.mkdir(directoryPath);
         }
@@ -185,8 +171,7 @@ public class SftpHelperImpl
     }
 
     @Override
-    public OutputStream getOutputStream(String filePath)
-    {
+    public OutputStream getOutputStream(String filePath) {
         try {
             this.printWorkingDirectory();
             String parentDir = filePath.substring(0, StringUtils.lastIndexOf(filePath, IOUtils.DIR_SEPARATOR));
@@ -198,8 +183,7 @@ public class SftpHelperImpl
                 throw AddaxException.asAddaxException(IO_ERROR, message);
             }
             return writeOutputStream;
-        }
-        catch (SftpException e) {
+        } catch (SftpException e) {
             String message = String.format("写出文件[%s] 时出错,请确认文件%s有权限写出, errorMessage:%s", filePath, filePath, e.getMessage());
             LOG.error(message);
             throw AddaxException.asAddaxException(IO_ERROR, message);
@@ -207,8 +191,7 @@ public class SftpHelperImpl
     }
 
     @Override
-    public String getRemoteFileContent(String filePath)
-    {
+    public String getRemoteFileContent(String filePath) {
         try {
             this.completePendingCommand();
             this.printWorkingDirectory();
@@ -220,8 +203,7 @@ public class SftpHelperImpl
             String result = outputStream.toString();
             IOUtils.closeQuietly(outputStream, null);
             return result;
-        }
-        catch (SftpException e) {
+        } catch (SftpException e) {
             String message = String.format("写出文件[%s] 时出错,请确认文件%s有权限写出, errorMessage:%s", filePath, filePath, e.getMessage());
             LOG.error(message);
             throw AddaxException.asAddaxException(IO_ERROR, message);
@@ -229,8 +211,7 @@ public class SftpHelperImpl
     }
 
     @Override
-    public Set<String> getAllFilesInDir(String dir, String prefixFileName)
-    {
+    public Set<String> getAllFilesInDir(String dir, String prefixFileName) {
         Set<String> allFilesWithPointedPrefix = new HashSet<>();
         try {
             this.printWorkingDirectory();
@@ -245,8 +226,7 @@ public class SftpHelperImpl
                     allFilesWithPointedPrefix.add(strName);
                 }
             }
-        }
-        catch (SftpException e) {
+        } catch (SftpException e) {
             String message = String.format("获取path:[%s] 下文件列表时发生I/O异常,请确认与ftp服务器的连接正常,拥有目录ls权限, errorMessage:%s",
                     dir, e.getMessage());
             LOG.error(message);
@@ -256,8 +236,7 @@ public class SftpHelperImpl
     }
 
     @Override
-    public void deleteFiles(Set<String> filesToDelete)
-    {
+    public void deleteFiles(Set<String> filesToDelete) {
         String eachFile = null;
         try {
             this.printWorkingDirectory();
@@ -266,8 +245,7 @@ public class SftpHelperImpl
                 eachFile = each;
                 this.channelSftp.rm(each);
             }
-        }
-        catch (SftpException e) {
+        } catch (SftpException e) {
             String message = String.format(
                     "删除文件:[%s] 时发生异常,请确认指定文件有删除权限,以及网络交互正常, errorMessage:%s",
                     eachFile, e.getMessage());
@@ -277,18 +255,15 @@ public class SftpHelperImpl
         }
     }
 
-    private void printWorkingDirectory()
-    {
+    private void printWorkingDirectory() {
         try {
             LOG.info(String.format("current working directory:%s", channelSftp.pwd()));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LOG.warn(String.format("printWorkingDirectory error:%s", e.getMessage()));
         }
     }
 
     @Override
-    public void completePendingCommand()
-    {
+    public void completePendingCommand() {
     }
 }

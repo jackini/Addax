@@ -46,8 +46,7 @@ import java.text.ParseException;
 
 import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 
-public abstract class HbaseAbstractTask
-{
+public abstract class HbaseAbstractTask {
     private final static Logger LOG = LoggerFactory.getLogger(HbaseAbstractTask.class);
 
     private final byte[] startKey;
@@ -62,8 +61,7 @@ public abstract class HbaseAbstractTask
     protected Scan scan;
     protected ResultScanner resultScanner;
 
-    public HbaseAbstractTask(Configuration configuration)
-    {
+    public HbaseAbstractTask(Configuration configuration) {
 
         this.hTable = Hbase11xHelper.getTable(configuration);
 
@@ -81,8 +79,7 @@ public abstract class HbaseAbstractTask
     public abstract void initScan(Scan scan);
 
     public void prepare()
-            throws Exception
-    {
+            throws Exception {
         this.scan = new Scan();
         this.scan.setSmall(false);
         this.scan.withStartRow(startKey);
@@ -99,20 +96,17 @@ public abstract class HbaseAbstractTask
         this.resultScanner = this.hTable.getScanner(this.scan);
     }
 
-    public void close()
-    {
+    public void close() {
         Hbase11xHelper.closeResultScanner(this.resultScanner);
         Hbase11xHelper.closeTable(this.hTable);
     }
 
     protected Result getNextHbaseRow()
-            throws IOException
-    {
+            throws IOException {
         Result result;
         try {
             result = resultScanner.next();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             if (lastResult != null) {
                 this.scan.withStopRow(lastResult.getRow());
             }
@@ -128,8 +122,7 @@ public abstract class HbaseAbstractTask
     }
 
     public Column convertBytesToAssignType(ColumnType columnType, byte[] byteArray, String dateformat)
-            throws UnsupportedEncodingException, ParseException
-    {
+            throws UnsupportedEncodingException, ParseException {
         Column column;
         boolean isEmpty = ArrayUtils.isEmpty(byteArray);
         switch (columnType) {
@@ -168,8 +161,7 @@ public abstract class HbaseAbstractTask
     }
 
     public Column convertValueToAssignType(ColumnType columnType, String constantValue, String dateformat)
-            throws ParseException
-    {
+            throws ParseException {
         Column column;
         switch (columnType) {
             case BOOLEAN:

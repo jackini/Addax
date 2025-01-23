@@ -55,19 +55,16 @@ import static com.wgzhao.addax.common.spi.ErrorCode.NOT_SUPPORT_TYPE;
 /**
  * Created by mazhenlin on 2019/8/21.
  */
-public class CassandraWriterHelper
-{
+public class CassandraWriterHelper {
     static CodecRegistry registry = new CodecRegistry();
 
     public static Object parseFromString(String s, DataType sqlType)
-            throws Exception
-    {
+            throws Exception {
         if (s == null || s.isEmpty()) {
             if (sqlType.getName() == Name.ASCII || sqlType.getName() == Name.TEXT ||
                     sqlType.getName() == Name.VARCHAR) {
                 return s;
-            }
-            else {
+            } else {
                 return null;
             }
         }
@@ -156,8 +153,7 @@ public class CassandraWriterHelper
     }
 
     public static Object parseFromJson(Object jsonObject, DataType type)
-            throws Exception
-    {
+            throws Exception {
         if (jsonObject == null) {
             return null;
         }
@@ -262,8 +258,7 @@ public class CassandraWriterHelper
     }
 
     public static void setupColumn(BoundStatement ps, int pos, DataType sqlType, Column col)
-            throws Exception
-    {
+            throws Exception {
         if (col.getRawData() != null) {
             switch (sqlType.getName()) {
                 case ASCII:
@@ -361,8 +356,7 @@ public class CassandraWriterHelper
                     throw AddaxException.asAddaxException(NOT_SUPPORT_TYPE,
                             "不支持您配置的列类型:" + sqlType + ", 请检查您的配置 或者 联系 管理员.");
             } // end switch
-        }
-        else {
+        } else {
             ps.setToNull(pos);
         }
     }

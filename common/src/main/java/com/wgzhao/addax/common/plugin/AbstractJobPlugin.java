@@ -23,22 +23,20 @@ package com.wgzhao.addax.common.plugin;
  * Created by jingxing on 14-8-24.
  */
 public abstract class AbstractJobPlugin
-        extends AbstractPlugin
-{
+        extends AbstractPlugin {
     private JobPluginCollector jobPluginCollector;
 
-    public JobPluginCollector getJobPluginCollector()
-    {
+    public JobPluginCollector getJobPluginCollector() {
         return jobPluginCollector;
     }
 
     /**
      * Set JobPluginCollector class
+     *
      * @param jobPluginCollector the jobPluginCollector to set
      */
     public void setJobPluginCollector(
-            JobPluginCollector jobPluginCollector)
-    {
+            JobPluginCollector jobPluginCollector) {
         this.jobPluginCollector = jobPluginCollector;
     }
 }

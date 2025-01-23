@@ -45,17 +45,14 @@ import static com.wgzhao.addax.common.base.Key.TABLE;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class InfluxDB2Writer
-        extends Writer
-{
+        extends Writer {
 
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
         private Configuration originalConfig = null;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = super.getPluginJobConf();
             originalConfig.getNecessaryValue(InfluxDB2Key.TOKEN, REQUIRED_VALUE);
             Configuration connConf = originalConfig.getConfiguration(CONNECTION);
@@ -71,23 +68,20 @@ public class InfluxDB2Writer
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             List<Configuration> splitConfigs = new ArrayList<>();
             splitConfigs.add(originalConfig);
             return splitConfigs;
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
         private String endpoint;
         private String token;
         private String org;
@@ -100,8 +94,7 @@ public class InfluxDB2Writer
         private int batchSize;
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration readerSliceConfig = super.getPluginJobConf();
             // get connection information
             Configuration connConf = readerSliceConfig.getConfiguration(CONNECTION);
@@ -118,8 +111,7 @@ public class InfluxDB2Writer
         }
 
         @Override
-        public void startWrite(RecordReceiver lineReceiver)
-        {
+        public void startWrite(RecordReceiver lineReceiver) {
             Record record;
             Column column;
 
@@ -170,8 +162,7 @@ public class InfluxDB2Writer
             influxDBClient.close();
         }
 
-        private long processTimeUnit(Instant instant)
-        {
+        private long processTimeUnit(Instant instant) {
             long ts;
             switch (wp) {
                 case S:
@@ -191,8 +182,7 @@ public class InfluxDB2Writer
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }

@@ -22,8 +22,7 @@ package com.wgzhao.addax.plugin.writer.mongodbwriter;
 import com.wgzhao.addax.common.base.Key;
 
 public class KeyConstant
-        extends Key
-{
+        extends Key {
     /**
      * mongodb 的 host 地址
      */
@@ -68,7 +67,8 @@ public class KeyConstant
      */
     public static final String UNIQUE_KEY = "replaceKey";
 
-    private KeyConstant() {}
+    private KeyConstant() {
+    }
 
     /**
      * 判断是否为数组类型
@@ -76,8 +76,7 @@ public class KeyConstant
      * @param type 数据类型
      * @return boolean
      */
-    public static boolean isArrayType(String type)
-    {
+    public static boolean isArrayType(String type) {
         return ARRAY_TYPE.equals(type);
     }
 
@@ -87,8 +86,7 @@ public class KeyConstant
      * @param type 数据类型
      * @return boolean
      */
-    public static boolean isObjectIdType(String type)
-    {
+    public static boolean isObjectIdType(String type) {
         return OBJECT_ID_TYPE.equals(type);
     }
 
@@ -98,8 +96,7 @@ public class KeyConstant
      * @param value string of judge
      * @return boolean
      */
-    public static boolean isValueTrue(String value)
-    {
+    public static boolean isValueTrue(String value) {
         return "true".equals(value);
     }
 }

@@ -28,66 +28,55 @@ import java.util.Map;
  * 作为标示 生产者已经完成生产的标志
  */
 public class TerminateRecord
-        implements Record
-{
+        implements Record {
     private static final TerminateRecord SINGLE = new TerminateRecord();
 
     private Map<String, String> meta;
 
-    private TerminateRecord()
-    {
+    private TerminateRecord() {
     }
 
-    public static TerminateRecord get()
-    {
+    public static TerminateRecord get() {
         return SINGLE;
     }
 
     @Override
-    public void addColumn(Column column)
-    {
+    public void addColumn(Column column) {
         //
     }
 
     @Override
-    public Column getColumn(int i)
-    {
+    public Column getColumn(int i) {
         return null;
     }
 
     @Override
-    public int getColumnNumber()
-    {
+    public int getColumnNumber() {
         return 0;
     }
 
     @Override
-    public int getByteSize()
-    {
+    public int getByteSize() {
         return 0;
     }
 
     @Override
-    public int getMemorySize()
-    {
+    public int getMemorySize() {
         return 0;
     }
 
     @Override
-    public void setMeta(Map<String, String> meta)
-    {
+    public void setMeta(Map<String, String> meta) {
         this.meta = meta;
     }
 
     @Override
-    public Map<String, String> getMeta()
-    {
+    public Map<String, String> getMeta() {
         return this.meta;
     }
 
     @Override
-    public void setColumn(int i, Column column)
-    {
+    public void setColumn(int i, Column column) {
         //
     }
 }

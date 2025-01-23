@@ -9,21 +9,18 @@ import java.util.Map;
 
 public class StarRocksJsonSerializer
         extends StarRocksBaseSerializer
-        implements StarRocksISerializer
-{
+        implements StarRocksISerializer {
 
     private static final long serialVersionUID = 1L;
 
     private final List<String> fieldNames;
 
-    public StarRocksJsonSerializer(List<String> fieldNames)
-    {
+    public StarRocksJsonSerializer(List<String> fieldNames) {
         this.fieldNames = fieldNames;
     }
 
     @Override
-    public String serialize(Record row)
-    {
+    public String serialize(Record row) {
         if (null == fieldNames) {
             return "";
         }

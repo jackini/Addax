@@ -54,25 +54,22 @@ import java.util.concurrent.TimeUnit;
  * @author kesc
  * @since 2020-04-14 10:32
  */
-public class ESClient
-{
+public class ESClient {
     private static final Logger log = LoggerFactory.getLogger(ESClient.class);
 
     private JestClient jestClient;
 
-    public JestClient getClient()
-    {
+    public JestClient getClient() {
         return jestClient;
     }
 
     public void createClient(String endpoint,
-            String user,
-            String passwd,
-            boolean multiThread,
-            int readTimeout,
-            boolean compression,
-            boolean discovery)
-    {
+                             String user,
+                             String passwd,
+                             boolean multiThread,
+                             int readTimeout,
+                             boolean compression,
+                             boolean discovery) {
 
         JestClientFactory factory = new JestClientFactory();
         HttpClientConfig.Builder httpClientConfig = new HttpClientConfig.Builder(endpoint)
@@ -95,14 +92,12 @@ public class ESClient
     }
 
     public boolean indicesExists(String indexName)
-            throws Exception
-    {
+            throws Exception {
         boolean isIndicesExists = false;
         JestResult rst = jestClient.execute(new IndicesExists.Builder(indexName).build());
         if (rst.isSucceeded()) {
             return true;
-        }
-        else {
+        } else {
             switch (rst.getResponseCode()) {
                 case 404:
                     return false;
@@ -116,18 +111,17 @@ public class ESClient
     }
 
     public SearchResult search(String query,
-            SearchType searchType,
-            String index,
-            String type,
-            String scroll,
-            Map<String, Object> headers,
-            List<String> columns)
-            throws IOException
-    {
+                               SearchType searchType,
+                               String index,
+                               String type,
+                               String scroll,
+                               Map<String, Object> headers,
+                               List<String> columns)
+            throws IOException {
         Search.Builder searchBuilder = new Search.Builder(query)
                 .setSearchType(searchType)
                 .addIndex(index).addType(type).setHeader(headers);
-        for (String column: columns) {
+        for (String column : columns) {
             searchBuilder.addSourceIncludePattern(column);
         }
         if (StringUtils.isNotBlank(scroll)) {
@@ -137,26 +131,22 @@ public class ESClient
     }
 
     public JestResult scroll(String scrollId, String scroll)
-            throws Exception
-    {
+            throws Exception {
         SearchScroll.Builder builder = new SearchScroll.Builder(scrollId, scroll);
         return execute(builder.build());
     }
 
-    public void clearScroll(String scrollId)
-    {
+    public void clearScroll(String scrollId) {
         ClearScroll.Builder builder = new ClearScroll.Builder().addScrollId(scrollId);
         try {
             execute(builder.build());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
     public JestResult execute(Action<JestResult> clientRequest)
-            throws Exception
-    {
+            throws Exception {
         JestResult rst;
         rst = jestClient.execute(clientRequest);
         if (!rst.isSucceeded()) {
@@ -165,8 +155,7 @@ public class ESClient
         return rst;
     }
 
-    public Integer getStatus(JestResult rst)
-    {
+    public Integer getStatus(JestResult rst) {
         JsonObject jsonObject = rst.getJsonObject();
         if (jsonObject.has("status")) {
             return jsonObject.get("status").getAsInt();
@@ -174,15 +163,13 @@ public class ESClient
         return 600;
     }
 
-    public boolean isBulkResult(JestResult rst)
-    {
+    public boolean isBulkResult(JestResult rst) {
         JsonObject jsonObject = rst.getJsonObject();
         return jsonObject.has("items");
     }
 
     public boolean alias(String indexName, String aliasName, boolean needClean)
-            throws IOException
-    {
+            throws IOException {
         GetAliases getAliases = new GetAliases.Builder().addIndex(aliasName).build();
         AliasMapping addAliasMapping = new AddAliasMapping.Builder(indexName, aliasName).build();
         JestResult rst = jestClient.execute(getAliases);
@@ -216,13 +203,11 @@ public class ESClient
     /**
      * 关闭JestClient客户端
      */
-    public void closeJestClient()
-    {
+    public void closeJestClient() {
         if (jestClient != null) {
             try {
                 jestClient.close();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 log.warn("Failed to close es client:", e);
             }
         }

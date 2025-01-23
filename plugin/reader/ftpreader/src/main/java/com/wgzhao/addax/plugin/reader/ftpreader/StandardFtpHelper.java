@@ -40,16 +40,14 @@ import static com.wgzhao.addax.common.spi.ErrorCode.IO_ERROR;
 import static org.apache.commons.net.ftp.FTP.BINARY_FILE_TYPE;
 
 public class StandardFtpHelper
-        extends FtpHelper
-{
+        extends FtpHelper {
     private static final Logger LOG = LoggerFactory.getLogger(StandardFtpHelper.class);
     FTPClient ftpClient = null;
     HashSet<String> sourceFiles = new HashSet<>();
 
     @Override
     public void loginFtpServer(String host, String username, String password, int port, String keyPath, String keyPass, int timeout,
-            String connectMode)
-    {
+                               String connectMode) {
         ftpClient = new FTPClient();
         try {
             // 连接
@@ -63,8 +61,7 @@ public class StandardFtpHelper
             if ("PASV".equals(connectMode)) {
                 ftpClient.enterRemotePassiveMode();
                 ftpClient.enterLocalPassiveMode();
-            }
-            else if ("PORT".equals(connectMode)) {
+            } else if ("PORT".equals(connectMode)) {
                 ftpClient.enterLocalActiveMode();
                 // ftpClient.enterRemoteActiveMode(host, port)
             }
@@ -79,42 +76,36 @@ public class StandardFtpHelper
             ftpClient.setControlEncoding(fileEncoding);
             // always use binary transfer model
             ftpClient.setFileType(BINARY_FILE_TYPE);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(CONNECT_ERROR,
                     "Failed to connect to the ftp server " + host, e);
         }
     }
 
     @Override
-    public void logoutFtpServer()
-    {
+    public void logoutFtpServer() {
         if (ftpClient.isConnected()) {
             try {
                 // ftpClient.completePendingCommand();//打开流操作之后必须，原因还需要深究
                 ftpClient.logout();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 throw AddaxException.asAddaxException(IO_ERROR,
                         "Failed to close the connection", e);
             }
         }
     }
 
-    private boolean isDirectory(String directoryPath)
-    {
+    private boolean isDirectory(String directoryPath) {
         try {
             return ftpClient.changeWorkingDirectory(directoryPath);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOG.error("Failed to check whether the directory exists", e);
             return false;
         }
     }
 
     @Override
-    public HashSet<String> getListFiles(String directoryPath, int parentLevel, int maxTraversalLevel)
-    {
+    public HashSet<String> getListFiles(String directoryPath, int parentLevel, int maxTraversalLevel) {
         String parentDir;
         if (isDirectory(directoryPath)) {
             parentDir = directoryPath;
@@ -129,21 +120,18 @@ public class StandardFtpHelper
                     sourceFiles.add(parentDir + IOUtils.DIR_SEPARATOR + ff.getName());
                 }
             } // end for vector
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOG.error("Failed to retrieve file(s) from {}", directoryPath, e);
         }
         return sourceFiles;
     }
 
     @Override
-    public InputStream getInputStream(String filePath)
-    {
+    public InputStream getInputStream(String filePath) {
         try {
             //Passing filePath directly to retrieveFileStream causes a NullPointerException when filePath contains Chinese characters.
             return ftpClient.retrieveFileStream(new String(filePath.getBytes(), StandardCharsets.ISO_8859_1));
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw AddaxException.asAddaxException(IO_ERROR,
                     "Failed to read the file: " + filePath, e);
         }

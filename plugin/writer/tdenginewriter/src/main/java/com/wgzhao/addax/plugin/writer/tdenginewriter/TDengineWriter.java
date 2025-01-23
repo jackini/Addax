@@ -15,20 +15,17 @@ import java.util.List;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class TDengineWriter
-        extends Writer
-{
+        extends Writer {
     private static final String PEER_PLUGIN_NAME = "peerPluginName";
 
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
 
         private Configuration originalConfig;
         private static final Logger LOG = LoggerFactory.getLogger(Job.class);
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = super.getPluginJobConf();
             this.originalConfig.set(PEER_PLUGIN_NAME, getPeerPluginName());
 
@@ -57,14 +54,12 @@ public class TDengineWriter
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
 
         }
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             List<Configuration> writerSplitConfigs = new ArrayList<>();
 
             Configuration conf = this.originalConfig.getConfiguration(Key.CONNECTION);
@@ -81,35 +76,30 @@ public class TDengineWriter
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
 
         private Configuration writerSliceConfig;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.writerSliceConfig = getPluginJobConf();
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
 
         }
 
         @Override
-        public void startWrite(RecordReceiver lineReceiver)
-        {
+        public void startWrite(RecordReceiver lineReceiver) {
             String peerPluginName = this.writerSliceConfig.getString(PEER_PLUGIN_NAME);
             LOG.debug("start to handle record from: {}", peerPluginName);
 
             DataHandler handler;
             if (peerPluginName.equals("opentsdbreader")) {
                 handler = new OpentsdbDataHandler(this.writerSliceConfig);
-            }
-            else {
+            } else {
                 handler = new DefaultDataHandler(this.writerSliceConfig);
             }
 

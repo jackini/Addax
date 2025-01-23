@@ -29,21 +29,18 @@ import java.util.Map;
 
 public class DorisJsonCodec
         extends DorisBaseCodec
-        implements DorisCodec
-{
+        implements DorisCodec {
 
     private static final long serialVersionUID = 1L;
 
     private final List<String> fieldNames;
 
-    public DorisJsonCodec(List<String> fieldNames)
-    {
+    public DorisJsonCodec(List<String> fieldNames) {
         this.fieldNames = fieldNames;
     }
 
     @Override
-    public String codec(Record row)
-    {
+    public String codec(Record row) {
         if (null == fieldNames) {
             return "";
         }

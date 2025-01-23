@@ -48,11 +48,9 @@ import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
  * Created by haiwei.luo on 14-9-20.
  */
 public class TxtFileReader
-        extends Reader
-{
+        extends Reader {
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
         private static final Logger LOG = LoggerFactory.getLogger(Job.class);
 
         private Configuration originConfig = null;
@@ -60,15 +58,13 @@ public class TxtFileReader
         private boolean needReadColumnName = false;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originConfig = this.getPluginJobConf();
             StorageReaderUtil.validateParameter(this.originConfig);
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             LOG.debug("prepare() begin...");
             // Compatible with the old version, path is a string before
             String pathInString = this.originConfig.getNecessaryValue(Key.PATH, REQUIRED_VALUE);
@@ -79,8 +75,7 @@ public class TxtFileReader
             if (!pathInString.startsWith("[") && !pathInString.endsWith("]")) {
                 path = new ArrayList<>();
                 path.add(pathInString);
-            }
-            else {
+            } else {
                 path = this.originConfig.getList(Key.PATH, String.class);
                 if (null == path || path.isEmpty()) {
                     throw AddaxException.asAddaxException(REQUIRED_VALUE, "the path is required");
@@ -107,14 +102,12 @@ public class TxtFileReader
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             LOG.debug("split() begin...");
             List<Configuration> readerSplitConfigs = new ArrayList<>();
 
@@ -130,8 +123,7 @@ public class TxtFileReader
             return readerSplitConfigs;
         }
 
-        private int getIndexByName(String name, String[] allNames)
-        {
+        private int getIndexByName(String name, String[] allNames) {
             for (int i = 0; i < allNames.length; i++) {
                 if (allNames[i].equalsIgnoreCase(name)) {
                     return i;
@@ -143,8 +135,7 @@ public class TxtFileReader
             );
         }
 
-        private void convertColumnNameToIndex(String fileName)
-        {
+        private void convertColumnNameToIndex(String fileName) {
             String encoding = this.originConfig.getString(Key.ENCODING, Constant.DEFAULT_ENCODING);
             int bufferSize = this.originConfig.getInt(Key.BUFFER_SIZE, Constant.DEFAULT_BUFFER_SIZE);
             String delimiter = this.originConfig.getString(Key.FIELD_DELIMITER, Constant.DEFAULT_FIELD_DELIMITER + "");
@@ -161,48 +152,41 @@ public class TxtFileReader
                     }
                 }
                 this.originConfig.set(Key.COLUMN, columns);
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 LOG.error(e.getMessage());
-            }
-            finally {
+            } finally {
                 IOUtils.closeQuietly(reader, null);
             }
         }
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
 
         private Configuration readerSliceConfig;
         private List<String> sourceFiles;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.readerSliceConfig = this.getPluginJobConf();
             this.sourceFiles = this.readerSliceConfig.getList(Key.SOURCE_FILES, String.class);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             LOG.debug("Begin to read source files...");
             FileInputStream inputStream;
             for (String fileName : this.sourceFiles) {
                 LOG.info("Reading file {}", fileName);
                 try {
                     inputStream = new FileInputStream(fileName);
-                }
-                catch (FileNotFoundException e) {
+                } catch (FileNotFoundException e) {
                     throw AddaxException.asAddaxException(CONFIG_ERROR, "The file '" + fileName + "' does not exists");
                 }
                 StorageReaderUtil.readFromStream(inputStream, fileName, readerSliceConfig, recordSender, getTaskPluginCollector());

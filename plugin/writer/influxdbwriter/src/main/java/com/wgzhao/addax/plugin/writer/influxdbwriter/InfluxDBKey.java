@@ -21,8 +21,7 @@ package com.wgzhao.addax.plugin.writer.influxdbwriter;
 
 import com.wgzhao.addax.common.base.Key;
 
-public final class InfluxDBKey extends Key
-{
+public final class InfluxDBKey extends Key {
     public static final String CONNECT_TIMEOUT_SECONDS = "connTimeout";
     public static final String READ_TIMEOUT_SECONDS = "readTimeout";
     public static final String WRITE_TIMEOUT_SECONDS = "writeTimeout";

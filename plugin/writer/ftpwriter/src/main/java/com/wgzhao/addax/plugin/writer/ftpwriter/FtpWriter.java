@@ -53,11 +53,9 @@ import static com.wgzhao.addax.common.spi.ErrorCode.LOGIN_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class FtpWriter
-        extends Writer
-{
+        extends Writer {
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
         private static final Logger LOG = LoggerFactory.getLogger(Job.class);
 
         private static final int DEFAULT_FTP_PORT = 21;
@@ -78,8 +76,7 @@ public class FtpWriter
         private IFtpHelper ftpHelper = null;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.writerSliceConfig = this.getPluginJobConf();
             this.validateParameter();
             StorageWriterUtil.validateParameter(this.writerSliceConfig);
@@ -91,8 +88,7 @@ public class FtpWriter
                     ftpHelper.loginFtpServer(host, port, username, password, keyPath, keyPass, timeout);
                     return null;
                 }, 3, 4000, true);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 String message = String.format("Failed to connect %s://%s@%s:%s , errorMessage:%s",
                         protocol, username, host, port, e.getMessage());
                 LOG.error(message);
@@ -101,8 +97,7 @@ public class FtpWriter
             }
         }
 
-        private void validateParameter()
-        {
+        private void validateParameter() {
             this.writerSliceConfig.getNecessaryValue(FILE_NAME, REQUIRED_VALUE);
             String path = this.writerSliceConfig.getNecessaryValue(FtpKey.PATH, REQUIRED_VALUE);
             if (!path.startsWith("/")) {
@@ -137,22 +132,19 @@ public class FtpWriter
                         boolean isFile = new File(privateKey).isFile();
                         if (isFile) {
                             this.writerSliceConfig.set(FtpKey.KEY_PATH, privateKey);
-                        }
-                        else {
+                        } else {
                             String msg = "You have configured to use the key, but neither the configured key file nor the default file(" +
                                     DEFAULT_PRIVATE_KEY + " exists";
                             throw AddaxException.asAddaxException(ILLEGAL_VALUE, msg);
                         }
                     }
                 }
-            }
-            else if ("ftp".equalsIgnoreCase(protocol)) {
+            } else if ("ftp".equalsIgnoreCase(protocol)) {
                 this.port = this.writerSliceConfig.getInt(FtpKey.PORT, DEFAULT_FTP_PORT);
                 // login with private key is unavailable for ftp protocol, disable it.
                 this.writerSliceConfig.set(FtpKey.KEY_PATH, null);
                 this.ftpHelper = new StandardFtpHelperImpl();
-            }
-            else {
+            } else {
                 throw AddaxException.asAddaxException(
                         ILLEGAL_VALUE, protocol + " is unsupported, supported protocol are ftp and sftp");
             }
@@ -160,8 +152,7 @@ public class FtpWriter
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             String path = this.writerSliceConfig.getString(FtpKey.PATH);
             // warn: 这里用户需要配一个目录
             this.ftpHelper.mkDirRecursive(path);
@@ -182,12 +173,10 @@ public class FtpWriter
                 LOG.info("The following file(s) will be deleted: [{}].", StringUtils.join(fullFileNameToDelete.iterator(), ", "));
 
                 this.ftpHelper.deleteFiles(fullFileNameToDelete);
-            }
-            else if ("append".equals(writeMode)) {
+            } else if ("append".equals(writeMode)) {
                 LOG.info("The current writeMode is append, no cleanup is performed. It will write file(s) with prefix [{}] under [{}].",
                         fileName, path);
-            }
-            else if ("nonConflict".equals(writeMode)) {
+            } else if ("nonConflict".equals(writeMode)) {
                 LOG.info("The current writeMode is noConflict, begin to check directory [{}] is empty or not", path);
                 if (!allFilesInDir.isEmpty()) {
                     LOG.info("The directory [{}] includes the following files with prefix [{}]: [{}].", path, fileName,
@@ -196,8 +185,7 @@ public class FtpWriter
                             ILLEGAL_VALUE,
                             String.format("您配置的path: [%s] 目录不为空, 下面存在其他文件或文件夹.", path));
                 }
-            }
-            else {
+            } else {
                 throw AddaxException
                         .asAddaxException(
                                 ILLEGAL_VALUE,
@@ -207,33 +195,28 @@ public class FtpWriter
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             //
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             try {
                 this.ftpHelper.logoutFtpServer();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 String message = String.format("Failed to disconnect server %s:%s, errorMessage:%s", host, port, e.getMessage());
                 LOG.error(message, e);
             }
         }
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             return StorageWriterUtil.split(this.writerSliceConfig, this.allFileExists, mandatoryNumber);
         }
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
         private static final int DEFAULT_TIMEOUT = 60000;
 
@@ -252,8 +235,7 @@ public class FtpWriter
         private IFtpHelper ftpHelper = null;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.writerSliceConfig = this.getPluginJobConf();
             this.path = this.writerSliceConfig.getString(FtpKey.PATH);
             StringBuilder realFileName = new StringBuilder();
@@ -262,19 +244,16 @@ public class FtpWriter
             this.suffix = this.writerSliceConfig.getString(SUFFIX);
             if (this.suffix != null) {
                 realFileName.append(".").append(suffix);
-            }
-            else {
+            } else {
                 realFileName.append(".").append(fileFormat);
             }
             this.compress = this.writerSliceConfig.getString(COMPRESS, null);
             if (this.compress != null) {
                 if ("zip".equalsIgnoreCase(this.compress)) {
                     this.suffix = ".zip";
-                }
-                else if ("gzip".equalsIgnoreCase(this.compress)) {
+                } else if ("gzip".equalsIgnoreCase(this.compress)) {
                     this.suffix = ".gz";
-                }
-                else if ("bzip2".equalsIgnoreCase(this.compress) || "bzip".equalsIgnoreCase(this.compress)) {
+                } else if ("bzip2".equalsIgnoreCase(this.compress) || "bzip".equalsIgnoreCase(this.compress)) {
                     this.suffix = ".bz2";
                 }
             }
@@ -291,8 +270,7 @@ public class FtpWriter
 
             if ("sftp".equalsIgnoreCase(protocol)) {
                 this.ftpHelper = new SftpHelperImpl();
-            }
-            else if ("ftp".equalsIgnoreCase(protocol)) {
+            } else if ("ftp".equalsIgnoreCase(protocol)) {
                 this.ftpHelper = new StandardFtpHelperImpl();
             }
             try {
@@ -300,8 +278,7 @@ public class FtpWriter
                     ftpHelper.loginFtpServer(host, port, username, password, keyPath, keyPass, timeout);
                     return null;
                 }, 3, 4000, true);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 String message = String.format("与ftp服务器建立连接失败, host:%s, username:%s, port:%s, errorMessage:%s",
                         host, username, port, e.getMessage());
                 LOG.error(message);
@@ -311,8 +288,7 @@ public class FtpWriter
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             String encoding = writerSliceConfig.getString(ENCODING, DEFAULT_ENCODING);
             // handle blank encoding
             if (StringUtils.isBlank(encoding)) {
@@ -323,8 +299,7 @@ public class FtpWriter
         }
 
         @Override
-        public void startWrite(RecordReceiver lineReceiver)
-        {
+        public void startWrite(RecordReceiver lineReceiver) {
             LOG.info("begin do write...");
             String fileFullPath = StorageWriterUtil.buildFilePath(path, fileName, suffix);
             LOG.info(String.format("write to file : [%s]", fileFullPath));
@@ -333,31 +308,26 @@ public class FtpWriter
             try {
                 outputStream = ftpHelper.getOutputStream(fileFullPath);
                 StorageWriterUtil.writeToStream(lineReceiver, outputStream, writerSliceConfig, fileName, getTaskPluginCollector());
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw AddaxException.asAddaxException(
                         IO_ERROR,
                         String.format("无法创建待写文件 : [%s]", this.fileName), e);
-            }
-            finally {
+            } finally {
                 IOUtils.closeQuietly(outputStream, null);
             }
             LOG.info("end do write");
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             //
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             try {
                 this.ftpHelper.logoutFtpServer();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 String message = String.format("关闭与ftp服务器连接失败, host:%s, username:%s, port:%s, errorMessage:%s",
                         host, username, port, e.getMessage());
                 LOG.error(message, e);

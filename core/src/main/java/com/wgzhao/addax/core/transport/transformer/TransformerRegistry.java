@@ -43,20 +43,17 @@ import static com.wgzhao.addax.core.util.container.CoreConstant.STORAGE_TRANSFOR
  * no comments.
  * Created by liqiang on 16/3/3.
  */
-public class TransformerRegistry
-{
+public class TransformerRegistry {
 
     private static final Logger LOG = LoggerFactory.getLogger(TransformerRegistry.class);
     private static final Map<String, TransformerInfo> registeredTransformer = new HashMap<>();
 
-    public static void loadTransformerFromLocalStorage()
-    {
+    public static void loadTransformerFromLocalStorage() {
         //add local_storage transformer
         loadTransformerFromLocalStorage(null);
     }
 
-    public static void loadTransformerFromLocalStorage(List<String> transformers)
-    {
+    public static void loadTransformerFromLocalStorage(List<String> transformers) {
 
         String[] paths = new File(STORAGE_TRANSFORMER_HOME).list();
         if (null == paths) {
@@ -68,22 +65,19 @@ public class TransformerRegistry
                 if (transformers == null || transformers.contains(each)) {
                     loadTransformer(each);
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 LOG.error("Skip transformer [{}] LoadTransformer has encountered an exception [{}].",
                         each, e.getMessage(), e);
             }
         }
     }
 
-    public static void loadTransformer(String each)
-    {
+    public static void loadTransformer(String each) {
         String transformerPath = STORAGE_TRANSFORMER_HOME + File.separator + each;
         Configuration transformerConfiguration;
         try {
             transformerConfiguration = loadTransFormerConfig(transformerPath);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LOG.error("Skip transformer[{}],load transformer.json error, path = {}, ",
                     each, transformerPath, e);
             return;
@@ -103,45 +97,38 @@ public class TransformerRegistry
                     each, funName, transformerPath, transformerConfiguration.beautify());
         }
 
-        try (JarLoader jarLoader = new JarLoader(new String[] {transformerPath})) {
+        try (JarLoader jarLoader = new JarLoader(new String[]{transformerPath})) {
             Class<?> transformerClass = jarLoader.loadClass(className);
             Object transformer = transformerClass.getConstructor().newInstance();
             if (ComplexTransformer.class.isAssignableFrom(transformer.getClass())) {
                 ((ComplexTransformer) transformer).setTransformerName(each);
                 registryComplexTransformer((ComplexTransformer) transformer, jarLoader, false);
-            }
-            else if (Transformer.class.isAssignableFrom(transformer.getClass())) {
+            } else if (Transformer.class.isAssignableFrom(transformer.getClass())) {
                 ((Transformer) transformer).setTransformerName(each);
                 registryTransformer((Transformer) transformer, jarLoader, false);
-            }
-            else {
+            } else {
                 LOG.error("Load Transformer class[{}] error, path = {}", className, transformerPath);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             //error, skip function
             LOG.error("Skip transformer({}),load Transformer class error, path = {} ", each, transformerPath, e);
         }
     }
 
-    private static Configuration loadTransFormerConfig(String transformerPath)
-    {
+    private static Configuration loadTransFormerConfig(String transformerPath) {
         return Configuration.from(new File(FilenameUtils.getPath(transformerPath) + File.separator + "transformer.json"));
     }
 
-    public static TransformerInfo getTransformer(String transformerName)
-    {
+    public static TransformerInfo getTransformer(String transformerName) {
         return registeredTransformer.get(transformerName);
     }
 
-    public static synchronized void registryTransformer(Transformer transformer)
-    {
+    public static synchronized void registryTransformer(Transformer transformer) {
         registryTransformer(transformer, null, true);
     }
 
     public static synchronized void registryTransformer(Transformer transformer,
-            ClassLoader classLoader, boolean isNative)
-    {
+                                                        ClassLoader classLoader, boolean isNative) {
 
         checkName(transformer.getTransformerName(), isNative);
 
@@ -157,8 +144,7 @@ public class TransformerRegistry
     }
 
     public static synchronized void registryComplexTransformer(ComplexTransformer complexTransformer,
-            ClassLoader classLoader, boolean isNative)
-    {
+                                                               ClassLoader classLoader, boolean isNative) {
 
         checkName(complexTransformer.getTransformerName(), isNative);
 
@@ -172,15 +158,13 @@ public class TransformerRegistry
                 buildTransformerInfo(complexTransformer, isNative, classLoader));
     }
 
-    private static void checkName(String functionName, boolean isNative)
-    {
+    private static void checkName(String functionName, boolean isNative) {
         boolean checkResult = true;
         if (isNative) {
             if (!functionName.startsWith("dx_")) {
                 checkResult = false;
             }
-        }
-        else {
+        } else {
             if (functionName.startsWith("dx_")) {
                 checkResult = false;
             }
@@ -194,8 +178,7 @@ public class TransformerRegistry
     }
 
     private static TransformerInfo buildTransformerInfo(ComplexTransformer complexTransformer,
-            boolean isNative, ClassLoader classLoader)
-    {
+                                                        boolean isNative, ClassLoader classLoader) {
         TransformerInfo transformerInfo = new TransformerInfo();
         transformerInfo.setClassLoader(classLoader);
         transformerInfo.setIsNative(isNative);
@@ -203,8 +186,7 @@ public class TransformerRegistry
         return transformerInfo;
     }
 
-    public static List<String> getAllSupportTransformer()
-    {
+    public static List<String> getAllSupportTransformer() {
         return new ArrayList<>(registeredTransformer.keySet());
     }
 

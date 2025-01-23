@@ -29,24 +29,20 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 public class DoubleColumn
-        extends Column
-{
+        extends Column {
 
     private final String errorTemplate = "Double type cannot be converted to %s.";
 
-    public DoubleColumn( String data)
-    {
+    public DoubleColumn(String data) {
         this(data, null == data ? 0 : data.length());
         this.validate(data);
     }
 
-    public DoubleColumn(Long data)
-    {
+    public DoubleColumn(Long data) {
         this(data == null ? null : String.valueOf(data));
     }
 
-    public DoubleColumn(Integer data)
-    {
+    public DoubleColumn(Integer data) {
         this(data == null ? null : String.valueOf(data));
     }
 
@@ -55,8 +51,7 @@ public class DoubleColumn
      *
      * @param data 要转成double类型的double数
      */
-    public DoubleColumn( Double data)
-    {
+    public DoubleColumn(Double data) {
         this(data == null ? null
                 : new BigDecimal(String.valueOf(data)).toPlainString());
     }
@@ -66,43 +61,36 @@ public class DoubleColumn
      *
      * @param data 要转成double类型的浮点数
      */
-    public DoubleColumn( Float data)
-    {
+    public DoubleColumn(Float data) {
         this(data == null ? null
                 : new BigDecimal(String.valueOf(data)).toPlainString());
     }
 
-    public DoubleColumn( BigDecimal data)
-    {
+    public DoubleColumn(BigDecimal data) {
         this(null == data ? null : data.toPlainString());
     }
 
-    public DoubleColumn( BigInteger data)
-    {
+    public DoubleColumn(BigInteger data) {
         this(null == data ? null : data.toString());
     }
 
-    public DoubleColumn()
-    {
+    public DoubleColumn() {
         this((String) null);
     }
 
-    private DoubleColumn( String data, int byteSize)
-    {
+    private DoubleColumn(String data, int byteSize) {
         super(data, Column.Type.DOUBLE, byteSize);
     }
 
     @Override
-    public BigDecimal asBigDecimal()
-    {
+    public BigDecimal asBigDecimal() {
         if (null == this.getRawData()) {
             return null;
         }
 
         try {
             return new BigDecimal((String) this.getRawData());
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AddaxException.asAddaxException(
                     ErrorCode.CONVERT_NOT_SUPPORT,
                     String.format("String[%s] cannot be converted to Double.",
@@ -111,8 +99,7 @@ public class DoubleColumn
     }
 
     @Override
-    public Double asDouble()
-    {
+    public Double asDouble() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -132,8 +119,7 @@ public class DoubleColumn
     }
 
     @Override
-    public Long asLong()
-    {
+    public Long asLong() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -145,8 +131,7 @@ public class DoubleColumn
     }
 
     @Override
-    public BigInteger asBigInteger()
-    {
+    public BigInteger asBigInteger() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -155,8 +140,7 @@ public class DoubleColumn
     }
 
     @Override
-    public String asString()
-    {
+    public String asString() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -164,35 +148,30 @@ public class DoubleColumn
     }
 
     @Override
-    public Boolean asBoolean()
-    {
+    public Boolean asBoolean() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, String.format(errorTemplate, "Boolean"));
     }
 
     @Override
-    public Date asDate()
-    {
+    public Date asDate() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, String.format(errorTemplate, "Date"));
     }
 
     @Override
-    public byte[] asBytes()
-    {
+    public byte[] asBytes() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, String.format(errorTemplate, "Bytes"));
     }
 
     @Override
-    public Timestamp asTimestamp()
-    {
+    public Timestamp asTimestamp() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, String.format(errorTemplate, "Timestamp"));
     }
 
-    private void validate( String data)
-    {
+    private void validate(String data) {
         if (null == data) {
             return;
         }
@@ -204,8 +183,7 @@ public class DoubleColumn
 
         try {
             new BigDecimal(data);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     ErrorCode.CONVERT_NOT_SUPPORT,
                     String.format("String[%s] cannot be converted to Double.", data));

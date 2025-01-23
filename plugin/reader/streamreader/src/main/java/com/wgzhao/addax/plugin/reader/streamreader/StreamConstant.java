@@ -21,8 +21,7 @@ package com.wgzhao.addax.plugin.reader.streamreader;
 
 import com.wgzhao.addax.common.base.Constant;
 
-public final class StreamConstant extends Constant
-{
+public final class StreamConstant extends Constant {
 
     public static final String RANDOM = "random";
 
@@ -37,5 +36,6 @@ public final class StreamConstant extends Constant
     public static final String MIXUP_FUNCTION_SCALE = "scale";
     public static final String HAVE_INCR_FUNCTION = "hasIncrFunction";
 
-    private StreamConstant() {}
+    private StreamConstant() {
+    }
 }

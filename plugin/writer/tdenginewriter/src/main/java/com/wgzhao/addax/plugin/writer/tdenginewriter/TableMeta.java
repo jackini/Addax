@@ -14,8 +14,7 @@
 
 package com.wgzhao.addax.plugin.writer.tdenginewriter;
 
-public class TableMeta
-{
+public class TableMeta {
     TableType tableType;
     String tbname;
     int columns;
@@ -24,8 +23,7 @@ public class TableMeta
     String stable_name;
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "TableMeta{" +
                 "tableType=" + tableType +
                 ", tbname='" + tbname + '\'' +

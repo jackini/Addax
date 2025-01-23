@@ -29,32 +29,31 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public final class RetryUtil
-{
+public final class RetryUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(RetryUtil.class);
 
     private static final long MAX_SLEEP_MILLISECOND = 256 * 1000L;
 
-    private RetryUtil() {}
+    private RetryUtil() {
+    }
 
     /**
      * 重试次数工具方法.
      *
-     * @param callable 实际逻辑
-     * @param retryTimes 最大重试次数
+     * @param callable               实际逻辑
+     * @param retryTimes             最大重试次数
      * @param sleepTimeInMilliSecond 运行失败后休眠对应时间再重试
-     * @param exponential 休眠时间是否指数递增
-     * @param <T> 返回值类型
+     * @param exponential            休眠时间是否指数递增
+     * @param <T>                    返回值类型
      * @return 经过重试的callable的执行结果
      * @throws Exception 运行异常
      */
     public static <T> T executeWithRetry(Callable<T> callable,
-            int retryTimes,
-            long sleepTimeInMilliSecond,
-            boolean exponential)
-            throws Exception
-    {
+                                         int retryTimes,
+                                         long sleepTimeInMilliSecond,
+                                         boolean exponential)
+            throws Exception {
         Retry retry = new Retry();
         return retry.doRetry(callable, retryTimes, sleepTimeInMilliSecond, exponential, null);
     }
@@ -62,22 +61,21 @@ public final class RetryUtil
     /**
      * 重试次数工具方法.
      *
-     * @param callable 实际逻辑
-     * @param retryTimes 最大重试次数
+     * @param callable               实际逻辑
+     * @param retryTimes             最大重试次数
      * @param sleepTimeInMilliSecond 运行失败后休眠对应时间再重试
-     * @param exponential 休眠时间是否指数递增
-     * @param <T> 返回值类型
-     * @param retryExceptionClass 出现指定的异常类型时才进行重试
+     * @param exponential            休眠时间是否指数递增
+     * @param <T>                    返回值类型
+     * @param retryExceptionClass    出现指定的异常类型时才进行重试
      * @return 经过重试的callable的执行结果
      * @throws Exception 运行异常
      */
     public static <T> T executeWithRetry(Callable<T> callable,
-            int retryTimes,
-            long sleepTimeInMilliSecond,
-            boolean exponential,
-            List<Class<?>> retryExceptionClass)
-            throws Exception
-    {
+                                         int retryTimes,
+                                         long sleepTimeInMilliSecond,
+                                         boolean exponential,
+                                         List<Class<?>> retryExceptionClass)
+            throws Exception {
         Retry retry = new Retry();
         return retry.doRetry(callable, retryTimes, sleepTimeInMilliSecond, exponential, retryExceptionClass);
     }
@@ -87,24 +85,23 @@ public final class RetryUtil
      * 执行异步操作的线程池从外部传入，线程池的共享粒度由外部控制。比如，HttpClientUtil共享一个线程池。
      * 限制条件：仅仅能够在阻塞的时候interrupt线程
      *
-     * @param callable 实际逻辑
-     * @param retryTimes 最大重试次数
+     * @param callable               实际逻辑
+     * @param retryTimes             最大重试次数
      * @param sleepTimeInMilliSecond 运行失败后休眠对应时间再重试
-     * @param exponential 休眠时间是否指数递增
-     * @param timeoutMs callable执行超时时间，毫秒
-     * @param executor 执行异步操作的线程池
-     * @param <T> 返回值类型
+     * @param exponential            休眠时间是否指数递增
+     * @param timeoutMs              callable执行超时时间，毫秒
+     * @param executor               执行异步操作的线程池
+     * @param <T>                    返回值类型
      * @return 经过重试的callable的执行结果
      * @throws Exception 运行异常
      */
     public static <T> T asyncExecuteWithRetry(Callable<T> callable,
-            int retryTimes,
-            long sleepTimeInMilliSecond,
-            boolean exponential,
-            long timeoutMs,
-            ThreadPoolExecutor executor)
-            throws Exception
-    {
+                                              int retryTimes,
+                                              long sleepTimeInMilliSecond,
+                                              boolean exponential,
+                                              long timeoutMs,
+                                              ThreadPoolExecutor executor)
+            throws Exception {
         Retry retry = new AsyncRetry(timeoutMs, executor);
         return retry.doRetry(callable, retryTimes, sleepTimeInMilliSecond, exponential, null);
     }
@@ -118,19 +115,16 @@ public final class RetryUtil
      *
      * @return 线程池
      */
-    public static ThreadPoolExecutor createThreadPoolExecutor()
-    {
+    public static ThreadPoolExecutor createThreadPoolExecutor() {
         return new ThreadPoolExecutor(0, 5,
                 60L, TimeUnit.SECONDS,
                 new SynchronousQueue<>());
     }
 
-    private static class Retry
-    {
+    private static class Retry {
 
         public <T> T doRetry(Callable<T> callable, int retryTimes, long sleepTimeInMilliSecond, boolean exponential, List<Class<?>> retryExceptionClass)
-                throws Exception
-        {
+                throws Exception {
 
             if (null == callable) {
                 throw new IllegalArgumentException("The parameter callable cannot be null.");
@@ -145,8 +139,7 @@ public final class RetryUtil
             for (int i = 0; i < retryTimes; i++) {
                 try {
                     return call(callable);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     saveException = e;
                     if (null != retryExceptionClass && !retryExceptionClass.isEmpty()) {
                         boolean needRetry = false;
@@ -167,8 +160,7 @@ public final class RetryUtil
                         long timeToSleep;
                         if (exponential) {
                             timeToSleep = sleepTimeInMilliSecond * (long) Math.pow(2, i);
-                        }
-                        else {
+                        } else {
                             timeToSleep = sleepTimeInMilliSecond;
                         }
                         if (timeToSleep >= MAX_SLEEP_MILLISECOND) {
@@ -177,8 +169,7 @@ public final class RetryUtil
 
                         try {
                             Thread.sleep(timeToSleep);
-                        }
-                        catch (InterruptedException ignored) {
+                        } catch (InterruptedException ignored) {
                             // ignore interrupted exception
                         }
 
@@ -194,21 +185,18 @@ public final class RetryUtil
         }
 
         protected <T> T call(Callable<T> callable)
-                throws Exception
-        {
+                throws Exception {
             return callable.call();
         }
     }
 
     private static class AsyncRetry
-            extends Retry
-    {
+            extends Retry {
 
         private final long timeoutMs;
         private final ThreadPoolExecutor executor;
 
-        public AsyncRetry(long timeoutMs, ThreadPoolExecutor executor)
-        {
+        public AsyncRetry(long timeoutMs, ThreadPoolExecutor executor) {
             this.timeoutMs = timeoutMs;
             this.executor = executor;
         }
@@ -222,13 +210,11 @@ public final class RetryUtil
          */
         @Override
         protected <T> T call(Callable<T> callable)
-                throws Exception
-        {
+                throws Exception {
             Future<T> future = executor.submit(callable);
             try {
                 return future.get(timeoutMs, TimeUnit.MILLISECONDS);
-            }
-            finally {
+            } finally {
                 if (!future.isDone()) {
                     future.cancel(true);
                     LOG.warn("A try-once task was not completed. Cancel it. Active count: {}.", executor.getActiveCount());

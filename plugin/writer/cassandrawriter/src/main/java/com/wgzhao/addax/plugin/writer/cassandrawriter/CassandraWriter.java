@@ -55,19 +55,16 @@ import static com.wgzhao.addax.common.spi.ErrorCode.EXECUTE_FAIL;
  * Created by mazhenlin on 2019/8/19.
  */
 public class CassandraWriter
-        extends Writer
-{
+        extends Writer {
     private static final Logger LOG = LoggerFactory
             .getLogger(CassandraWriter.class);
 
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
         private Configuration originalConfig = null;
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             List<Configuration> splitResultConfigs = new ArrayList<>();
             for (int j = 0; j < mandatoryNumber; j++) {
                 splitResultConfigs.add(originalConfig.clone());
@@ -76,21 +73,18 @@ public class CassandraWriter
         }
 
         @Override
-        public void init()
-        {
+        public void init() {
             originalConfig = getPluginJobConf();
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
 
         }
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
         private Session session = null;
         private PreparedStatement statement = null;
         private int columnNumber = 0;
@@ -102,8 +96,7 @@ public class CassandraWriter
         private List<BoundStatement> bufferedWrite;
 
         @Override
-        public void startWrite(RecordReceiver lineReceiver)
-        {
+        public void startWrite(RecordReceiver lineReceiver) {
             try {
                 Record record;
                 while ((record = lineReceiver.getFromReader()) != null) {
@@ -136,8 +129,7 @@ public class CassandraWriter
                     }
                     if (batchSize <= 1) {
                         session.execute(boundStmt);
-                    }
-                    else {
+                    } else {
                         if (asyncWrite) {
                             unConfirmedWrite.add(session.executeAsync(boundStmt));
                             if (unConfirmedWrite.size() >= batchSize) {
@@ -146,16 +138,14 @@ public class CassandraWriter
                                 }
                                 unConfirmedWrite.clear();
                             }
-                        }
-                        else {
+                        } else {
                             bufferedWrite.add(boundStmt);
                             if (bufferedWrite.size() >= batchSize) {
                                 BatchStatement batchStatement = new BatchStatement(Type.UNLOGGED);
                                 batchStatement.addAll(bufferedWrite);
                                 try {
                                     session.execute(batchStatement);
-                                }
-                                catch (Exception e) {
+                                } catch (Exception e) {
                                     LOG.error("batch写入失败，尝试逐条写入.", e);
                                     for (BoundStatement stmt : bufferedWrite) {
                                         session.execute(stmt);
@@ -179,16 +169,14 @@ public class CassandraWriter
                     session.execute(batchStatement);
                     bufferedWrite.clear();
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw AddaxException.asAddaxException(
                         EXECUTE_FAIL, e);
             }
         }
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration taskConfig = super.getPluginJobConf();
             String username = taskConfig.getString(CassandraKey.USERNAME);
             String password = taskConfig.getString(CassandraKey.PASSWORD);
@@ -216,8 +204,7 @@ public class CassandraWriter
                 if (useSSL) {
                     clusterBuilder = clusterBuilder.withSSL();
                 }
-            }
-            else {
+            } else {
                 clusterBuilder = clusterBuilder.withPort(port)
                         .addContactPoints(hosts.split(","));
             }
@@ -255,8 +242,7 @@ public class CassandraWriter
             String cl = taskConfig.getString(CassandraKey.CONSISTENCY_LEVEL);
             if (cl != null && !cl.isEmpty()) {
                 insertStmt.setConsistencyLevel(ConsistencyLevel.valueOf(cl));
-            }
-            else {
+            } else {
                 insertStmt.setConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM);
             }
 
@@ -265,16 +251,14 @@ public class CassandraWriter
             if (batchSize > 1) {
                 if (asyncWrite) {
                     unConfirmedWrite = new ArrayList<>();
-                }
-                else {
+                } else {
                     bufferedWrite = new ArrayList<>();
                 }
             }
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
 
         }
     }

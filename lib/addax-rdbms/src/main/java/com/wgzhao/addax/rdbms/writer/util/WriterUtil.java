@@ -42,14 +42,13 @@ import java.util.List;
 import static com.wgzhao.addax.common.spi.ErrorCode.CONFIG_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 
-public final class WriterUtil
-{
+public final class WriterUtil {
     private static final Logger LOG = LoggerFactory.getLogger(WriterUtil.class);
 
-    private WriterUtil() {}
+    private WriterUtil() {
+    }
 
-    public static List<Configuration> doSplit(Configuration simplifiedConf, int adviceNumber)
-    {
+    public static List<Configuration> doSplit(Configuration simplifiedConf, int adviceNumber) {
 
         List<Configuration> splitResultConfigs = new ArrayList<>();
 
@@ -98,8 +97,7 @@ public final class WriterUtil
         return splitResultConfigs;
     }
 
-    public static List<String> renderPreOrPostSqls(List<String> preOrPostSqls, String tableName)
-    {
+    public static List<String> renderPreOrPostSqls(List<String> preOrPostSqls, String tableName) {
         if (null == preOrPostSqls) {
             return new ArrayList<>();
         }
@@ -115,23 +113,20 @@ public final class WriterUtil
         return renderedSqls;
     }
 
-    public static void executeSqls(Connection conn, List<String> sqls)
-    {
+    public static void executeSqls(Connection conn, List<String> sqls) {
         String currentSql = null;
         try (Statement stmt = conn.createStatement()) {
             for (String sql : sqls) {
                 currentSql = sql;
                 stmt.execute(sql);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw RdbmsException.asQueryException(e, currentSql);
         }
     }
 
     public static String getWriteTemplate(List<String> columnHolders, List<String> valueHolders,
-            String writeMode, DataBaseType dataBaseType, boolean forceUseUpdate)
-    {
+                                          String writeMode, DataBaseType dataBaseType, boolean forceUseUpdate) {
         String mode = writeMode.trim().toLowerCase();
         String columns = StringUtils.join(columnHolders, ",");
         String placeHolders = StringUtils.join(valueHolders, ",");
@@ -146,25 +141,20 @@ public final class WriterUtil
             if (dataBaseType == DataBaseType.MySql) {
                 writeDataSqlTemplate = "INSERT INTO %s (" + columns + ") VALUES(" + placeHolders + ")" +
                         doMysqlUpdate(columnHolders);
-            }
-            else if (dataBaseType == DataBaseType.Oracle) {
+            } else if (dataBaseType == DataBaseType.Oracle) {
                 writeDataSqlTemplate = doOracleOrSqlServerUpdate(writeMode, columnHolders, valueHolders, dataBaseType) +
                         "INSERT (" + columns + ") VALUES ( " + placeHolders + " )";
-            }
-            else if (dataBaseType == DataBaseType.PostgreSQL) {
+            } else if (dataBaseType == DataBaseType.PostgreSQL) {
                 writeDataSqlTemplate = "INSERT INTO %s (" + columns + ") VALUES ( " + placeHolders + " )" +
                         doPostgresqlUpdate(writeMode, columnHolders);
-            }
-            else if (dataBaseType == DataBaseType.SQLServer) {
+            } else if (dataBaseType == DataBaseType.SQLServer) {
                 writeDataSqlTemplate = doOracleOrSqlServerUpdate(writeMode, columnHolders, valueHolders, dataBaseType) +
                         "INSERT (" + columns + ") VALUES ( " + placeHolders + " );";
-            }
-            else {
+            } else {
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                         "The writeMode " + writeMode + " is not supported by current database");
             }
-        }
-        else {
+        } else {
             //这里是保护,如果其他错误的使用了update,需要更换为replace
             if (mode.startsWith("update")) {
                 writeMode = "replace";
@@ -175,8 +165,7 @@ public final class WriterUtil
         return writeDataSqlTemplate;
     }
 
-    private static String doPostgresqlUpdate(String writeMode, List<String> columnHolders)
-    {
+    private static String doPostgresqlUpdate(String writeMode, List<String> columnHolders) {
         String conflict = writeMode.replaceFirst("update", "");
         StringBuilder sb = new StringBuilder();
         sb.append(" ON CONFLICT ");
@@ -191,8 +180,7 @@ public final class WriterUtil
         for (String column : columnHolders) {
             if (!first) {
                 sb.append(",");
-            }
-            else {
+            } else {
                 first = false;
             }
             sb.append(column);
@@ -202,8 +190,7 @@ public final class WriterUtil
         return sb.toString();
     }
 
-    public static String doMysqlUpdate(List<String> columnHolders)
-    {
+    public static String doMysqlUpdate(List<String> columnHolders) {
         if (columnHolders == null || columnHolders.isEmpty()) {
             return "";
         }
@@ -213,8 +200,7 @@ public final class WriterUtil
         for (String column : columnHolders) {
             if (!first) {
                 sb.append(",");
-            }
-            else {
+            } else {
                 first = false;
             }
             sb.append(column);
@@ -226,8 +212,7 @@ public final class WriterUtil
         return sb.toString();
     }
 
-    public static String doOracleOrSqlServerUpdate(String merge, List<String> columnHolders, List<String> valueHolders, DataBaseType dataBaseType)
-    {
+    public static String doOracleOrSqlServerUpdate(String merge, List<String> columnHolders, List<String> valueHolders, DataBaseType dataBaseType) {
         String[] sArray = getStrings(merge);
         StringBuilder sb = new StringBuilder();
         sb.append("MERGE INTO %s A USING ( SELECT ");
@@ -242,8 +227,7 @@ public final class WriterUtil
                 if (!first) {
                     sb.append(",");
                     str.append(" AND ");
-                }
-                else {
+                } else {
                     first = false;
                 }
                 str.append("TMP.").append(columnHolder);
@@ -259,8 +243,7 @@ public final class WriterUtil
             if (!Arrays.asList(sArray).contains(columnHolders.get(i))) {
                 if (!first1) {
                     update.append(",");
-                }
-                else {
+                } else {
                     first1 = false;
                 }
                 update.append(columnHolders.get(i));
@@ -271,8 +254,7 @@ public final class WriterUtil
 
         if (dataBaseType == DataBaseType.Oracle) {
             sb.append(" FROM DUAL ) TMP ON (");
-        }
-        else {
+        } else {
             sb.append(" ) TMP ON (");
         }
         sb.append(str);
@@ -282,8 +264,7 @@ public final class WriterUtil
         return sb.toString();
     }
 
-    public static String[] getStrings(String merge)
-    {
+    public static String[] getStrings(String merge) {
         merge = merge.replace("update", "");
         merge = merge.replace("(", "");
         merge = merge.replace(")", "");
@@ -291,8 +272,7 @@ public final class WriterUtil
         return merge.split(",");
     }
 
-    public static void preCheckPrePareSQL(Configuration originalConfig, DataBaseType type)
-    {
+    public static void preCheckPrePareSQL(Configuration originalConfig, DataBaseType type) {
         Configuration connConf = originalConfig.getConfiguration(Key.CONNECTION);
         String table = connConf.getList(Key.TABLE, String.class).get(0);
 
@@ -304,16 +284,14 @@ public final class WriterUtil
             for (String sql : renderedPreSqls) {
                 try {
                     DBUtil.sqlValid(sql, type);
-                }
-                catch (ParserException e) {
+                } catch (ParserException e) {
                     throw RdbmsException.asPreSQLParserException(e, sql);
                 }
             }
         }
     }
 
-    public static void preCheckPostSQL(Configuration originalConfig, DataBaseType type)
-    {
+    public static void preCheckPostSQL(Configuration originalConfig, DataBaseType type) {
         Configuration connConf = originalConfig.getConfiguration(Key.CONNECTION);
         String table = connConf.getList(Key.TABLE, String.class).get(0);
 

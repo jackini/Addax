@@ -21,9 +21,9 @@
 
 package com.wgzhao.addax.common.base;
 
-public final class HBaseConstant extends Constant
-{
-    private HBaseConstant() {}
+public final class HBaseConstant extends Constant {
+    private HBaseConstant() {
+    }
 
     public static final String RANGE = "range";
     public static final String ROWKEY_FLAG = "rowkey";

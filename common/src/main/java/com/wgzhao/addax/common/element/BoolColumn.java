@@ -31,36 +31,30 @@ import java.util.Date;
  * Created by jingxing on 14-8-24.
  */
 public class BoolColumn
-        extends Column
-{
+        extends Column {
 
-    public BoolColumn(Boolean bool)
-    {
+    public BoolColumn(Boolean bool) {
         super(bool, Column.Type.BOOL, 1);
     }
 
-    public BoolColumn(final String data)
-    {
+    public BoolColumn(final String data) {
         this(true);
         this.validate(data);
         if (null == data) {
             this.setRawData(null);
             this.setByteSize(0);
-        }
-        else {
+        } else {
             this.setRawData(Boolean.valueOf(data));
             this.setByteSize(1);
         }
     }
 
-    public BoolColumn()
-    {
+    public BoolColumn() {
         super(null, Column.Type.BOOL, 1);
     }
 
     @Override
-    public Boolean asBoolean()
-    {
+    public Boolean asBoolean() {
         if (null == super.getRawData()) {
             return null; //NOSONAR
         }
@@ -69,8 +63,7 @@ public class BoolColumn
     }
 
     @Override
-    public Long asLong()
-    {
+    public Long asLong() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -79,8 +72,7 @@ public class BoolColumn
     }
 
     @Override
-    public Double asDouble()
-    {
+    public Double asDouble() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -89,8 +81,7 @@ public class BoolColumn
     }
 
     @Override
-    public String asString()
-    {
+    public String asString() {
         if (null == super.getRawData()) {
             return null;
         }
@@ -99,8 +90,7 @@ public class BoolColumn
     }
 
     @Override
-    public BigInteger asBigInteger()
-    {
+    public BigInteger asBigInteger() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -109,8 +99,7 @@ public class BoolColumn
     }
 
     @Override
-    public BigDecimal asBigDecimal()
-    {
+    public BigDecimal asBigDecimal() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -119,28 +108,24 @@ public class BoolColumn
     }
 
     @Override
-    public Date asDate()
-    {
+    public Date asDate() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, "Bool type cannot be converted to Date.");
     }
 
     @Override
-    public byte[] asBytes()
-    {
+    public byte[] asBytes() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, "Bool type cannot be converted to Bytes.");
     }
 
     @Override
-    public Timestamp asTimestamp()
-    {
+    public Timestamp asTimestamp() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, "Bool type cannot be converted to Timestamp.");
     }
 
-    private void validate(final String data)
-    {
+    private void validate(final String data) {
         if (null == data) {
             return;
         }

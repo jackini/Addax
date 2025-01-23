@@ -22,9 +22,9 @@ package com.wgzhao.addax.plugin.reader.ftpreader;
 import com.wgzhao.addax.common.base.Key;
 
 public class FtpKey
-        extends Key
-{
-    private FtpKey() {}
+        extends Key {
+    private FtpKey() {
+    }
 
     public static final String PROTOCOL = "protocol";
     public static final String HOST = "host";

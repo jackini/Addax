@@ -23,21 +23,18 @@ import java.io.IOException;
 import java.util.Map;
 
 public class DorisWriterException
-        extends IOException
-{
+        extends IOException {
 
     private final Map<String, Object> response;
     private final boolean reCreateLabel;
 
-    public DorisWriterException(String message, Map<String, Object> response, boolean reCreateLabel)
-    {
+    public DorisWriterException(String message, Map<String, Object> response, boolean reCreateLabel) {
         super(message);
         this.response = response;
         this.reCreateLabel = reCreateLabel;
     }
 
-    public boolean needReCreateLabel()
-    {
+    public boolean needReCreateLabel() {
         return reCreateLabel;
     }
 }

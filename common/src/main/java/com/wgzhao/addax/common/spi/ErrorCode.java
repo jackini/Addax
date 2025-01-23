@@ -21,8 +21,7 @@ package com.wgzhao.addax.common.spi;
 /**
  * Enum representing common error codes and their descriptions.
  */
-public enum ErrorCode
-{
+public enum ErrorCode {
     // Required and Illegal Values
     REQUIRED_VALUE("1001", "Missing required parameters"),
     ILLEGAL_VALUE("1002", "Illegal parameter value"),
@@ -60,8 +59,7 @@ public enum ErrorCode
 
     private final String description;
 
-    ErrorCode(String code, String description)
-    {
+    ErrorCode(String code, String description) {
         if (code == null || code.isEmpty()) {
             throw new IllegalArgumentException("Error code cannot be null or empty");
         }
@@ -72,18 +70,15 @@ public enum ErrorCode
         this.description = description;
     }
 
-    public String getCode()
-    {
+    public String getCode() {
         return this.code;
     }
 
-    public String getDescription()
-    {
+    public String getDescription() {
         return this.description;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return String.format("Error code: %s, Description: %s", this.code, this.description);
     }
 }

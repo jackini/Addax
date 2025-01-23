@@ -58,20 +58,16 @@ import static com.wgzhao.addax.common.spi.ErrorCode.NOT_SUPPORT_TYPE;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class StreamReader
-        extends Reader
-{
+        extends Reader {
 
-    private enum Type
-    {
+    private enum Type {
         STRING, LONG, BOOL, DOUBLE, DATE, BYTES, TIMESTAMP,
         ;
 
-        private static boolean isTypeIllegal(String typeString)
-        {
+        private static boolean isTypeIllegal(String typeString) {
             try {
                 Type.valueOf(typeString.toUpperCase());
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 return false;
             }
 
@@ -80,16 +76,14 @@ public class StreamReader
     }
 
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
 
         private static final Logger LOG = LoggerFactory.getLogger(Job.class);
         private Configuration originalConfig;
         private static final List<String> validUnits = Arrays.asList("d", "day", "M", "month", "y", "year", "h", "hour", "m", "minute", "s", "second", "w", "week");
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = getPluginJobConf();
             dealColumn(this.originalConfig);
 
@@ -98,15 +92,13 @@ public class StreamReader
             if (null == sliceRecordCount) {
                 throw AddaxException.asAddaxException(REQUIRED_VALUE,
                         "The item sliceRecordCount is required.");
-            }
-            else if (sliceRecordCount < 1) {
+            } else if (sliceRecordCount < 1) {
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                         "The value of item sliceRecordCount must be greater than 0.");
             }
         }
 
-        private void dealColumn(Configuration originalConfig)
-        {
+        private void dealColumn(Configuration originalConfig) {
             List<JSONObject> columns = originalConfig.getList(Key.COLUMN,
                     JSONObject.class);
             if (null == columns || columns.isEmpty()) {
@@ -119,8 +111,7 @@ public class StreamReader
                 Configuration eachColumnConfig = Configuration.from(eachColumn);
                 try {
                     this.parseMixupFunctions(eachColumnConfig);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     throw AddaxException.asAddaxException(NOT_SUPPORT_TYPE,
                             String.format("Failed to parse mixup functions [%s]", e.getMessage()), e);
                 }
@@ -129,8 +120,7 @@ public class StreamReader
                 if (StringUtils.isBlank(typeName)) {
                     // empty typeName will be set to default type: string
                     eachColumnConfig.set(Key.TYPE, Type.STRING);
-                }
-                else {
+                } else {
                     if (Type.DATE.name().equalsIgnoreCase(typeName)) {
                         boolean notAssignDateFormat = StringUtils
                                 .isBlank(eachColumnConfig.getString(Key.DATE_FORMAT));
@@ -174,8 +164,7 @@ public class StreamReader
          *
          * @param eachColumnConfig see {@link Configuration}
          */
-        private void parseMixupFunctions(Configuration eachColumnConfig)
-        {
+        private void parseMixupFunctions(Configuration eachColumnConfig) {
             String columnValue = eachColumnConfig.getString(Key.VALUE);
             String columnRandom = eachColumnConfig.getString(StreamConstant.RANDOM);
             String columnIncr = eachColumnConfig.getString(StreamConstant.INCR);
@@ -196,20 +185,17 @@ public class StreamReader
                     try {
                         Long.parseLong(columnIncr.split(",")[0].trim());
                         Long.parseLong(columnIncr.split(",")[1].trim());
-                    }
-                    catch (NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         throw AddaxException.asAddaxException(
                                 ILLEGAL_VALUE,
                                 "The value of  must be numeric, value [" + columnValue + "] is not valid."
                         );
                     }
-                }
-                else if ("date".equals(dType)) {
+                } else if ("date".equals(dType)) {
                     String[] fields = columnIncr.split(",");
                     if (fields.length == 1) {
                         eachColumnConfig.set(StreamConstant.INCR, columnIncr.trim() + ",1,d");
-                    }
-                    else if (fields.length == 2) {
+                    } else if (fields.length == 2) {
                         try {
                             Integer.parseInt(fields[1]);
                         } catch (NumberFormatException e) {
@@ -219,16 +205,14 @@ public class StreamReader
                             );
                         }
                         eachColumnConfig.set(StreamConstant.INCR, fields[0].trim() + "," + fields[1].trim() + ",d");
-                    }
-                    else {
+                    } else {
                         String unit = fields[2].charAt(0) + "";
                         // validate unit
                         validateDateIncrUnit(unit);
                         // normalize unit to 1-char
                         eachColumnConfig.set(StreamConstant.INCR, fields[0].trim() + "," + fields[1].trim() + "," + unit);
                     }
-                }
-                else {
+                } else {
                     throw AddaxException.asAddaxException(
                             NOT_SUPPORT_TYPE,
                             "The increment sequence must be long or date, value [" + dType + "] is not valid."
@@ -275,15 +259,13 @@ public class StreamReader
                         //warn: do no concern int -> long
                         param1Int = format.parse(param1).getTime();//milliseconds
                         param2Int = format.parse(param2).getTime();//milliseconds
-                    }
-                    catch (ParseException e) {
+                    } catch (ParseException e) {
                         throw AddaxException.asAddaxException(
                                 ILLEGAL_VALUE,
                                 String.format("The random function's params [%s,%s] does not match the dateFormat[%s].",
                                         dateFormat, param1, param2), e);
                     }
-                }
-                else {
+                } else {
                     param1Int = Integer.parseInt(param1);
                     param2Int = Integer.parseInt(param2);
                 }
@@ -312,23 +294,23 @@ public class StreamReader
         /**
          * valid the unit
          * current support unit are the following:
-         *  1. d/day
-         *  2. M/month
-         *  3. y/year
-         *  4. h/hour
-         *  5. m/minute
-         *  6. s/second
-         *  7. w/week
+         * 1. d/day
+         * 2. M/month
+         * 3. y/year
+         * 4. h/hour
+         * 5. m/minute
+         * 6. s/second
+         * 7. w/week
+         *
          * @param unit the date interval unit
          */
-        private void validateDateIncrUnit(String unit)
-        {
+        private void validateDateIncrUnit(String unit) {
             boolean isOK = true;
-            if ( unit.length() == 1 ) {
-                if (! validUnits.contains(unit)) {
+            if (unit.length() == 1) {
+                if (!validUnits.contains(unit)) {
                     isOK = false;
                 }
-            }  else if (! validUnits.contains(unit.toLowerCase())) {
+            } else if (!validUnits.contains(unit.toLowerCase())) {
                 isOK = false;
             }
             if (!isOK) {
@@ -339,14 +321,12 @@ public class StreamReader
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             //
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             List<Configuration> configurations = new ArrayList<>();
 
             for (int i = 0; i < adviceNumber; i++) {
@@ -356,21 +336,18 @@ public class StreamReader
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             //
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
         private List<String> columns;
 
         private long sliceRecordCount;
@@ -382,8 +359,7 @@ public class StreamReader
         private static final Map<Integer, Object> incrMap = new ConcurrentHashMap<>(8);
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration readerSliceConfig = getPluginJobConf();
             this.columns = readerSliceConfig.getList(Key.COLUMN, String.class);
 
@@ -393,14 +369,12 @@ public class StreamReader
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             //
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             Record oneRecord = buildOneRecord(recordSender, this.columns);
             while (this.sliceRecordCount > 0) {
                 recordSender.sendToWriter(oneRecord);
@@ -412,20 +386,17 @@ public class StreamReader
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             //
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
 
         private Column buildOneColumn(Configuration eachColumnConfig, int columnIndex)
-                throws Exception
-        {
+                throws Exception {
             String columnValue = eachColumnConfig.getString(Key.VALUE);
             if ("null".equals(columnValue)) {
                 return new StringColumn();
@@ -435,7 +406,7 @@ public class StreamReader
             String columnIncr = eachColumnConfig.getString(StreamConstant.INCR);
             long param1Int = eachColumnConfig.getLong(StreamConstant.MIXUP_FUNCTION_PARAM1, 0L);
             long param2Int = eachColumnConfig.getLong(StreamConstant.MIXUP_FUNCTION_PARAM2, 1L);
-            int  scale = eachColumnConfig.getInt(StreamConstant.MIXUP_FUNCTION_SCALE, -1);
+            int scale = eachColumnConfig.getInt(StreamConstant.MIXUP_FUNCTION_SCALE, -1);
             boolean isColumnMixup = StringUtils.isNotBlank(columnRandom);
             boolean isIncr = StringUtils.isNotBlank(columnIncr);
             UniformRandomProvider rng = RandomSource.XO_RO_SHI_RO_128_PP.create();
@@ -465,11 +436,9 @@ public class StreamReader
                         }
                         if (param1Int == 0) {
                             return new BoolColumn(true);
-                        }
-                        else if (param2Int == 0) {
+                        } else if (param2Int == 0) {
                             return new BoolColumn(false);
-                        }
-                        else {
+                        } else {
                             long randomInt = rng.nextLong(0, param1Int + param2Int + 1);
                             return new BoolColumn(randomInt > param1Int);
                         }
@@ -482,8 +451,7 @@ public class StreamReader
                         // in fact,never to be here
                         throw new Exception(String.format("不支持类型[%s]", columnType.name()));
                 }
-            }
-            else if (isIncr) {
+            } else if (isIncr) {
                 Object currVal;
                 long step;
                 if (columnType == Type.LONG) {
@@ -509,15 +477,14 @@ public class StreamReader
                         }
                     }
                     incrMap.put(columnIndex, dateIncrement((Date) currVal, Integer.parseInt(fields[1]), fields[2]));
-                    return new DateColumn((Date)currVal);
+                    return new DateColumn((Date) currVal);
                 } else {
                     throw AddaxException.asAddaxException(
                             NOT_SUPPORT_TYPE,
                             columnType + " can not support for increment"
                     );
                 }
-            }
-            else {
+            } else {
                 switch (columnType) {
                     case STRING:
                         return new StringColumn(columnValue);
@@ -543,14 +510,14 @@ public class StreamReader
 
         /**
          * calculate next date via interval
+         *
          * @param curDate current date
-         * @param step interval
-         * @param unit unit
+         * @param step    interval
+         * @param unit    unit
          * @return next date
          */
-        private Date dateIncrement(Date curDate, int step, String unit)
-        {
-            switch(unit) {
+        private Date dateIncrement(Date curDate, int step, String unit) {
+            switch (unit) {
                 case "d":
                     return DateUtils.addDays(curDate, step);
                 case "M":
@@ -571,8 +538,7 @@ public class StreamReader
         }
 
         private Record buildOneRecord(RecordSender recordSender,
-                List<String> columns)
-        {
+                                      List<String> columns) {
             if (null == recordSender) {
                 throw new IllegalArgumentException("The parameter recordSender must not be null.");
             }
@@ -587,8 +553,7 @@ public class StreamReader
                     Configuration eachColumnConfig = Configuration.from(columns.get(i));
                     record.addColumn(this.buildOneColumn(eachColumnConfig, i));
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                         "Failed to build record.", e);
             }

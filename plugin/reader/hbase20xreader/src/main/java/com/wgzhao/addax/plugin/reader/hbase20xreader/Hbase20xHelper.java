@@ -53,14 +53,12 @@ import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.IO_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
-public class Hbase20xHelper
-{
+public class Hbase20xHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(Hbase20xHelper.class);
     private static org.apache.hadoop.hbase.client.Connection H_CONNECTION = null;
 
-    public static org.apache.hadoop.hbase.client.Connection getHbaseConnection(String hbaseConfig)
-    {
+    public static org.apache.hadoop.hbase.client.Connection getHbaseConnection(String hbaseConfig) {
         if (H_CONNECTION != null && !H_CONNECTION.isClosed()) {
             return H_CONNECTION;
         }
@@ -69,7 +67,8 @@ public class Hbase20xHelper
         }
         org.apache.hadoop.conf.Configuration hConfiguration = HBaseConfiguration.create();
 
-        Map<String, String> hbaseConfigMap = JSON.parseObject(hbaseConfig, new TypeReference<Map<String, String>>() {});
+        Map<String, String> hbaseConfigMap = JSON.parseObject(hbaseConfig, new TypeReference<Map<String, String>>() {
+        });
         // 用户配置的 key-value 对 来表示 hbaseConfig
         Validate.isTrue(hbaseConfigMap != null && !hbaseConfigMap.isEmpty(), "hbaseConfig不能为空Map结构!");
         for (Map.Entry<String, String> entry : hbaseConfigMap.entrySet()) {
@@ -78,16 +77,14 @@ public class Hbase20xHelper
 
         try {
             H_CONNECTION = ConnectionFactory.createConnection(hConfiguration);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             Hbase20xHelper.closeConnection(H_CONNECTION);
             throw AddaxException.asAddaxException(IO_ERROR, e);
         }
         return H_CONNECTION;
     }
 
-    public static Table getTable(Configuration configuration)
-    {
+    public static Table getTable(Configuration configuration) {
         String hbaseConfig = configuration.getString(HBaseKey.HBASE_CONFIG);
         String userTable = configuration.getString(HBaseKey.TABLE);
         org.apache.hadoop.hbase.client.Connection hConnection = Hbase20xHelper.getHbaseConnection(hbaseConfig);
@@ -98,8 +95,7 @@ public class Hbase20xHelper
             admin = hConnection.getAdmin();
             Hbase20xHelper.checkHbaseTable(admin, hTableName);
             hTable = hConnection.getTable(hTableName);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             Hbase20xHelper.closeAdmin(admin);
             Hbase20xHelper.closeConnection(hConnection);
             throw AddaxException.asAddaxException(IO_ERROR, e);
@@ -107,8 +103,7 @@ public class Hbase20xHelper
         return hTable;
     }
 
-    public static RegionLocator getRegionLocator(Configuration configuration)
-    {
+    public static RegionLocator getRegionLocator(Configuration configuration) {
         String hbaseConfig = configuration.getString(HBaseKey.HBASE_CONFIG);
         String userTable = configuration.getString(HBaseKey.TABLE);
         org.apache.hadoop.hbase.client.Connection hConnection = Hbase20xHelper.getHbaseConnection(hbaseConfig);
@@ -119,8 +114,7 @@ public class Hbase20xHelper
             admin = hConnection.getAdmin();
             Hbase20xHelper.checkHbaseTable(admin, hTableName);
             regionLocator = hConnection.getRegionLocator(hTableName);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             Hbase20xHelper.closeAdmin(admin);
             Hbase20xHelper.closeConnection(hConnection);
             throw AddaxException.asAddaxException(IO_ERROR, e);
@@ -128,64 +122,54 @@ public class Hbase20xHelper
         return regionLocator;
     }
 
-    public synchronized static void closeConnection(Connection hConnection)
-    {
+    public synchronized static void closeConnection(Connection hConnection) {
         try {
             if (null != hConnection) {
                 hConnection.close();
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw AddaxException.asAddaxException(IO_ERROR, e);
         }
     }
 
-    public static void closeAdmin(Admin admin)
-    {
+    public static void closeAdmin(Admin admin) {
         try {
             if (null != admin) {
                 admin.close();
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw AddaxException.asAddaxException(IO_ERROR, e);
         }
     }
 
-    public static void closeTable(Table table)
-    {
+    public static void closeTable(Table table) {
         try {
             if (null != table) {
                 table.close();
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw AddaxException.asAddaxException(IO_ERROR, e);
         }
     }
 
-    public static void closeResultScanner(ResultScanner resultScanner)
-    {
+    public static void closeResultScanner(ResultScanner resultScanner) {
         if (null != resultScanner) {
             resultScanner.close();
         }
     }
 
-    public static void closeRegionLocator(RegionLocator regionLocator)
-    {
+    public static void closeRegionLocator(RegionLocator regionLocator) {
         try {
             if (null != regionLocator) {
                 regionLocator.close();
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw AddaxException.asAddaxException(IO_ERROR, e);
         }
     }
 
     public static void checkHbaseTable(Admin admin, TableName hTableName)
-            throws IOException
-    {
+            throws IOException {
         if (!admin.tableExists(hTableName)) {
             throw AddaxException.asAddaxException(ILLEGAL_VALUE, "HBase源头表" + hTableName.toString()
                     + "不存在, 请检查您的配置 或者 联系 Hbase 管理员.");
@@ -200,25 +184,21 @@ public class Hbase20xHelper
         }
     }
 
-    public static byte[] convertUserStartRowkey(Configuration configuration)
-    {
+    public static byte[] convertUserStartRowkey(Configuration configuration) {
         String startRowkey = configuration.getString(HBaseKey.START_ROW_KEY);
         if (StringUtils.isBlank(startRowkey)) {
             return HConstants.EMPTY_BYTE_ARRAY;
-        }
-        else {
+        } else {
             boolean isBinaryRowkey = configuration.getBool(HBaseKey.IS_BINARY_ROW_KEY);
             return Hbase20xHelper.stringToBytes(startRowkey, isBinaryRowkey);
         }
     }
 
-    public static byte[] convertUserEndRowkey(Configuration configuration)
-    {
+    public static byte[] convertUserEndRowkey(Configuration configuration) {
         String endRowkey = configuration.getString(HBaseKey.END_ROW_KEY);
         if (StringUtils.isBlank(endRowkey)) {
             return HConstants.EMPTY_BYTE_ARRAY;
-        }
-        else {
+        } else {
             boolean isBinaryRowkey = configuration.getBool(HBaseKey.IS_BINARY_ROW_KEY);
             return Hbase20xHelper.stringToBytes(endRowkey, isBinaryRowkey);
         }
@@ -231,8 +211,7 @@ public class Hbase20xHelper
      * @param configuration configuration
      * @return An array of byte, the rowkey start position
      */
-    public static byte[] convertInnerStartRowkey(Configuration configuration)
-    {
+    public static byte[] convertInnerStartRowkey(Configuration configuration) {
         String startRowkey = configuration.getString(HBaseKey.START_ROW_KEY);
         if (StringUtils.isBlank(startRowkey)) {
             return HConstants.EMPTY_BYTE_ARRAY;
@@ -241,8 +220,7 @@ public class Hbase20xHelper
         return Bytes.toBytesBinary(startRowkey);
     }
 
-    public static byte[] convertInnerEndRowkey(Configuration configuration)
-    {
+    public static byte[] convertInnerEndRowkey(Configuration configuration) {
         String endRowkey = configuration.getString(HBaseKey.END_ROW_KEY);
         if (StringUtils.isBlank(endRowkey)) {
             return HConstants.EMPTY_BYTE_ARRAY;
@@ -251,18 +229,15 @@ public class Hbase20xHelper
         return Bytes.toBytesBinary(endRowkey);
     }
 
-    private static byte[] stringToBytes(String rowkey, boolean isBinaryRowkey)
-    {
+    private static byte[] stringToBytes(String rowkey, boolean isBinaryRowkey) {
         if (isBinaryRowkey) {
             return Bytes.toBytesBinary(rowkey);
-        }
-        else {
+        } else {
             return Bytes.toBytes(rowkey);
         }
     }
 
-    public static boolean isRowkeyColumn(String columnName)
-    {
+    public static boolean isRowkeyColumn(String columnName) {
         return HBaseConstant.ROWKEY_FLAG.equalsIgnoreCase(columnName);
     }
 
@@ -272,8 +247,7 @@ public class Hbase20xHelper
      * @param column column
      * @return list of hbase cell
      */
-    public static List<HbaseColumnCell> parseColumnOfNormalMode(List<Map> column)
-    {
+    public static List<HbaseColumnCell> parseColumnOfNormalMode(List<Map> column) {
         List<HbaseColumnCell> hbaseColumnCells = new ArrayList<>();
 
         HbaseColumnCell oneColumnCell;
@@ -300,8 +274,7 @@ public class Hbase20xHelper
                         .columnValue(columnValue)
                         .dateformat(dateformat)
                         .build();
-            }
-            else {
+            } else {
                 Validate.isTrue(StringUtils.isNotBlank(columnName)
                                 || StringUtils.isNotBlank(columnValue),
                         "Hbasereader 在 normal 方式读取时，其列配置中，如果类型不是时间，" +
@@ -319,8 +292,7 @@ public class Hbase20xHelper
     }
 
     //将多竖表column变成<familyQualifier,<>>形式
-    public static HashMap<String, HashMap<String, String>> parseColumnOfMultiversionMode(List<Map> column)
-    {
+    public static HashMap<String, HashMap<String, String>> parseColumnOfMultiversionMode(List<Map> column) {
 
         HashMap<String, HashMap<String, String>> familyQualifierMap = new HashMap<>();
         for (Map<String, String> aColumn : column) {
@@ -338,8 +310,7 @@ public class Hbase20xHelper
                     throw AddaxException.asAddaxException(ILLEGAL_VALUE, "Hbasereader 中，column 的列配置格式应该是：列族:列名. 您配置的列错误：" + columnName);
                 }
                 familyQualifier = StringUtils.join(cfAndQualifier[0].trim(), ":", cfAndQualifier[1].trim());
-            }
-            else {
+            } else {
                 familyQualifier = columnName.trim();
             }
 
@@ -351,8 +322,7 @@ public class Hbase20xHelper
         return familyQualifierMap;
     }
 
-    public static List<Configuration> split(Configuration configuration)
-    {
+    public static List<Configuration> split(Configuration configuration) {
         byte[] startRowkeyByte = Hbase20xHelper.convertUserStartRowkey(configuration);
         byte[] endRowkeyByte = Hbase20xHelper.convertUserEndRowkey(configuration);
 
@@ -373,18 +343,15 @@ public class Hbase20xHelper
 
             LOG.info("HBaseReader split job into {} tasks.", resultConfigurations.size());
             return resultConfigurations;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(EXECUTE_FAIL, "切分源头 Hbase 表失败.", e);
-        }
-        finally {
+        } finally {
             Hbase20xHelper.closeRegionLocator(regionLocator);
         }
     }
 
     private static List<Configuration> doSplit(Configuration config, byte[] startRowkeyByte,
-            byte[] endRowkeyByte, Pair<byte[][], byte[][]> regionRanges)
-    {
+                                               byte[] endRowkeyByte, Pair<byte[][], byte[][]> regionRanges) {
 
         List<Configuration> configurations = new ArrayList<Configuration>();
 
@@ -433,8 +400,7 @@ public class Hbase20xHelper
         return configurations;
     }
 
-    private static String getEndKey(byte[] endRowkeyByte, byte[] regionEndKey)
-    {
+    private static String getEndKey(byte[] endRowkeyByte, byte[] regionEndKey) {
         if (endRowkeyByte == null) {// 由于之前处理过，所以传入的userStartKey不可能为null
             throw new IllegalArgumentException("userEndKey should not be null!");
         }
@@ -443,16 +409,13 @@ public class Hbase20xHelper
 
         if (endRowkeyByte.length == 0) {
             tempEndRowkeyByte = regionEndKey;
-        }
-        else if (Bytes.compareTo(regionEndKey, HConstants.EMPTY_BYTE_ARRAY) == 0) {
+        } else if (Bytes.compareTo(regionEndKey, HConstants.EMPTY_BYTE_ARRAY) == 0) {
             // 为最后一个region
             tempEndRowkeyByte = endRowkeyByte;
-        }
-        else {
+        } else {
             if (Bytes.compareTo(endRowkeyByte, regionEndKey) > 0) {
                 tempEndRowkeyByte = regionEndKey;
-            }
-            else {
+            } else {
                 tempEndRowkeyByte = endRowkeyByte;
             }
         }
@@ -460,8 +423,7 @@ public class Hbase20xHelper
         return Bytes.toStringBinary(tempEndRowkeyByte);
     }
 
-    private static String getStartKey(byte[] startRowkeyByte, byte[] regionStarKey)
-    {
+    private static String getStartKey(byte[] startRowkeyByte, byte[] regionStarKey) {
         if (startRowkeyByte == null) {// 由于之前处理过，所以传入的userStartKey不可能为null
             throw new IllegalArgumentException(
                     "userStartKey should not be null!");
@@ -471,15 +433,13 @@ public class Hbase20xHelper
 
         if (Bytes.compareTo(startRowkeyByte, regionStarKey) < 0) {
             tempStartRowkeyByte = regionStarKey;
-        }
-        else {
+        } else {
             tempStartRowkeyByte = startRowkeyByte;
         }
         return Bytes.toStringBinary(tempStartRowkeyByte);
     }
 
-    public static void validateParameter(Configuration originalConfig)
-    {
+    public static void validateParameter(Configuration originalConfig) {
         originalConfig.getNecessaryValue(HBaseKey.HBASE_CONFIG, REQUIRED_VALUE);
         originalConfig.getNecessaryValue(HBaseKey.TABLE, REQUIRED_VALUE);
 
@@ -515,8 +475,7 @@ public class Hbase20xHelper
         originalConfig.set(HBaseKey.SCAN_BATCH_SIZE, scanBatchSize);
     }
 
-    private static void validateMode(Configuration originalConfig)
-    {
+    private static void validateMode(Configuration originalConfig) {
         String mode = originalConfig.getNecessaryValue(HBaseKey.MODE, REQUIRED_VALUE);
         List<Map> column = originalConfig.getList(HBaseKey.COLUMN, Map.class);
         if (column == null || column.isEmpty()) {
@@ -547,8 +506,7 @@ public class Hbase20xHelper
     }
 
     // 检查 maxVersion 是否存在，并且值是否合法
-    private static void checkMaxVersion(Configuration configuration, String mode)
-    {
+    private static void checkMaxVersion(Configuration configuration, String mode) {
         Integer maxVersion = configuration.getInt(HBaseKey.MAX_VERSION);
         Validate.notNull(maxVersion, String.format("您配置的是 %s 模式读取 hbase 中的数据，所以必须配置：maxVersion", mode));
         boolean isMaxVersionValid = maxVersion == -1 || maxVersion > 1;

@@ -47,20 +47,17 @@ import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.LOGIN_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
-public class HbaseSQLHelper
-{
+public class HbaseSQLHelper {
     private static final Logger LOG = LoggerFactory.getLogger(HbaseSQLHelper.class);
     //    private static final String JDBC_PHOENIX_DRIVER = "org.apache.phoenix.jdbc.PhoenixDriver";
     private static final org.apache.hadoop.conf.Configuration hadoopConf = new org.apache.hadoop.conf.Configuration();
     private final Configuration jobConf;
 
-    public HbaseSQLHelper(Configuration conf)
-    {
+    public HbaseSQLHelper(Configuration conf) {
         this.jobConf = conf;
     }
 
-    public Configuration parseConfig()
-    {
+    public Configuration parseConfig() {
         // 获取hbase集群的连接信息字符串
         Map<String, Object> hbaseCfg = jobConf.getMap(HBaseKey.HBASE_CONFIG);
         String zkUrl;
@@ -106,8 +103,7 @@ public class HbaseSQLHelper
         if (zkQuorum.contains(":")) {
             // Has zookeeper port
             zkUrl = zkQuorum + ":" + znode;
-        }
-        else {
+        } else {
             // Uses default zookeeper port
             zkUrl = String.format("%s:%s:%s", zkQuorum, HConstants.DEFAULT_ZOOKEPER_CLIENT_PORT, znode);
         }
@@ -138,12 +134,11 @@ public class HbaseSQLHelper
     /**
      * 依据三个不同配置场景生成正确的查询语句
      *
-     * @param table 表名
+     * @param table   表名
      * @param columns 字段
-     * @param url jdbc url
+     * @param url     jdbc url
      */
-    private void generateQuerySql(String table, List<String> columns, String url)
-    {
+    private void generateQuerySql(String table, List<String> columns, String url) {
         if (columns.isEmpty() || (columns.size() == 1 && "*".equals(columns.get(0)))) {
             // get columns from
             columns = getPColumnNames(table, url);
@@ -160,8 +155,7 @@ public class HbaseSQLHelper
         jobConf.set(Key.QUERY_SQL, sql.toString());
     }
 
-    public List<String> getPColumnNames(String fullTableName, String url)
-    {
+    public List<String> getPColumnNames(String fullTableName, String url) {
         LOG.info("column is not configured, try to retrieve column description from hbase table");
 
         try (Connection conn = DriverManager.getConnection(url)) {
@@ -174,28 +168,24 @@ public class HbaseSQLHelper
             for (PColumn pColumn : table.getColumns()) {
                 if (!pColumn.getName().getString().equals(SaltingUtil.SALTING_COLUMN_NAME)) {
                     columnNames.add(pColumn.getName().getString());
-                }
-                else {
+                } else {
                     LOG.info("{} is salt table", tableName);
                 }
             }
             LOG.info("End retrieve column description");
             return columnNames;
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             throw AddaxException.asAddaxException(
                     EXECUTE_FAIL, "Failed to get table's column description:\n" + e.getMessage(), e);
         }
     }
 
-    private void kerberosAuthentication(String kerberosPrincipal, String kerberosKeytabFilePath)
-    {
+    private void kerberosAuthentication(String kerberosPrincipal, String kerberosKeytabFilePath) {
         hadoopConf.set("hadoop.security.authentication", "Kerberos");
         UserGroupInformation.setConfiguration(hadoopConf);
         try {
             UserGroupInformation.loginUserFromKeytab(kerberosPrincipal, kerberosKeytabFilePath);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             String message = String.format("kerberos authentication failed, please make sure that kerberosKeytabFilePath[%s] and kerberosPrincipal[%s] are configure correctly",
                     kerberosKeytabFilePath, kerberosPrincipal);
             LOG.error(message);

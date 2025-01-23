@@ -38,26 +38,22 @@ import java.util.List;
 import static com.wgzhao.addax.common.spi.ErrorCode.CONFIG_ERROR;
 
 public class OracleWriter
-        extends Writer
-{
+        extends Writer {
     private static final DataBaseType DATABASE_TYPE = DataBaseType.Oracle;
 
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
         private Configuration originalConfig = null;
         private CommonRdbmsWriter.Job commonRdbmsWriterJob;
 
         @Override
-        public void preCheck()
-        {
+        public void preCheck() {
             this.init();
             this.commonRdbmsWriterJob.writerPreCheck(this.originalConfig, DATABASE_TYPE);
         }
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = getPluginJobConf();
 
             String writeMode = originalConfig.getString(Key.WRITE_MODE);
@@ -73,47 +69,40 @@ public class OracleWriter
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             commonRdbmsWriterJob.prepare(originalConfig);
         }
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             return commonRdbmsWriterJob.split(originalConfig, mandatoryNumber);
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             commonRdbmsWriterJob.post(originalConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             commonRdbmsWriterJob.destroy(originalConfig);
         }
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
         private Configuration writerSliceConfig;
         private CommonRdbmsWriter.Task commonRdbmsWriterTask;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.writerSliceConfig = getPluginJobConf();
             this.commonRdbmsWriterTask = new CommonRdbmsWriter.Task(DATABASE_TYPE) {
                 @Override
                 protected PreparedStatement fillPreparedStatementColumnType(PreparedStatement preparedStatement, int columnIndex, int columnSqlType, Column column)
-                        throws SQLException
-                {
+                        throws SQLException {
                     if (writerSliceConfig.getString(Key.WRITE_MODE, "").startsWith("update")) {
-                        if (columnSqlType == Types.CLOB ) {
+                        if (columnSqlType == Types.CLOB) {
                             Clob clob = preparedStatement.getConnection().createClob();
                             clob.setString(1, column.asString());
                             preparedStatement.setClob(columnIndex, clob);
@@ -135,25 +124,21 @@ public class OracleWriter
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             commonRdbmsWriterTask.prepare(writerSliceConfig);
         }
 
-        public void startWrite(RecordReceiver recordReceiver)
-        {
+        public void startWrite(RecordReceiver recordReceiver) {
             commonRdbmsWriterTask.startWrite(recordReceiver, writerSliceConfig, getTaskPluginCollector());
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             commonRdbmsWriterTask.post(writerSliceConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             commonRdbmsWriterTask.destroy(writerSliceConfig);
         }
     }

@@ -25,21 +25,18 @@ import com.wgzhao.addax.plugin.writer.doriswriter.DelimiterParser;
 
 public class DorisCsvCodec
         extends DorisBaseCodec
-        implements DorisCodec
-{
+        implements DorisCodec {
 
     private static final long serialVersionUID = 1L;
 
     private final String columnSeparator;
 
-    public DorisCsvCodec(String sp)
-    {
+    public DorisCsvCodec(String sp) {
         this.columnSeparator = DelimiterParser.parse(sp, "\t");
     }
 
     @Override
-    public String codec(Record row)
-    {
+    public String codec(Record row) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < row.getColumnNumber(); i++) {
             String value = convertField(row.getColumn(i));

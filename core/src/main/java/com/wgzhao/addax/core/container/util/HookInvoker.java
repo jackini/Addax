@@ -30,11 +30,9 @@ import java.util.Map;
  * <a href="http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html">ServiceLoader</a>。
  * 加载里头的jar，使用ServiceLoader机制调用。
  */
-public class HookInvoker
-{
+public class HookInvoker {
 
-    public HookInvoker(String baseDirName, Configuration conf, Map<String, Number> msg)
-    {
+    public HookInvoker(String baseDirName, Configuration conf, Map<String, Number> msg) {
         File baseDir = new File(baseDirName);
     }
 }

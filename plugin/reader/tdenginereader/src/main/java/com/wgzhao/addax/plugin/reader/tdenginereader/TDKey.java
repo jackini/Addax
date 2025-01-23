@@ -17,8 +17,7 @@ package com.wgzhao.addax.plugin.reader.tdenginereader;
 import com.wgzhao.addax.common.base.Key;
 
 public class TDKey
-        extends Key
-{
+        extends Key {
 
     public static final String BEGIN_DATETIME = "beginDateTime";
     public static final String END_DATETIME = "endDateTime";

@@ -21,8 +21,7 @@
 
 package com.wgzhao.addax.plugin.reader.datareader.util;
 
-public class CompanyUtil
-{
+public class CompanyUtil {
     private static final String[] COMPANY_PREFIXES = {
             "超艺", "和泰", "九方", "鑫博腾飞", "戴硕电子", "济南亿次元", "海创", "创联世纪", "凌云", "泰麒麟", "彩虹", "兰金电子", "晖来计算机", "天益",
             "恒聪百汇", "菊风", "惠派国际", "创汇", "思优", "时空盒数字", "易动力", "飞海科技", "华泰通安", "盟新", "商软冠联", "图龙信息", "易动力",
@@ -32,12 +31,11 @@ public class CompanyUtil
             "同兴万点", "襄樊地球村", "精芯", "艾提科信", "昊嘉", "鸿睿思博", "四通", "富罳", "商软冠联", "诺依曼软件", "东方峻景", "华成育卓", "趋势",
             "维涛", "通际名联"};
     private static final String[] COMPANY_TYPES = {"科技", "网络", "信息技术", "传媒", "科技", "教育", "软件", "信息", "通信", "电子", "生物", "环保", "新能源",
-             "机械", "建筑", "房地产", "金融", "贸易", "物流", "服务", "文化", "旅游", "餐饮", "娱乐", "体育", "健康", "美容", "家居", "办公"};
+            "机械", "建筑", "房地产", "金融", "贸易", "物流", "服务", "文化", "旅游", "餐饮", "娱乐", "体育", "健康", "美容", "家居", "办公"};
     private static final String[] COMPANY_SUFFIXES = {"有限公司", "股份有限公司", "集团有限公司", "责任有限公司", "中外合作有限公司", "普通合伙企业",
             "有限合伙企业", "集团"};
 
-    public static String nextCompany()
-    {
+    public static String nextCompany() {
         return CommonUtil.randChoose(COMPANY_PREFIXES)
                 + CommonUtil.randChoose(COMPANY_TYPES)
                 + CommonUtil.randChoose(COMPANY_SUFFIXES);

@@ -70,28 +70,23 @@ import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class HttpReader
-        extends Reader
-{
+        extends Reader {
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
         private Configuration originConfig = null;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originConfig = this.getPluginJobConf();
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             List<Configuration> result = new ArrayList<>();
             result.add(this.originConfig);
             return result;
@@ -99,8 +94,7 @@ public class HttpReader
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
         private Configuration readerSliceConfig = null;
         private URIBuilder uriBuilder;
         private String username;
@@ -111,8 +105,7 @@ public class HttpReader
         private String method;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.readerSliceConfig = this.getPluginJobConf();
             this.username = readerSliceConfig.getString(HttpKey.USERNAME, null);
             this.password = readerSliceConfig.getString(HttpKey.PASSWORD, null);
@@ -129,14 +122,12 @@ public class HttpReader
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             boolean isPage = readerSliceConfig.getBool(HttpKey.IS_PAGE, false);
             String paramPageSize = HttpKey.PAGE_SIZE;
             int valPageSize = 20;
@@ -169,27 +160,23 @@ public class HttpReader
                     }
                     valPageIndex++;
                 }
-            }
-            else {
+            } else {
                 getRecords(recordSender);
             }
         }
 
-        private int getRecords(RecordSender recordSender)
-        {
+        private int getRecords(RecordSender recordSender) {
             String encoding = readerSliceConfig.getString(HttpKey.ENCODING, null);
             Charset charset;
             if (encoding != null) {
                 charset = Charset.forName(encoding);
-            }
-            else {
+            } else {
                 charset = StandardCharsets.UTF_8;
             }
 
             try {
                 request = Request.create(method, uriBuilder.build());
-            }
-            catch (URISyntaxException e) {
+            } catch (URISyntaxException e) {
                 throw AddaxException.asAddaxException(
                         ILLEGAL_VALUE, e.getMessage()
                 );
@@ -201,8 +188,7 @@ public class HttpReader
             Object object;
             if (key != null) {
                 object = JSON.parseObject(body).get(key);
-            }
-            else {
+            } else {
                 object = JSON.parse(body);
             }
             // 需要判断返回的结果仅仅是一条记录还是多条记录，如果是一条记录，则是一个map
@@ -211,8 +197,7 @@ public class HttpReader
                 // 有空值的情况下, toString会过滤掉，所以不能简单的使用 object.toString()方式
                 // https://github.com/wgzhao/Addax/issues/171
                 jsonArray = JSON.parseArray(JSONObject.toJSONString(object, JSONWriter.Feature.WriteMapNullValue));
-            }
-            else if (object instanceof JSONObject) {
+            } else if (object instanceof JSONObject) {
                 jsonArray = new JSONArray();
                 jsonArray.add(object);
             }
@@ -242,8 +227,7 @@ public class HttpReader
                     Object v = JSONPath.eval(jsonObject, k);
                     if (v == null) {
                         record.addColumn(new StringColumn());
-                    }
-                    else {
+                    } else {
                         record.addColumn(new StringColumn(v.toString()));
                     }
                 }
@@ -252,13 +236,11 @@ public class HttpReader
             return i;
         }
 
-        private void setProxy(Configuration proxyConf)
-        {
+        private void setProxy(Configuration proxyConf) {
             URI host;
             try {
                 host = new URI(proxyConf.getString(HttpKey.HOST));
-            }
-            catch (URISyntaxException e) {
+            } catch (URISyntaxException e) {
                 throw AddaxException.asAddaxException(
                         ILLEGAL_VALUE, e.getMessage()
                 );
@@ -274,8 +256,7 @@ public class HttpReader
             }
         }
 
-        private Content createCloseableHttpResponse()
-        {
+        private Content createCloseableHttpResponse() {
             Map<String, Object> headers = readerSliceConfig.getMap(HttpKey.HEADERS, new HashMap<>());
             CloseableHttpClient httpClient;
             headers.forEach((k, v) -> request.addHeader(k, v.toString()));
@@ -284,14 +265,12 @@ public class HttpReader
                 return Executor.newInstance(httpClient)
                         .execute(request)
                         .returnContent();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        private CloseableHttpClient createCloseableHttpClient()
-        {
+        private CloseableHttpClient createCloseableHttpClient() {
             HttpClientBuilder httpClientBuilder = HttpClients.custom();
             if (proxy != null) {
                 httpClientBuilder.setProxy(proxy);
@@ -317,14 +296,12 @@ public class HttpReader
                 return httpClientBuilder
                         .setConnectionManager(cm)
                         .build();
-            }
-            else {
+            } else {
                 return httpClientBuilder.build();
             }
         }
 
-        private DefaultClientTlsStrategy customTlsStrategy()
-        {
+        private DefaultClientTlsStrategy customTlsStrategy() {
             TrustStrategy trustStrategy = (x509Certificates, s) -> true;
             try {
                 // use the TrustSelfSignedStrategy to allow Self Signed Certificates
@@ -333,8 +310,7 @@ public class HttpReader
                         .build();
                 // ignore hostname verification
                 return new DefaultClientTlsStrategy(ssl, NoopHostnameVerifier.INSTANCE);
-            }
-            catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+            } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
                 throw AddaxException.asAddaxException(
                         ILLEGAL_VALUE, e.getMessage()
                 );

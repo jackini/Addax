@@ -40,20 +40,17 @@ import static com.wgzhao.addax.common.base.Key.FETCH_SIZE;
 import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 
 public class PostgresqlReader
-        extends Reader
-{
+        extends Reader {
 
     private static final DataBaseType DATABASE_TYPE = DataBaseType.PostgreSQL;
 
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
         private Configuration originalConfig;
         private CommonRdbmsReader.Job commonRdbmsReaderMaster;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = super.getPluginJobConf();
             int fetchSize = this.originalConfig.getInt(FETCH_SIZE, DEFAULT_FETCH_SIZE);
             if (fetchSize < 1) {
@@ -67,44 +64,37 @@ public class PostgresqlReader
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             return this.commonRdbmsReaderMaster.split(this.originalConfig, adviceNumber);
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsReaderMaster.post(this.originalConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsReaderMaster.destroy(this.originalConfig);
         }
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
 
         private Configuration readerSliceConfig;
         private CommonRdbmsReader.Task commonRdbmsReaderSlave;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.readerSliceConfig = super.getPluginJobConf();
-            this.commonRdbmsReaderSlave = new CommonRdbmsReader.Task(DATABASE_TYPE, super.getTaskGroupId(), super.getTaskId())
-            {
+            this.commonRdbmsReaderSlave = new CommonRdbmsReader.Task(DATABASE_TYPE, super.getTaskGroupId(), super.getTaskId()) {
                 @Override
                 protected Column createColumn(ResultSet rs, ResultSetMetaData metaData, int i)
-                        throws SQLException, UnsupportedEncodingException
-                {
+                        throws SQLException, UnsupportedEncodingException {
                     if (metaData.getColumnType(i) == Types.DOUBLE && metaData.isCurrency(i)) {
                         // money type has currency symbol( etc $) and thousands separator(,)
-                        return new DoubleColumn(Double.valueOf(rs.getString(i).substring(1).replace(",","")));
+                        return new DoubleColumn(Double.valueOf(rs.getString(i).substring(1).replace(",", "")));
                     }
                     return super.createColumn(rs, metaData, i);
                 }
@@ -114,8 +104,7 @@ public class PostgresqlReader
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             int fetchSize = this.readerSliceConfig.getInt(FETCH_SIZE);
 
             this.commonRdbmsReaderSlave.startRead(this.readerSliceConfig, recordSender,
@@ -123,14 +112,12 @@ public class PostgresqlReader
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.commonRdbmsReaderSlave.post(this.readerSliceConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.commonRdbmsReaderSlave.destroy(this.readerSliceConfig);
         }
     }

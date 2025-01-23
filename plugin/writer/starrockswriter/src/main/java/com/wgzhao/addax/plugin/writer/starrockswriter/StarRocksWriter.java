@@ -22,36 +22,31 @@ import static com.wgzhao.addax.common.spi.ErrorCode.CONFIG_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.EXECUTE_FAIL;
 
 public class StarRocksWriter
-        extends Writer
-{
+        extends Writer {
 
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
 
         private static final Logger LOG = LoggerFactory.getLogger(Job.class);
         private Configuration originalConfig = null;
         private StarRocksWriterOptions options;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = super.getPluginJobConf();
             options = new StarRocksWriterOptions(super.getPluginJobConf());
             options.doPretreatment();
         }
 
         @Override
-        public void preCheck()
-        {
+        public void preCheck() {
             this.init();
             StarRocksWriterUtil.preCheckPrePareSQL(options);
             StarRocksWriterUtil.preCheckPostSQL(options);
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             String username = options.getUsername();
             String password = options.getPassword();
             String jdbcUrl = options.getJdbcUrl();
@@ -65,8 +60,7 @@ public class StarRocksWriter
         }
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             List<Configuration> configurations = new ArrayList<>(mandatoryNumber);
             for (int i = 0; i < mandatoryNumber; i++) {
                 configurations.add(originalConfig);
@@ -75,8 +69,7 @@ public class StarRocksWriter
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             String username = options.getUsername();
             String password = options.getPassword();
             String jdbcUrl = options.getJdbcUrl();
@@ -90,21 +83,18 @@ public class StarRocksWriter
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
         }
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
         private StarRocksWriterManager writerManager;
         private StarRocksWriterOptions options;
         private StarRocksISerializer rowSerializer;
 
         @Override
-        public void init()
-        {
+        public void init() {
             options = new StarRocksWriterOptions(super.getPluginJobConf());
             if (options.isWildcardColumn()) {
                 Connection conn = DBUtil.getConnection(DataBaseType.MySql, options.getJdbcUrl(), options.getUsername(), options.getPassword());
@@ -116,12 +106,10 @@ public class StarRocksWriter
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
         }
 
-        public void startWrite(RecordReceiver recordReceiver)
-        {
+        public void startWrite(RecordReceiver recordReceiver) {
             try {
                 Record record;
                 while ((record = recordReceiver.getFromReader()) != null) {
@@ -136,29 +124,26 @@ public class StarRocksWriter
                     }
                     writerManager.writeRecord(rowSerializer.serialize(record));
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw AddaxException.asAddaxException(EXECUTE_FAIL, e);
             }
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             try {
                 writerManager.close();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw AddaxException.asAddaxException(EXECUTE_FAIL, e);
             }
         }
 
         @Override
-        public void destroy() {}
+        public void destroy() {
+        }
 
         @Override
-        public boolean supportFailOver()
-        {
+        public boolean supportFailOver() {
             return false;
         }
     }

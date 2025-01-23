@@ -35,16 +35,14 @@ import java.util.Map;
 import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
 
 public class DirtyRecord
-        implements Record
-{
+        implements Record {
     private List<Column> columns = new ArrayList<>();
 
     private static final String NOT_SUPPORT_METHOD = "该方法不支持!";
 
     private Map<String, String> meta;
 
-    public static DirtyRecord asDirtyRecord(final Record record)
-    {
+    public static DirtyRecord asDirtyRecord(final Record record) {
         DirtyRecord result = new DirtyRecord();
         for (int i = 0; i < record.getColumnNumber(); i++) {
             result.addColumn(record.getColumn(i));
@@ -55,145 +53,121 @@ public class DirtyRecord
     }
 
     @Override
-    public void addColumn(Column column)
-    {
+    public void addColumn(Column column) {
         this.columns.add(DirtyColumn.asDirtyColumn(column, this.columns.size()));
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return JSON.toJSONString(this.columns);
     }
 
     @Override
-    public void setColumn(int i, Column column)
-    {
+    public void setColumn(int i, Column column) {
         throw AddaxException.asAddaxException(RUNTIME_ERROR, NOT_SUPPORT_METHOD);
     }
 
     @Override
-    public Column getColumn(int i)
-    {
+    public Column getColumn(int i) {
         throw AddaxException.asAddaxException(RUNTIME_ERROR, NOT_SUPPORT_METHOD);
     }
 
     @Override
-    public int getColumnNumber()
-    {
+    public int getColumnNumber() {
         throw AddaxException.asAddaxException(RUNTIME_ERROR, NOT_SUPPORT_METHOD);
     }
 
     @Override
-    public int getByteSize()
-    {
+    public int getByteSize() {
         throw AddaxException.asAddaxException(RUNTIME_ERROR, NOT_SUPPORT_METHOD);
     }
 
     @Override
-    public int getMemorySize()
-    {
+    public int getMemorySize() {
         throw AddaxException.asAddaxException(RUNTIME_ERROR, NOT_SUPPORT_METHOD);
     }
 
     @Override
-    public void setMeta(Map<String, String> meta)
-    {
+    public void setMeta(Map<String, String> meta) {
         this.meta = meta;
     }
 
     @Override
-    public Map<String, String> getMeta()
-    {
+    public Map<String, String> getMeta() {
         return this.meta;
     }
 
-    public List<Column> getColumns()
-    {
+    public List<Column> getColumns() {
         return columns;
     }
 
-    public void setColumns(List<Column> columns)
-    {
+    public void setColumns(List<Column> columns) {
         this.columns = columns;
     }
 }
 
 class DirtyColumn
-        extends Column
-{
+        extends Column {
 
     private static final String NOT_SUPPORT_METHOD = "该方法不支持!";
 
-    private DirtyColumn(Column column, int index)
-    {
+    private DirtyColumn(Column column, int index) {
         this(null == column ? null : column.getRawData(),
                 null == column ? Column.Type.NULL : column.getType(),
                 null == column ? 0 : column.getByteSize(), index);
     }
 
-    private DirtyColumn(Object object, Type type, int byteSize, int index)
-    {
+    private DirtyColumn(Object object, Type type, int byteSize, int index) {
         super(object, type, byteSize);
         // this.setIndex(index)
     }
 
-    public static Column asDirtyColumn(final Column column, int index)
-    {
+    public static Column asDirtyColumn(final Column column, int index) {
         return new DirtyColumn(column, index);
     }
 
     @Override
-    public Long asLong()
-    {
+    public Long asLong() {
         throw AddaxException.asAddaxException(RUNTIME_ERROR, NOT_SUPPORT_METHOD);
     }
 
     @Override
-    public Double asDouble()
-    {
+    public Double asDouble() {
         throw AddaxException.asAddaxException(RUNTIME_ERROR, NOT_SUPPORT_METHOD);
     }
 
     @Override
-    public String asString()
-    {
+    public String asString() {
         throw AddaxException.asAddaxException(RUNTIME_ERROR, NOT_SUPPORT_METHOD);
     }
 
     @Override
-    public Date asDate()
-    {
+    public Date asDate() {
         throw AddaxException.asAddaxException(RUNTIME_ERROR, NOT_SUPPORT_METHOD);
     }
 
     @Override
-    public byte[] asBytes()
-    {
+    public byte[] asBytes() {
         throw AddaxException.asAddaxException(RUNTIME_ERROR, NOT_SUPPORT_METHOD);
     }
 
     @Override
-    public Boolean asBoolean()
-    {
+    public Boolean asBoolean() {
         throw AddaxException.asAddaxException(RUNTIME_ERROR, NOT_SUPPORT_METHOD);
     }
 
     @Override
-    public BigDecimal asBigDecimal()
-    {
+    public BigDecimal asBigDecimal() {
         throw AddaxException.asAddaxException(RUNTIME_ERROR, NOT_SUPPORT_METHOD);
     }
 
     @Override
-    public BigInteger asBigInteger()
-    {
+    public BigInteger asBigInteger() {
         throw AddaxException.asAddaxException(RUNTIME_ERROR, NOT_SUPPORT_METHOD);
     }
 
     @Override
-    public Timestamp asTimestamp()
-    {
+    public Timestamp asTimestamp() {
         throw AddaxException.asAddaxException(RUNTIME_ERROR, NOT_SUPPORT_METHOD);
     }
 }

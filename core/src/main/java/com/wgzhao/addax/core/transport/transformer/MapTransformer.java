@@ -41,16 +41,13 @@ import static com.wgzhao.addax.common.util.MathUtil.subtract;
  * Created by liqiang on 16/3/4.
  */
 public class MapTransformer
-        extends Transformer
-{
-    public MapTransformer()
-    {
+        extends Transformer {
+    public MapTransformer() {
         setTransformerName("dx_map");
     }
 
     @Override
-    public Record evaluate(Record record, Object... paras)
-    {
+    public Record evaluate(Record record, Object... paras) {
 
         int columnIndex;
         String code;
@@ -74,8 +71,7 @@ public class MapTransformer
 
             Double.valueOf(column.asString());
             Double.valueOf(value);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     ILLEGAL_VALUE,
                     "paras:" + Arrays.asList(paras) + " => " + e.getMessage());
@@ -110,8 +106,7 @@ public class MapTransformer
             }
             record.setColumn(columnIndex, new StringColumn(newValue));
             return record;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     RUNTIME_ERROR, e.getMessage(), e);
         }

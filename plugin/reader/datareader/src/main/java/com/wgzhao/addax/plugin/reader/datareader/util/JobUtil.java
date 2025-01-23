@@ -21,8 +21,7 @@
 
 package com.wgzhao.addax.plugin.reader.datareader.util;
 
-public class JobUtil
-{
+public class JobUtil {
     private static final String[] JOBS = {
             "高级硬件工程师", "硬件工程师", "计算机软件", "高级软件工程师", "软件工程师", "软件UI设计师/工程师", "算法工程师", "仿真应用工程师",
             "ERP实施顾问", "ERP技术开发", "需求工程师", "系统集成工程师", "系统分析员", "系统工程师", "系统架构设计师", "数据库工程师/管理员",
@@ -127,8 +126,7 @@ public class JobUtil
             "驻唱/歌手", "舞蹈演员", "模特", "演员/群众演员", "娱乐领班", "娱乐服务员", "前台迎宾", "驯兽师/助理驯兽师", "志愿者/社会工作者", "其他",
     };
 
-    public static String nextJob()
-    {
+    public static String nextJob() {
         return CommonUtil.randChoose(JOBS);
     }
 }

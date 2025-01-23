@@ -28,8 +28,7 @@ import java.text.DecimalFormat;
 /**
  * 这里主要是业务层面的处理
  */
-public final class CommunicationTool
-{
+public final class CommunicationTool {
     public static final String STAGE = "stage";
     public static final String BYTE_SPEED = "byteSpeed";
     public static final String RECORD_SPEED = "recordSpeed";
@@ -61,10 +60,10 @@ public final class CommunicationTool
     private static final String WRITE_SUCCEED_BYTES = "writeSucceedBytes";
     //public static final String TRANSFORMER_NAME_PREFIX = "usedTimeByTransformer_"
 
-    private CommunicationTool() {}
+    private CommunicationTool() {
+    }
 
-    public static Communication getReportCommunication(Communication now, Communication old, int totalStage)
-    {
+    public static Communication getReportCommunication(Communication now, Communication old, int totalStage) {
         Validate.isTrue(now != null && old != null,
                 "为汇报准备的新旧metric不能为null");
 
@@ -93,45 +92,38 @@ public final class CommunicationTool
         return now;
     }
 
-    public static long getTotalReadRecords(Communication communication)
-    {
+    public static long getTotalReadRecords(Communication communication) {
 
         return communication.getLongCounter(READ_SUCCEED_RECORDS) + communication.getLongCounter(READ_FAILED_RECORDS);
     }
 
-    public static long getTotalReadBytes(Communication communication)
-    {
+    public static long getTotalReadBytes(Communication communication) {
         return communication.getLongCounter(READ_SUCCEED_BYTES) + communication.getLongCounter(READ_FAILED_BYTES);
     }
 
-    public static long getTotalErrorRecords(Communication communication)
-    {
+    public static long getTotalErrorRecords(Communication communication) {
         return communication.getLongCounter(READ_FAILED_RECORDS) + communication.getLongCounter(WRITE_FAILED_RECORDS);
     }
 
-    public static long getTotalErrorBytes(Communication communication)
-    {
+    public static long getTotalErrorBytes(Communication communication) {
         return communication.getLongCounter(READ_FAILED_BYTES) + communication.getLongCounter(WRITE_FAILED_BYTES);
     }
 
-    public static long getWriteSucceedRecords(Communication communication)
-    {
+    public static long getWriteSucceedRecords(Communication communication) {
         return communication.getLongCounter(WRITE_RECEIVED_RECORDS) - communication.getLongCounter(WRITE_FAILED_RECORDS);
     }
 
-    public static long getWriteSucceedBytes(Communication communication)
-    {
+    public static long getWriteSucceedBytes(Communication communication) {
         return communication.getLongCounter(WRITE_RECEIVED_BYTES) - communication.getLongCounter(WRITE_FAILED_BYTES);
     }
 
-    public static class Stringify
-    {
+    public static class Stringify {
         private final static DecimalFormat df = new DecimalFormat("0.00");
 
-        private Stringify() {}
+        private Stringify() {
+        }
 
-        public static String getSnapshot(Communication communication)
-        {
+        public static String getSnapshot(Communication communication) {
             StringBuilder sb = new StringBuilder();
             sb.append("Total ");
             sb.append(getTotal(communication));
@@ -170,23 +162,19 @@ public final class CommunicationTool
             return sb.toString();
         }
 
-        private static String getTotal(Communication communication)
-        {
+        private static String getTotal(Communication communication) {
             return String.format("%d records, %d bytes", communication.getLongCounter(TOTAL_READ_RECORDS), communication.getLongCounter(TOTAL_READ_BYTES));
         }
 
-        private static String getSpeed(Communication communication)
-        {
+        private static String getSpeed(Communication communication) {
             return String.format("%s/s, %d records/s", StrUtil.stringify(communication.getLongCounter(BYTE_SPEED)), communication.getLongCounter(RECORD_SPEED));
         }
 
-        private static String getError(Communication communication)
-        {
+        private static String getError(Communication communication) {
             return String.format("%d records, %d bytes", communication.getLongCounter(TOTAL_ERROR_RECORDS), communication.getLongCounter(TOTAL_ERROR_BYTES));
         }
 
-        private static String getPercentage(Communication communication)
-        {
+        private static String getPercentage(Communication communication) {
             return df.format(communication.getDoubleCounter(PERCENTAGE) * 100) + "%";
         }
     }

@@ -35,12 +35,10 @@ import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
 public class InfluxDBWriter
-        extends Writer
-{
+        extends Writer {
 
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
         private Configuration originalConfig = null;
 
         private String endpoint;
@@ -49,8 +47,7 @@ public class InfluxDBWriter
         private String database;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.originalConfig = super.getPluginJobConf();
             Configuration conn = originalConfig.getConfiguration(InfluxDBKey.CONNECTION);
             conn.getNecessaryValue(InfluxDBKey.TABLE, REQUIRED_VALUE);
@@ -67,8 +64,7 @@ public class InfluxDBWriter
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             List<String> preSqls = originalConfig.getList(InfluxDBKey.PRE_SQL, String.class);
             if (!preSqls.isEmpty()) {
                 try (InfluxDB influxDB = InfluxDBFactory.connect(this.endpoint, this.username, this.password)) {
@@ -76,8 +72,7 @@ public class InfluxDBWriter
                     for (String sql : preSqls) {
                         influxDB.query(new Query(sql));
                     }
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     throw AddaxException.asAddaxException(
                             CONNECT_ERROR, e
                     );
@@ -86,8 +81,7 @@ public class InfluxDBWriter
         }
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             List<Configuration> splitResultConfigs = new ArrayList<>();
             for (int j = 0; j < mandatoryNumber; j++) {
                 splitResultConfigs.add(this.originalConfig.clone());
@@ -96,8 +90,7 @@ public class InfluxDBWriter
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             List<String> postSqls = originalConfig.getList(InfluxDBKey.POST_SQL, String.class);
             if (!postSqls.isEmpty()) {
                 try (InfluxDB influxDB = InfluxDBFactory.connect(endpoint, username, password)) {
@@ -105,8 +98,7 @@ public class InfluxDBWriter
                     for (String sql : postSqls) {
                         influxDB.query(new Query(sql));
                     }
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     throw AddaxException.asAddaxException(
                             ILLEGAL_VALUE, e
                     );
@@ -115,45 +107,38 @@ public class InfluxDBWriter
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
         private InfluxDBWriterTask influxDBWriterTask;
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration writerSliceConfig = getPluginJobConf();
             this.influxDBWriterTask = new InfluxDBWriterTask(writerSliceConfig);
             this.influxDBWriterTask.init();
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             this.influxDBWriterTask.prepare();
         }
 
-        public void startWrite(RecordReceiver recordReceiver)
-        {
+        public void startWrite(RecordReceiver recordReceiver) {
             this.influxDBWriterTask.startWrite(recordReceiver, getTaskPluginCollector());
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             this.influxDBWriterTask.post();
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             this.influxDBWriterTask.destroy();
         }
     }

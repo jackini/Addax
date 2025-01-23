@@ -45,8 +45,7 @@ import java.io.IOException;
 import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.NOT_SUPPORT_TYPE;
 
-public abstract class HbaseAbstractTask
-{
+public abstract class HbaseAbstractTask {
     private final static Logger LOG = LoggerFactory.getLogger(HbaseAbstractTask.class);
 
     private final byte[] startKey;
@@ -61,8 +60,7 @@ public abstract class HbaseAbstractTask
     protected Scan scan;
     protected ResultScanner resultScanner;
 
-    public HbaseAbstractTask(Configuration configuration)
-    {
+    public HbaseAbstractTask(Configuration configuration) {
 
         this.htable = Hbase20xHelper.getTable(configuration);
 
@@ -80,8 +78,7 @@ public abstract class HbaseAbstractTask
     public abstract void initScan(Scan scan);
 
     public void prepare()
-            throws Exception
-    {
+            throws Exception {
         this.scan = new Scan();
         this.scan.setSmall(false);
         this.scan.withStartRow(startKey);
@@ -98,20 +95,17 @@ public abstract class HbaseAbstractTask
         this.resultScanner = this.htable.getScanner(this.scan);
     }
 
-    public void close()
-    {
+    public void close() {
         Hbase20xHelper.closeResultScanner(this.resultScanner);
         Hbase20xHelper.closeTable(this.htable);
     }
 
     protected Result getNextHbaseRow()
-            throws IOException
-    {
+            throws IOException {
         Result result;
         try {
             result = resultScanner.next();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             if (lastResult != null) {
                 this.scan.withStopRow(lastResult.getRow());
             }
@@ -127,8 +121,7 @@ public abstract class HbaseAbstractTask
     }
 
     public Column convertBytesToAssignType(ColumnType columnType, byte[] byteArray, String dateformat)
-            throws Exception
-    {
+            throws Exception {
         Column column;
         switch (columnType) {
             case BOOLEAN:
@@ -166,8 +159,7 @@ public abstract class HbaseAbstractTask
     }
 
     public Column convertValueToAssignType(ColumnType columnType, String constantValue, String dateformat)
-            throws Exception
-    {
+            throws Exception {
         Column column;
         switch (columnType) {
             case BOOLEAN:

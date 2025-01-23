@@ -21,10 +21,11 @@ package com.wgzhao.addax.plugin.reader.ftpreader;
 
 import com.wgzhao.addax.common.base.Constant;
 
-public class FtpConstant extends Constant
-{
+public class FtpConstant extends Constant {
 
-    public FtpConstant() {super();}
+    public FtpConstant() {
+        super();
+    }
 
     public static final int DEFAULT_FTP_PORT = 21;
     public static final int DEFAULT_SFTP_PORT = 22;

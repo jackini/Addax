@@ -41,18 +41,15 @@ import static com.wgzhao.addax.common.spi.ErrorCode.CONFIG_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 
 public class NormalTask
-        extends HbaseAbstractTask
-{
+        extends HbaseAbstractTask {
     private static final Logger LOG = LoggerFactory.getLogger(NormalTask.class);
 
-    public NormalTask(Configuration configuration)
-    {
+    public NormalTask(Configuration configuration) {
         super(configuration);
     }
 
     @Override
-    public Put convertRecordToPut(Record record)
-    {
+    public Put convertRecordToPut(Record record) {
         byte[] rowkey = getRowkey(record);
         Put put;
         if (this.versionColumn == null) {
@@ -61,8 +58,7 @@ public class NormalTask
                 //等价与0.94 put.setWriteToWAL(super.walFlag)
                 put.setDurability(Durability.SKIP_WAL);
             }
-        }
-        else {
+        } else {
             long timestamp = getVersion(record);
             put = new Put(rowkey, timestamp);
         }
@@ -87,8 +83,7 @@ public class NormalTask
         return put;
     }
 
-    public byte[] getRowkey(Record record)
-    {
+    public byte[] getRowkey(Record record) {
         byte[] rowkeyBuffer = {};
         for (Configuration aRowkeyColumn : rowkeyColumn) {
             Integer index = aRowkeyColumn.getInt(HBaseKey.INDEX);
@@ -97,8 +92,7 @@ public class NormalTask
             if (index == -1) {
                 String value = aRowkeyColumn.getString(HBaseKey.VALUE);
                 rowkeyBuffer = Bytes.add(rowkeyBuffer, getValueByte(columnType, value));
-            }
-            else {
+            } else {
                 if (index >= record.getColumnNumber()) {
                     throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                             String.format("The field[index] of rowkeyColumn is out-range, it should be less than %s. actually got %s.", record.getColumnNumber(), index));
@@ -110,8 +104,7 @@ public class NormalTask
         return rowkeyBuffer;
     }
 
-    public long getVersion(Record record)
-    {
+    public long getVersion(Record record) {
         int index = versionColumn.getInt(HBaseKey.INDEX);
         long timestamp;
         if (index == -1) {
@@ -120,8 +113,7 @@ public class NormalTask
             if (timestamp < 0) {
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE, "Illegal timestamp version");
             }
-        }
-        else {
+        } else {
             //指定列作为版本,long/doubleColumn直接record.asLong, 其它类型尝试用yyyy-MM-dd HH:mm:ss,yyyy-MM-dd HH:mm:ss SSS去format
             if (index >= record.getColumnNumber()) {
                 throw AddaxException.asAddaxException(CONFIG_ERROR,
@@ -134,17 +126,14 @@ public class NormalTask
             SimpleDateFormat dfMs = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
             if (record.getColumn(index) instanceof LongColumn || record.getColumn(index) instanceof DoubleColumn) {
                 timestamp = record.getColumn(index).asLong();
-            }
-            else {
+            } else {
                 Date date;
                 try {
                     date = dfMs.parse(record.getColumn(index).asString());
-                }
-                catch (ParseException e) {
+                } catch (ParseException e) {
                     try {
                         date = dfSeconds.parse(record.getColumn(index).asString());
-                    }
-                    catch (ParseException e1) {
+                    } catch (ParseException e1) {
                         LOG.info(String.format("The value of version %s can not parsed as Date type with 'yyyy-MM-dd HH:mm:ss' and 'yyyy-MM-dd HH:mm:ss SSS' format", index));
                         throw AddaxException.asAddaxException(ILLEGAL_VALUE, e1);
                     }

@@ -68,21 +68,18 @@ import static com.wgzhao.addax.common.spi.ErrorCode.NOT_SUPPORT_TYPE;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
 
-public class StorageWriterUtil
-{
+public class StorageWriterUtil {
     private static final Logger LOG = LoggerFactory.getLogger(StorageWriterUtil.class);
     private static final Set<String> supportedWriteModes = new HashSet<>(Arrays.asList("truncate", "append", "nonConflict", "overwrite"));
 
-    private StorageWriterUtil()
-    {
+    private StorageWriterUtil() {
 
     }
 
     /*
      * check parameter: writeMode, encoding, compress, filedDelimiter
      */
-    public static void validateParameter(Configuration writerConfiguration)
-    {
+    public static void validateParameter(Configuration writerConfiguration) {
         // writeMode check
         String writeMode = writerConfiguration.getNecessaryValue(Key.WRITE_MODE, REQUIRED_VALUE);
         writeMode = writeMode.trim();
@@ -102,14 +99,12 @@ public class StorageWriterUtil
             // like "  ", null
             LOG.warn("The item encoding is empty, uses [{}] as default.", Constant.DEFAULT_ENCODING);
             writerConfiguration.set(Key.ENCODING, Constant.DEFAULT_ENCODING);
-        }
-        else {
+        } else {
             try {
                 encoding = encoding.trim();
                 writerConfiguration.set(Key.ENCODING, encoding);
                 Charsets.toCharset(encoding);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw AddaxException.asAddaxException(
                         NOT_SUPPORT_TYPE,
                         String.format("The encoding [%s] is unsupported.", encoding), e);
@@ -144,8 +139,7 @@ public class StorageWriterUtil
         }
     }
 
-    public static List<Configuration> split(Configuration writerSliceConfig, Set<String> originAllFileExists, int mandatoryNumber)
-    {
+    public static List<Configuration> split(Configuration writerSliceConfig, Set<String> originAllFileExists, int mandatoryNumber) {
         List<Configuration> writerSplitConfigs = new ArrayList<>();
         LOG.info("Begin to split...");
         if (mandatoryNumber == 1) {
@@ -156,7 +150,7 @@ public class StorageWriterUtil
         Set<String> allFileExists = new HashSet<>(originAllFileExists);
 
         String filePrefix = writerSliceConfig.getString(Key.FILE_NAME);
-        String suffix="";
+        String suffix = "";
         if (filePrefix.contains(".")) {
             String[] split = filePrefix.split("\\.");
             filePrefix = split[0];
@@ -179,8 +173,7 @@ public class StorageWriterUtil
         return writerSplitConfigs;
     }
 
-    public static String buildFilePath(String path, String fileName, String suffix)
-    {
+    public static String buildFilePath(String path, String fileName, String suffix) {
         boolean isEndWithSeparator = false;
         switch (IOUtils.DIR_SEPARATOR) {
             case IOUtils.DIR_SEPARATOR_UNIX:
@@ -197,17 +190,15 @@ public class StorageWriterUtil
         }
         if (null == suffix) {
             suffix = "";
-        }
-        else {
+        } else {
             suffix = suffix.trim();
         }
         return String.format("%s%s%s", path, fileName, suffix);
     }
 
     public static void writeToStream(RecordReceiver lineReceiver,
-            OutputStream outputStream, Configuration config, String fileName,
-            TaskPluginCollector taskPluginCollector)
-    {
+                                     OutputStream outputStream, Configuration config, String fileName,
+                                     TaskPluginCollector taskPluginCollector) {
         String encoding = config.getString(Key.ENCODING, Constant.DEFAULT_ENCODING);
 
         String compress = config.getString(Key.COMPRESS);
@@ -217,58 +208,49 @@ public class StorageWriterUtil
         try {
             if (null == compress) {
                 writer = new BufferedWriter(new OutputStreamWriter(outputStream, encoding));
-            }
-            else {
+            } else {
                 //normalize compress name
                 if ("gzip".equalsIgnoreCase(compress)) {
                     compress = "gz";
-                }
-                else if ("bz2".equalsIgnoreCase(compress)) {
+                } else if ("bz2".equalsIgnoreCase(compress)) {
                     compress = "bzip2";
                 }
 
                 if ("zip".equals(compress)) {
                     ZipCycleOutputStream zis = new ZipCycleOutputStream(outputStream, fileName);
                     writer = new BufferedWriter(new OutputStreamWriter(zis, encoding));
-                }
-                else {
+                } else {
                     CompressorOutputStream compressorOutputStream = new CompressorStreamFactory().createCompressorOutputStream(compress,
                             outputStream);
                     writer = new BufferedWriter(new OutputStreamWriter(compressorOutputStream, encoding));
                 }
             }
             StorageWriterUtil.doWriteToStream(lineReceiver, writer, fileName, config, taskPluginCollector);
-        }
-        catch (UnsupportedEncodingException uee) {
+        } catch (UnsupportedEncodingException uee) {
             throw AddaxException
                     .asAddaxException(
                             ENCODING_ERROR,
                             String.format("The encoding [%s] is unsupported.", encoding), uee);
-        }
-        catch (NullPointerException e) {
+        } catch (NullPointerException e) {
             throw AddaxException.asAddaxException(RUNTIME_ERROR, "NPE occurred", e);
-        }
-        catch (CompressorException e) {
+        } catch (CompressorException e) {
             throw AddaxException.asAddaxException(
                     NOT_SUPPORT_TYPE,
                     "The compress algorithm [" + compress + "] is unsupported yet."
             );
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw AddaxException.asAddaxException(
                     IO_ERROR,
                     String.format("IO exception occurred when writing [%s].", fileName), e);
-        }
-        finally {
+        } finally {
             IOUtils.closeQuietly(writer, null);
         }
     }
 
     private static void doWriteToStream(RecordReceiver lineReceiver,
-            BufferedWriter writer, String context, Configuration config,
-            TaskPluginCollector taskPluginCollector)
-            throws IOException
-    {
+                                        BufferedWriter writer, String context, Configuration config,
+                                        TaskPluginCollector taskPluginCollector)
+            throws IOException {
         CSVFormat.Builder csvBuilder = CSVFormat.DEFAULT.builder();
         csvBuilder.setRecordSeparator(IOUtils.LINE_SEPARATOR_UNIX);
         String nullFormat = config.getString(Key.NULL_FORMAT);
@@ -317,8 +299,7 @@ public class StorageWriterUtil
         csvPrinter.close();
     }
 
-    public static List<String> recordToList(Record record, String nullFormat, DateFormat dateParse, TaskPluginCollector taskPluginCollector)
-    {
+    public static List<String> recordToList(Record record, String nullFormat, DateFormat dateParse, TaskPluginCollector taskPluginCollector) {
         try {
             List<String> splitRows = new ArrayList<>();
             int recordLength = record.getColumnNumber();
@@ -329,18 +310,15 @@ public class StorageWriterUtil
                     if (null == column || null == column.getRawData() || column.asString().equals(nullFormat)) {
                         // warn: it's all ok if nullFormat is null
                         splitRows.add(nullFormat);
-                    }
-                    else {
+                    } else {
                         // warn: it's all ok if nullFormat is null
                         boolean isDateColumn = column instanceof DateColumn || column instanceof TimestampColumn;
                         if (!isDateColumn) {
                             splitRows.add(column.asString());
-                        }
-                        else {
+                        } else {
                             if (null != dateParse) {
                                 splitRows.add(dateParse.format(column.asDate()));
-                            }
-                            else {
+                            } else {
                                 splitRows.add(column.asString());
                             }
                         }
@@ -348,8 +326,7 @@ public class StorageWriterUtil
                 }
             }
             return splitRows;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             // warn: dirty data
             taskPluginCollector.collectDirtyRecord(record, e);
             return null;
@@ -357,8 +334,7 @@ public class StorageWriterUtil
     }
 
     public static void writeToSql(RecordReceiver lineReceiver, BufferedWriter writer, Configuration config)
-            throws IOException
-    {
+            throws IOException {
         // sql format required table and column name and optional extendedInsert and optional batchSize
         String tableName = config.getNecessaryValue(Key.TABLE, REQUIRED_VALUE);
         String existColumns = config.getString(Key.COLUMN, null);
@@ -388,8 +364,7 @@ public class StorageWriterUtil
                 column = record.getColumn(i);
                 if (column instanceof LongColumn || column instanceof BoolColumn) {
                     sb.append(column.asString());
-                }
-                else {
+                } else {
                     sb.append("'").append(column.asString()).append("'");
                 }
                 if (i < record.getColumnNumber() - 1) {
@@ -407,13 +382,11 @@ public class StorageWriterUtil
                     sb.append(sqlHeader).append(" VALUES (");
                     // reset counter
                     curNum = 0;
-                }
-                else {
+                } else {
                     sb.append("), (");
                     curNum++;
                 }
-            }
-            else {
+            } else {
                 sb.append(");\n");
                 //write to file
                 writer.write(sb.toString());

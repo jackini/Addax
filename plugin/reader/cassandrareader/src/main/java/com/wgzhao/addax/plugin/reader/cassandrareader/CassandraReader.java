@@ -35,20 +35,17 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 public class CassandraReader
-        extends Reader
-{
+        extends Reader {
     private static final Logger LOG = LoggerFactory.getLogger(CassandraReader.class);
 
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
 
         private Configuration jobConfig = null;
         private Cluster cluster = null;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.jobConfig = super.getPluginJobConf();
             this.jobConfig = super.getPluginJobConf();
             String username = jobConfig.getString(MyKey.USERNAME);
@@ -64,8 +61,7 @@ public class CassandraReader
                     clusterBuilder = clusterBuilder.withSSL();
                 }
                 cluster = clusterBuilder.build();
-            }
-            else {
+            } else {
                 cluster = Cluster.builder().withPort(port)
                         .addContactPoints(hosts.split(",")).build();
             }
@@ -73,29 +69,25 @@ public class CassandraReader
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
 
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             return CassandraReaderHelper.splitJob(adviceNumber, jobConfig, cluster);
         }
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
         private Session session = null;
         private String queryString = null;
         private ConsistencyLevel consistencyLevel;
         private int columnNumber = 0;
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration taskConfig = super.getPluginJobConf();
             String username = taskConfig.getString(MyKey.USERNAME);
             String password = taskConfig.getString(MyKey.PASSWORD);
@@ -114,8 +106,7 @@ public class CassandraReader
                     clusterBuilder = clusterBuilder.withSSL();
                 }
                 cluster = clusterBuilder.build();
-            }
-            else {
+            } else {
                 cluster = Cluster.builder().withPort(port)
                         .addContactPoints(hosts.split(",")).build();
             }
@@ -123,8 +114,7 @@ public class CassandraReader
             String cl = taskConfig.getString(MyKey.CONSISTENCY_LEVEL);
             if (cl != null && !cl.isEmpty()) {
                 consistencyLevel = ConsistencyLevel.valueOf(cl);
-            }
-            else {
+            } else {
                 consistencyLevel = ConsistencyLevel.LOCAL_QUORUM;
             }
 
@@ -133,8 +123,7 @@ public class CassandraReader
         }
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             ResultSet r = session.execute(new SimpleStatement(queryString).setConsistencyLevel(consistencyLevel));
             for (Row row : r) {
                 Record record = recordSender.createRecord();
@@ -147,8 +136,7 @@ public class CassandraReader
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
 
         }
     }

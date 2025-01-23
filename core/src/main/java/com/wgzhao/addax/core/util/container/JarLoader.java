@@ -37,20 +37,16 @@ import static com.wgzhao.addax.common.spi.ErrorCode.PLUGIN_INIT_ERROR;
  * 提供Jar隔离的加载机制，会把传入的路径、及其子路径、以及路径中的jar文件加入到class path。
  */
 public class JarLoader
-        extends URLClassLoader
-{
-    public JarLoader(String[] paths)
-    {
+        extends URLClassLoader {
+    public JarLoader(String[] paths) {
         this(paths, JarLoader.class.getClassLoader());
     }
 
-    public JarLoader(String[] paths, ClassLoader parent)
-    {
+    public JarLoader(String[] paths, ClassLoader parent) {
         super(getURLs(paths), parent);
     }
 
-    private static URL[] getURLs(String[] paths)
-    {
+    private static URL[] getURLs(String[] paths) {
         Validate.isTrue(null != paths && 0 != paths.length, "The jar path can not be empty");
 
         List<String> dirs = new ArrayList<>();
@@ -67,8 +63,7 @@ public class JarLoader
         return urls.toArray(new URL[0]);
     }
 
-    private static void collectDirs(String path, List<String> collector)
-    {
+    private static void collectDirs(String path, List<String> collector) {
         if (null == path || StringUtils.isBlank(path)) {
             return;
         }
@@ -88,8 +83,7 @@ public class JarLoader
         }
     }
 
-    private static List<URL> doGetURLs(final String path)
-    {
+    private static List<URL> doGetURLs(final String path) {
         Validate.isTrue(!StringUtils.isBlank(path), "The jar path can not be empty");
 
         File jarPath = new File(path);
@@ -108,8 +102,7 @@ public class JarLoader
         for (File allJar : allJars) {
             try {
                 jarURLs.add(allJar.toURI().toURL());
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw AddaxException.asAddaxException(PLUGIN_INIT_ERROR,
                         "Exception occurred when load the jar package.", e);
             }

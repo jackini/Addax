@@ -32,13 +32,12 @@ import java.util.Map;
 /**
  * 提供通用的根据数字范围、字符串范围等进行切分的通用功能.
  */
-public final class RangeSplitUtil
-{
+public final class RangeSplitUtil {
 
-    private RangeSplitUtil() {}
+    private RangeSplitUtil() {
+    }
 
-    public static String[] doAsciiStringSplit(String left, String right, int expectSliceNumber)
-    {
+    public static String[] doAsciiStringSplit(String left, String right, int expectSliceNumber) {
         int radix = 128;
 
         BigInteger[] tempResult = doBigIntegerSplit(stringToBigInteger(left, radix),
@@ -56,8 +55,7 @@ public final class RangeSplitUtil
         return result;
     }
 
-    public static long[] doLongSplit(long left, long right, int expectSliceNumber)
-    {
+    public static long[] doLongSplit(long left, long right, int expectSliceNumber) {
         BigInteger[] result = doBigIntegerSplit(BigInteger.valueOf(left),
                 BigInteger.valueOf(right), expectSliceNumber);
         long[] returnResult = new long[result.length];
@@ -67,8 +65,7 @@ public final class RangeSplitUtil
         return returnResult;
     }
 
-    public static BigInteger[] doBigIntegerSplit(BigInteger left, BigInteger right, int expectSliceNumber)
-    {
+    public static BigInteger[] doBigIntegerSplit(BigInteger left, BigInteger right, int expectSliceNumber) {
         if (expectSliceNumber < 1) {
             throw new IllegalArgumentException(String.format(
                     "The number of splits cannot be less than 1, expectSliceNumber = [%s].", expectSliceNumber));
@@ -80,9 +77,8 @@ public final class RangeSplitUtil
         }
 
         if (left.compareTo(right) == 0) {
-            return new BigInteger[] {left, right};
-        }
-        else {
+            return new BigInteger[]{left, right};
+        } else {
             // 调整大小顺序，确保 left < right
             if (left.compareTo(right) > 0) {
                 BigInteger temp = left;
@@ -121,8 +117,7 @@ public final class RangeSplitUtil
         }
     }
 
-    private static void checkIfBetweenRange(int value, int left, int right)
-    {
+    private static void checkIfBetweenRange(int value, int left, int right) {
         if (value < left || value > right) {
             throw new IllegalArgumentException(String.format("The value of parameter can not less than [%s] or greater than [%s].",
                     left, right));
@@ -133,12 +128,10 @@ public final class RangeSplitUtil
      * 由于只支持 ascii 码对应字符，所以radix 范围为[1,128]
      *
      * @param aString ascii码
-     * @param radix 指数
-     *
+     * @param radix   指数
      * @return bigint
      */
-    public static BigInteger stringToBigInteger(String aString, int radix)
-    {
+    public static BigInteger stringToBigInteger(String aString, int radix) {
         if (null == aString) {
             throw new IllegalArgumentException("The parameter bigInteger cannot be null.");
         }
@@ -169,12 +162,10 @@ public final class RangeSplitUtil
      * 把BigInteger 转换为 String.注意：radix 和 basic 范围都为[1,128], radix + basic 的范围也必须在[1,128].
      *
      * @param bigInteger 要转的数
-     * @param radix  范围
-     *
+     * @param radix      范围
      * @return string
      */
-    private static String bigIntegerToString(BigInteger bigInteger, int radix)
-    {
+    private static String bigIntegerToString(BigInteger bigInteger, int radix) {
         if (null == bigInteger) {
             throw new IllegalArgumentException("The parameter bigInteger cannot be null.");
         }
@@ -216,11 +207,9 @@ public final class RangeSplitUtil
      * 返回的Pair，left=最小字符，right=最大字符.
      *
      * @param aString 字符串
-     *
      * @return pair
      */
-    public static Pair<Character, Character> getMinAndMaxCharacter(String aString)
-    {
+    public static Pair<Character, Character> getMinAndMaxCharacter(String aString) {
         if (!isPureAscii(aString)) {
             throw new IllegalArgumentException(
                     String.format("When split by string, only ASCII chars are supported, " +
@@ -240,8 +229,7 @@ public final class RangeSplitUtil
         return new ImmutablePair<>(min, max);
     }
 
-    private static boolean isPureAscii(String aString)
-    {
+    private static boolean isPureAscii(String aString) {
         if (null == aString) {
             return false;
         }

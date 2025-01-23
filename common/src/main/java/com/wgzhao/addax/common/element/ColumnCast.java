@@ -32,44 +32,38 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-public final class ColumnCast
-{
+public final class ColumnCast {
 
-    private ColumnCast() {}
+    private ColumnCast() {
+    }
 
-    public static void bind(final Configuration configuration)
-    {
+    public static void bind(final Configuration configuration) {
         StringCast.init(configuration);
         DateCast.init(configuration);
         BytesCast.init(configuration);
     }
 
     public static Date string2Date(final StringColumn column)
-            throws ParseException
-    {
+            throws ParseException {
         return StringCast.asDate(column);
     }
 
     public static byte[] string2Bytes(final StringColumn column)
-            throws UnsupportedEncodingException
-    {
+            throws UnsupportedEncodingException {
         return StringCast.asBytes(column);
     }
 
-    public static String date2String(final DateColumn column)
-    {
+    public static String date2String(final DateColumn column) {
         return DateCast.asString(column);
     }
 
     public static String bytes2String(final BytesColumn column)
-            throws UnsupportedEncodingException
-    {
+            throws UnsupportedEncodingException {
         return BytesCast.asString(column);
     }
 }
 
-class StringCast
-{
+class StringCast {
 
     static String datetimeFormat = "yyyy-MM-dd HH:mm:ss";
     static String dateFormat = "yyyy-MM-dd";
@@ -82,10 +76,10 @@ class StringCast
     static TimeZone timeZoner;
     static String encoding = "UTF-8";
 
-    private StringCast() {}
+    private StringCast() {
+    }
 
-    static void init(final Configuration configuration)
-    {
+    static void init(final Configuration configuration) {
         StringCast.datetimeFormat = configuration.getString(
                 "common.column.datetimeFormat", StringCast.datetimeFormat);
         StringCast.dateFormat = configuration.getString(
@@ -111,39 +105,34 @@ class StringCast
     }
 
     static Date asDate(final StringColumn column)
-            throws ParseException
-    {
+            throws ParseException {
         if (null == column.asString()) {
             return null;
         }
 
         try {
             return StringCast.datetimeFormatter.parse(column.asString());
-        }
-        catch (ParseException ignored) {
+        } catch (ParseException ignored) {
             //
         }
 
         try {
             return StringCast.dateFormatter.parse(column.asString());
-        }
-        catch (ParseException ignored) {
+        } catch (ParseException ignored) {
             //
         }
 
         ParseException e;
         try {
             return StringCast.timeFormatter.parse(column.asString());
-        }
-        catch (ParseException pe) {
+        } catch (ParseException pe) {
             e = pe;
         }
 
         for (String format : StringCast.extraFormats) {
             try {
                 return FastDateFormat.getInstance(format, StringCast.timeZoner).parse(column.asString());
-            }
-            catch (ParseException pe) {
+            } catch (ParseException pe) {
                 e = pe;
             }
         }
@@ -151,8 +140,7 @@ class StringCast
     }
 
     static byte[] asBytes(final StringColumn column)
-            throws UnsupportedEncodingException
-    {
+            throws UnsupportedEncodingException {
         if (null == column.asString()) {
             return new byte[0];
         }
@@ -166,18 +154,17 @@ class StringCast
  * <p>
  * 迟南已经修复了该问题，但是为了维护性，还是直接使用apache的内置函数
  */
-class DateCast
-{
+class DateCast {
     static String datetimeFormat = "yyyy-MM-dd HH:mm:ss";
     static String dateFormat = "yyyy-MM-dd";
     static String timeFormat = "HH:mm:ss";
     static String timeZone = "GMT+8";
     static TimeZone timeZoner = TimeZone.getTimeZone(DateCast.timeZone);
 
-    private DateCast() {}
+    private DateCast() {
+    }
 
-    static void init(final Configuration configuration)
-    {
+    static void init(final Configuration configuration) {
         DateCast.datetimeFormat = configuration.getString(
                 "common.column.datetimeFormat", datetimeFormat);
         DateCast.timeFormat = configuration.getString(
@@ -189,8 +176,7 @@ class DateCast
         DateCast.timeZoner = TimeZone.getTimeZone(DateCast.timeZone);
     }
 
-    static String asString(final DateColumn column)
-    {
+    static String asString(final DateColumn column) {
         if (null == column.asDate()) {
             return null;
         }
@@ -213,21 +199,19 @@ class DateCast
     }
 }
 
-class BytesCast
-{
+class BytesCast {
     static String encoding = "utf-8";
 
-    private BytesCast() {}
+    private BytesCast() {
+    }
 
-    static void init(final Configuration configuration)
-    {
+    static void init(final Configuration configuration) {
         BytesCast.encoding = configuration.getString("common.column.encoding",
                 BytesCast.encoding);
     }
 
     static String asString(final BytesColumn column)
-            throws UnsupportedEncodingException
-    {
+            throws UnsupportedEncodingException {
         if (null == column.asBytes()) {
             return null;
         }

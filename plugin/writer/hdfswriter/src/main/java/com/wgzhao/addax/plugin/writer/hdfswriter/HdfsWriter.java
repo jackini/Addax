@@ -58,11 +58,9 @@ import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
 
 public class HdfsWriter
-        extends Writer
-{
+        extends Writer {
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
         private static final Logger LOG = LoggerFactory.getLogger(Job.class);
 
         private static final String SKIP_TRASH = "skipTrash";
@@ -81,8 +79,7 @@ public class HdfsWriter
         public static final Set<String> SUPPORT_FORMAT = new HashSet<>(Arrays.asList("ORC", "PARQUET", "TEXT"));
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.writerSliceConfig = this.getPluginJobConf();
             this.validateParameter();
 
@@ -91,8 +88,7 @@ public class HdfsWriter
             hdfsHelper.getFileSystem(this.writerSliceConfig);
         }
 
-        private void validateParameter()
-        {
+        private void validateParameter() {
             String defaultFS = this.writerSliceConfig.getNecessaryValue(Key.DEFAULT_FS, REQUIRED_VALUE);
             //fileType check
             String fileType = this.writerSliceConfig.getNecessaryValue(Key.FILE_TYPE, REQUIRED_VALUE).toUpperCase();
@@ -118,8 +114,7 @@ public class HdfsWriter
             List<Configuration> columns = this.writerSliceConfig.getListConfiguration(Key.COLUMN);
             if (null == columns || columns.isEmpty()) {
                 throw AddaxException.asAddaxException(REQUIRED_VALUE, "The item columns should be configured");
-            }
-            else {
+            } else {
                 boolean rewriteFlag = false;
                 for (int i = 0; i < columns.size(); i++) {
                     Configuration eachColumnConf = columns.get(i);
@@ -165,8 +160,7 @@ public class HdfsWriter
             if ("ORC".equals(fileType)) {
                 try {
                     CompressionKind.valueOf(compress);
-                }
-                catch (IllegalArgumentException e) {
+                } catch (IllegalArgumentException e) {
                     throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                             String.format("The ORC format only supports [%s] compression. your configure [%s] is unsupported yet.",
                                     Arrays.toString(CompressionKind.values()), compress));
@@ -179,8 +173,7 @@ public class HdfsWriter
                 }
                 try {
                     CompressionCodecName.fromConf(compress);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                             String.format("The PARQUET format only supports [%s] compression. your configure [%s] is unsupported yet.",
                                     Arrays.toString(CompressionCodecName.values()), compress));
@@ -199,8 +192,7 @@ public class HdfsWriter
                 encoding = encoding.trim();
                 this.writerSliceConfig.set(Key.ENCODING, encoding);
                 Charsets.toCharset(encoding);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                         String.format("The encoding [%s] is unsupported yet.", encoding), e);
             }
@@ -210,8 +202,7 @@ public class HdfsWriter
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             // check preShell item
             List<String> preShells = this.writerSliceConfig.getList(PRE_SHELL, String.class);
             boolean ignore = this.writerSliceConfig.getBool(IGNORE_ERROR, false);
@@ -236,14 +227,12 @@ public class HdfsWriter
                 if ("append".equals(writeMode)) {
                     LOG.info("The current write mode is set to 'append', no cleanup is performed before writing. " +
                             "Files with the prefix [{}] are written in the [{}] directory.", fileName, path);
-                }
-                else if ("nonConflict".equals(writeMode) && isExistFile) {
+                } else if ("nonConflict".equals(writeMode) && isExistFile) {
                     throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                             String.format("The current writeMode is set to 'nonConflict', but the directory [%s] is not empty, it includes the sub-path(s): [%s]",
                                     path, String.join(",", Arrays.stream(existFilePaths).map(Path::getName).collect(Collectors.toSet()))));
                 }
-            }
-            else {
+            } else {
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                         String.format("The directory [%s]  does not exists. please create it first. ", path));
             }
@@ -256,8 +245,7 @@ public class HdfsWriter
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             if ("overwrite".equals(writeMode)) {
                 hdfsHelper.deleteFilesFromDir(new Path(path), this.skipTrash);
             }
@@ -278,14 +266,12 @@ public class HdfsWriter
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             hdfsHelper.closeFileSystem();
         }
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             LOG.info("Begin splitting ...");
 
             List<Configuration> writerSplitConfigs = new ArrayList<>();
@@ -326,8 +312,7 @@ public class HdfsWriter
          * @param userPath hdfs path
          * @return temporary path
          */
-        private String buildTmpFilePath(String userPath)
-        {
+        private String buildTmpFilePath(String userPath) {
             String tmpDir;
             String tmpFilePath;
 
@@ -352,12 +337,10 @@ public class HdfsWriter
          * @param type decimal type including precision and scale (if present)
          * @return decimal precision
          */
-        private static int getDecimalPrecision(String type)
-        {
+        private static int getDecimalPrecision(String type) {
             if (!type.contains("(")) {
                 return Constant.DEFAULT_DECIMAL_MAX_PRECISION;
-            }
-            else {
+            } else {
                 String regEx = "[^0-9]";
                 Pattern p = Pattern.compile(regEx);
                 Matcher m = p.matcher(type);
@@ -379,43 +362,37 @@ public class HdfsWriter
          * @param type decimal type string, including precision and scale (if present)
          * @return decimal scale
          */
-        private static int getDecimalScale(String type)
-        {
+        private static int getDecimalScale(String type) {
             if (!type.contains("(")) {
                 return Constant.DEFAULT_DECIMAL_MAX_SCALE;
             }
             if (!type.contains(",")) {
                 return 0;
-            }
-            else {
+            } else {
                 return Integer.parseInt(type.split(",")[1].replace(")", "").trim());
             }
         }
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
 
         private Configuration writerSliceConfig;
 
         @Override
-        public void init()
-        {
+        public void init() {
 
             this.writerSliceConfig = this.getPluginJobConf();
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             //
         }
 
         @Override
-        public void startWrite(RecordReceiver lineReceiver)
-        {
+        public void startWrite(RecordReceiver lineReceiver) {
             String fileType = this.writerSliceConfig.getString(Key.FILE_TYPE).toUpperCase();
             IHDFSWriter hdfsHelper = null;
             switch (fileType) {
@@ -440,14 +417,12 @@ public class HdfsWriter
         }
 
         @Override
-        public void post()
-        {
+        public void post() {
             //
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }

@@ -50,23 +50,20 @@ import java.sql.Types;
 import static com.wgzhao.addax.common.spi.ErrorCode.EXECUTE_FAIL;
 import static com.wgzhao.addax.common.spi.ErrorCode.NOT_SUPPORT_TYPE;
 
-public class HBase20xSQLReaderTask
-{
+public class HBase20xSQLReaderTask {
     private static final Logger LOG = LoggerFactory.getLogger(HBase20xSQLReaderTask.class);
 
     private final Configuration readerConfig;
     private int taskGroupId;
     private int taskId;
 
-    public HBase20xSQLReaderTask(Configuration config, int taskGroupId, int taskId)
-    {
+    public HBase20xSQLReaderTask(Configuration config, int taskGroupId, int taskId) {
         this.readerConfig = config;
         this.taskGroupId = taskGroupId;
         this.taskId = taskId;
     }
 
-    public void readRecord(RecordSender recordSender)
-    {
+    public void readRecord(RecordSender recordSender) {
         String querySql = readerConfig.getString(HBaseConstant.QUERY_SQL_PER_SPLIT);
         LOG.info("Begin to read record by Sql: [{}].", querySql);
         HBase20SQLReaderHelper helper = new HBase20SQLReaderHelper(readerConfig);
@@ -101,18 +98,15 @@ public class HBase20xSQLReaderTask
             }
             allResultPerfRecord.end(rsNextUsedTime);
             LOG.info("Finished read record by Sql: [{}].", querySql);
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             throw AddaxException.asAddaxException(
                     EXECUTE_FAIL, "查询Phoenix数据出现异常，请检查服务状态或与HBase管理员联系！", e);
-        }
-        finally {
+        } finally {
             helper.closeJdbc(conn, statement, resultSet);
         }
     }
 
-    private Column convertPhoenixValueToAddaxColumn(int sqlType, Object value)
-    {
+    private Column convertPhoenixValueToAddaxColumn(int sqlType, Object value) {
         Column column;
         switch (sqlType) {
             case Types.CHAR:

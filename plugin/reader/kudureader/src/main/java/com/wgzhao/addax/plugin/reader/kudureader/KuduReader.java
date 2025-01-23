@@ -66,12 +66,10 @@ import static com.wgzhao.addax.plugin.reader.kudureader.KuduKey.KUDU_OPERATORS;
  * Kudu reader plugin
  */
 public class KuduReader
-        extends Reader
-{
+        extends Reader {
 
     public static class Job
-            extends Reader.Job
-    {
+            extends Reader.Job {
         private Configuration originalConfig = null;
 
         private String splitKey;
@@ -84,8 +82,7 @@ public class KuduReader
         private static final Pattern pattern = Pattern.compile(PATTERN_FOR_WHERE);
 
         @Override
-        public void init()
-        {
+        public void init() {
             originalConfig = super.getPluginJobConf();
             splitKey = originalConfig.getString(KuduKey.SPLIT_PK);
             lowerBound = originalConfig.getString(KuduKey.LOWER_BOUND, "min");
@@ -93,8 +90,7 @@ public class KuduReader
         }
 
         @Override
-        public List<Configuration> split(int adviceNumber)
-        {
+        public List<Configuration> split(int adviceNumber) {
             List<Configuration> confList = new ArrayList<>();
 
             if ((splitKey != null) && (!"min".equals(lowerBound)) && (!"max".equals(upperBound))) {
@@ -111,16 +107,14 @@ public class KuduReader
                     if (possibleLowerBound > iUpperBound) {
                         possibleLowerBound = 0;
                         possibleUpperBound = 0;
-                    }
-                    else {
+                    } else {
                         possibleUpperBound = Math.min(possibleUpperBound, iUpperBound);
                     }
                     conf.set(KuduKey.SPLIT_LOWER_BOUND, String.valueOf(possibleLowerBound));
                     conf.set(KuduKey.SPLIT_UPPER_BOUND, String.valueOf(possibleUpperBound));
                     confList.add(conf);
                 }
-            }
-            else {
+            } else {
                 Configuration conf = originalConfig.clone();
                 conf.set(KuduKey.SPLIT_LOWER_BOUND, "min");
                 conf.set(KuduKey.SPLIT_UPPER_BOUND, "max");
@@ -131,8 +125,7 @@ public class KuduReader
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             List<String> where = this.originalConfig.getList(WHERE, String.class);
             if (where != null && !where.isEmpty()) {
                 List<Configuration> result = new ArrayList<>();
@@ -147,13 +140,11 @@ public class KuduReader
                                         String.format("{\"field\": \"%s\", \"op\": \"%s\", \"value\": \"%s\"}",
                                                 matcher.group(1).trim(), matcher.group(2).trim(), matcher.group(3).trim()));
                                 result.add(conf);
-                            }
-                            else {
+                            } else {
                                 throw AddaxException.asAddaxException(NOT_SUPPORT_TYPE,
                                         "operator '" + matcher.group(2) + "' is unsupported");
                             }
-                        }
-                        else {
+                        } else {
                             throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                                     "Illegal where clause: " + w);
                         }
@@ -167,15 +158,13 @@ public class KuduReader
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }
 
     public static class Task
-            extends Reader.Task
-    {
+            extends Reader.Task {
 
         private KuduClient kuduClient;
 
@@ -196,13 +185,11 @@ public class KuduReader
         List<Configuration> where;
 
         @Override
-        public void startRead(RecordSender recordSender)
-        {
+        public void startRead(RecordSender recordSender) {
             KuduTable kuduTable;
             try {
                 kuduTable = kuduClient.openTable(tableName);
-            }
-            catch (KuduException ex) {
+            } catch (KuduException ex) {
                 throw AddaxException.asAddaxException(
                         RUNTIME_ERROR,
                         ex.getMessage()
@@ -261,8 +248,7 @@ public class KuduReader
                 RowResultIterator rows;
                 try {
                     rows = kuduScanner.nextRows();
-                }
-                catch (KuduException ex) {
+                } catch (KuduException ex) {
                     throw AddaxException.asAddaxException(
                             RUNTIME_ERROR,
                             ex.getMessage()
@@ -338,8 +324,7 @@ public class KuduReader
 
             try {
                 kuduScanner.close();
-            }
-            catch (KuduException ex) {
+            } catch (KuduException ex) {
                 throw AddaxException.asAddaxException(
                         RUNTIME_ERROR,
                         ex.getMessage()
@@ -348,8 +333,7 @@ public class KuduReader
         }
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration readerSliceConfig = super.getPluginJobConf();
             String masterAddresses = readerSliceConfig.getString(KuduKey.KUDU_MASTER_ADDRESSES);
             tableName = readerSliceConfig.getString(KuduKey.TABLE);
@@ -370,8 +354,7 @@ public class KuduReader
 //            processWhere(where);
         }
 
-        private void processWhere(List<Configuration> where)
-        {
+        private void processWhere(List<Configuration> where) {
             String field;
             KuduPredicate.ComparisonOp op;
             KuduPredicate predicate;
@@ -383,12 +366,10 @@ public class KuduReader
                 if (value.startsWith("'")) {
                     column = new ColumnSchema.ColumnSchemaBuilder(field, Type.VARCHAR).build();
                     predicate = KuduPredicate.newComparisonPredicate(column, op, value);
-                }
-                else if (value.indexOf('.') > 0) {
+                } else if (value.indexOf('.') > 0) {
                     column = new ColumnSchema.ColumnSchemaBuilder(field, Type.DOUBLE).build();
                     predicate = KuduPredicate.newComparisonPredicate(column, op, Double.valueOf(value));
-                }
-                else {
+                } else {
                     column = new ColumnSchema.ColumnSchemaBuilder(field, Type.INT32).build();
                     predicate = KuduPredicate.newComparisonPredicate(column, op, Long.parseLong(value));
                 }
@@ -403,12 +384,11 @@ public class KuduReader
          *      KuduPredicate.newComparisonPredicate("age", KuduPredicate.ComparisonOp.GREATER, 1);
          * </pre>
          *
-         * @param where List of configuration, each element like <code>{"field":"age", "op": "&gt;", "value": 1}</code>
+         * @param where  List of configuration, each element like <code>{"field":"age", "op": "&gt;", "value": 1}</code>
          * @param schema kudu schema
          * @return list of {@link KuduPredicate}
          */
-        private List<KuduPredicate> processWhere(List<Configuration> where, Schema schema)
-        {
+        private List<KuduPredicate> processWhere(List<Configuration> where, Schema schema) {
             List<KuduPredicate> customPredicate = new ArrayList<>();
             String field;
             KuduPredicate.ComparisonOp op;
@@ -459,10 +439,9 @@ public class KuduReader
                         try {
                             java.util.Date date = sdf.parse(value);
                             int offsetSecs = ZonedDateTime.now(ZoneId.systemDefault()).getOffset().getTotalSeconds();
-                            long ts  = date.getTime() * 1_000L + offsetSecs * 1_000_000L;
+                            long ts = date.getTime() * 1_000L + offsetSecs * 1_000_000L;
                             predicate = KuduPredicate.newComparisonPredicate(column, op, ts);
-                        }
-                        catch (ParseException e) {
+                        } catch (ParseException e) {
                             throw AddaxException.asAddaxException(CONFIG_ERROR, "Can not parse date: " + value);
                         }
                         break;
@@ -475,12 +454,10 @@ public class KuduReader
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             try {
                 kuduClient.close();
-            }
-            catch (KuduException ex) {
+            } catch (KuduException ex) {
                 throw AddaxException.asAddaxException(
                         RUNTIME_ERROR,
                         ex.getMessage()

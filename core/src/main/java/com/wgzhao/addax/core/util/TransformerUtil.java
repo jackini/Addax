@@ -45,13 +45,11 @@ import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
  * no comments.
  * Created by liqiang on 16/3/9.
  */
-public class TransformerUtil
-{
+public class TransformerUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(TransformerUtil.class);
 
-    public static List<TransformerExecution> buildTransformerInfo(Configuration taskConfig)
-    {
+    public static List<TransformerExecution> buildTransformerInfo(Configuration taskConfig) {
         List<Configuration> tfConfigs = taskConfig.getListConfiguration(CoreConstant.JOB_TRANSFORMER);
         if (tfConfigs == null || tfConfigs.isEmpty()) {
             return null;
@@ -111,8 +109,7 @@ public class TransformerUtil
                 if (paras != null && !paras.isEmpty()) {
                     transformerExecutionParas.setParas(paras.toArray(new String[0]));
                 }
-            }
-            else {
+            } else {
                 String code = configuration.getString(CoreConstant.TRANSFORMER_PARAMETER_CODE);
                 String codeFile = configuration.getString(CoreConstant.TRANSFORMER_PARAMETER_CODE_FILE);
                 if (StringUtils.isAllEmpty(code, codeFile)) {
@@ -133,8 +130,7 @@ public class TransformerUtil
                     }
                     try {
                         code = FileUtils.readFileToString(file, Charset.defaultCharset());
-                    }
-                    catch (IOException e) {
+                    } catch (IOException e) {
                         throw AddaxException.asAddaxException(IO_ERROR,
                                 "read codeFile [" + codeFile + "] failure:", e);
                     }

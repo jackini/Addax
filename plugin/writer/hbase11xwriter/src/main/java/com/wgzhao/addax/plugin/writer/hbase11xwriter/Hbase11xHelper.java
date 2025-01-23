@@ -53,50 +53,46 @@ import static com.wgzhao.addax.common.spi.ErrorCode.LOGIN_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
 
-public class Hbase11xHelper
-{
+public class Hbase11xHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(Hbase11xHelper.class);
 
-    private Hbase11xHelper() {}
+    private Hbase11xHelper() {
+    }
 
-    public static org.apache.hadoop.conf.Configuration getHbaseConfiguration(String hbaseConfig)
-    {
+    public static org.apache.hadoop.conf.Configuration getHbaseConfiguration(String hbaseConfig) {
         if (StringUtils.isBlank(hbaseConfig)) {
             throw AddaxException.asAddaxException(REQUIRED_VALUE, "The item hbaseConfig must be configured.");
         }
         org.apache.hadoop.conf.Configuration hConfiguration = HBaseConfiguration.create();
         try {
-            Map<String, String> hbaseConfigMap = JSON.parseObject(hbaseConfig, new TypeReference<Map<String, String>>() {});
+            Map<String, String> hbaseConfigMap = JSON.parseObject(hbaseConfig, new TypeReference<Map<String, String>>() {
+            });
             // 用户配置的 key-value 对 来表示 hbaseConfig
             Validate.isTrue(hbaseConfigMap != null, "The item hbaseConfig must be not empty.");
             for (Map.Entry<String, String> entry : hbaseConfigMap.entrySet()) {
                 hConfiguration.set(entry.getKey(), entry.getValue());
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(CONNECT_ERROR, e);
         }
         return hConfiguration;
     }
 
-    public static org.apache.hadoop.hbase.client.Connection getHbaseConnection(String hbaseConfig)
-    {
+    public static org.apache.hadoop.hbase.client.Connection getHbaseConnection(String hbaseConfig) {
         org.apache.hadoop.conf.Configuration hConfiguration = Hbase11xHelper.getHbaseConfiguration(hbaseConfig);
 
         org.apache.hadoop.hbase.client.Connection hConnection = null;
         try {
             hConnection = ConnectionFactory.createConnection(hConfiguration);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Hbase11xHelper.closeConnection(hConnection);
             throw AddaxException.asAddaxException(CONNECT_ERROR, e);
         }
         return hConnection;
     }
 
-    public static Table getTable(Configuration configuration)
-    {
+    public static Table getTable(Configuration configuration) {
         String hbaseConfig = configuration.getString(HBaseKey.HBASE_CONFIG);
         String userTable = configuration.getString(HBaseKey.TABLE);
         long writeBufferSize = configuration.getLong(HBaseKey.WRITE_BUFFER_SIZE, HBaseConstant.DEFAULT_WRITE_BUFFER_SIZE);
@@ -110,8 +106,7 @@ public class Hbase11xHelper
             hTable = hConnection.getTable(hTableName);
             BufferedMutatorParams bufferedMutatorParams = new BufferedMutatorParams(hTableName);
             bufferedMutatorParams.writeBufferSize(writeBufferSize);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Hbase11xHelper.closeTable(hTable);
             Hbase11xHelper.closeAdmin(admin);
             Hbase11xHelper.closeConnection(hConnection);
@@ -120,8 +115,7 @@ public class Hbase11xHelper
         return hTable;
     }
 
-    public static BufferedMutator getBufferedMutator(Configuration configuration)
-    {
+    public static BufferedMutator getBufferedMutator(Configuration configuration) {
         String hbaseConfig = configuration.getString(HBaseKey.HBASE_CONFIG);
         String userTable = configuration.getString(HBaseKey.TABLE);
         long writeBufferSize = configuration.getLong(HBaseKey.WRITE_BUFFER_SIZE, HBaseConstant.DEFAULT_WRITE_BUFFER_SIZE);
@@ -138,8 +132,7 @@ public class Hbase11xHelper
                     new BufferedMutatorParams(hTableName)
                             .pool(HTable.getDefaultExecutor(hConfiguration))
                             .writeBufferSize(writeBufferSize));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Hbase11xHelper.closeBufferedMutator(bufferedMutator);
             Hbase11xHelper.closeAdmin(admin);
             Hbase11xHelper.closeConnection(hConnection);
@@ -148,8 +141,7 @@ public class Hbase11xHelper
         return bufferedMutator;
     }
 
-    public static void truncateTable(Configuration configuration)
-    {
+    public static void truncateTable(Configuration configuration) {
         String hbaseConfig = configuration.getString(HBaseKey.HBASE_CONFIG);
         String userTable = configuration.getString(HBaseKey.TABLE);
         LOG.info("Begin truncating table {} .", userTable);
@@ -161,67 +153,56 @@ public class Hbase11xHelper
             Hbase11xHelper.checkHbaseTable(admin, hTableName);
             admin.disableTable(hTableName);
             admin.truncateTable(hTableName, true);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(RUNTIME_ERROR, e);
-        }
-        finally {
+        } finally {
             Hbase11xHelper.closeAdmin(admin);
             Hbase11xHelper.closeConnection(hConnection);
         }
     }
 
-    public static void closeConnection(Connection hConnection)
-    {
+    public static void closeConnection(Connection hConnection) {
         try {
             if (null != hConnection) {
                 hConnection.close();
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw AddaxException.asAddaxException(IO_ERROR, e);
         }
     }
 
-    public static void closeAdmin(Admin admin)
-    {
+    public static void closeAdmin(Admin admin) {
         try {
             if (null != admin) {
                 admin.close();
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw AddaxException.asAddaxException(IO_ERROR, e);
         }
     }
 
-    public static void closeBufferedMutator(BufferedMutator bufferedMutator)
-    {
+    public static void closeBufferedMutator(BufferedMutator bufferedMutator) {
         try {
             if (null != bufferedMutator) {
                 bufferedMutator.close();
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw AddaxException.asAddaxException(IO_ERROR, e);
         }
     }
 
-    public static void closeTable(Table table)
-    {
+    public static void closeTable(Table table) {
         try {
             if (null != table) {
                 table.close();
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw AddaxException.asAddaxException(IO_ERROR, e);
         }
     }
 
     private static void checkHbaseTable(Admin admin, TableName hTableName)
-            throws IOException
-    {
+            throws IOException {
         if (!admin.tableExists(hTableName)) {
             throw AddaxException.asAddaxException(ILLEGAL_VALUE, "The table " + hTableName.toString() + "DOES NOT exists.");
         }
@@ -233,8 +214,7 @@ public class Hbase11xHelper
         }
     }
 
-    public static void validateParameter(Configuration originalConfig)
-    {
+    public static void validateParameter(Configuration originalConfig) {
         originalConfig.getNecessaryValue(HBaseKey.HBASE_CONFIG, REQUIRED_VALUE);
         originalConfig.getNecessaryValue(HBaseKey.TABLE, REQUIRED_VALUE);
 
@@ -258,22 +238,19 @@ public class Hbase11xHelper
         originalConfig.set(HBaseKey.WRITE_BUFFER_SIZE, writeBufferSize);
     }
 
-    private static void validateMode(Configuration originalConfig)
-    {
+    private static void validateMode(Configuration originalConfig) {
         String mode = originalConfig.getNecessaryValue(HBaseKey.MODE, REQUIRED_VALUE);
         ModeType modeType = ModeType.getByTypeName(mode);
         if (modeType == ModeType.NORMAL) {
             validateRowkeyColumn(originalConfig);
             validateColumn(originalConfig);
             validateVersionColumn(originalConfig);
-        }
-        else {
+        } else {
             throw AddaxException.asAddaxException(ILLEGAL_VALUE, "The mode " + mode + "is unsupported");
         }
     }
 
-    private static void validateColumn(Configuration originalConfig)
-    {
+    private static void validateColumn(Configuration originalConfig) {
         List<Configuration> columns = originalConfig.getListConfiguration(HBaseKey.COLUMN);
         if (columns == null || columns.isEmpty()) {
             throw AddaxException.asAddaxException(REQUIRED_VALUE,
@@ -295,8 +272,7 @@ public class Hbase11xHelper
         }
     }
 
-    private static void validateRowkeyColumn(Configuration originalConfig)
-    {
+    private static void validateRowkeyColumn(Configuration originalConfig) {
         List<Configuration> rowkeyColumn = originalConfig.getListConfiguration(HBaseKey.ROW_KEY_COLUMN);
         if (rowkeyColumn == null || rowkeyColumn.isEmpty()) {
             throw AddaxException.asAddaxException(REQUIRED_VALUE,
@@ -321,8 +297,7 @@ public class Hbase11xHelper
         }
     }
 
-    private static void validateVersionColumn(Configuration originalConfig)
-    {
+    private static void validateVersionColumn(Configuration originalConfig) {
         Configuration versionColumn = originalConfig.getConfiguration(HBaseKey.VERSION_COLUMN);
         //为null,表示用当前时间;指定列,需要index
         if (versionColumn != null) {
@@ -333,23 +308,20 @@ public class Hbase11xHelper
             if (index == -1) {
                 //指定时间,需要index=-1,value
                 versionColumn.getNecessaryValue(HBaseKey.VALUE, REQUIRED_VALUE);
-            }
-            else if (index < 0) {
+            } else if (index < 0) {
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE, "The field[index] of versionColumn must be either -1 or non-negative number");
             }
         }
     }
 
-    public static void kerberosAuthentication(String kerberosPrincipal, String kerberosKeytabFilePath)
-    {
+    public static void kerberosAuthentication(String kerberosPrincipal, String kerberosKeytabFilePath) {
         LOG.debug("Try to login in with principal[{}] and keytab[{}]", kerberosPrincipal, kerberosKeytabFilePath);
         org.apache.hadoop.conf.Configuration hadoopConf = new org.apache.hadoop.conf.Configuration();
         hadoopConf.set("hadoop.security.authentication", "Kerberos");
         UserGroupInformation.setConfiguration(hadoopConf);
         try {
             UserGroupInformation.loginUserFromKeytab(kerberosPrincipal, kerberosKeytabFilePath);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             String message = String.format("Kerberos authentication failed, please make sure that kerberosKeytabFilePath[%s] and kerberosPrincipal[%s] are correct",
                     kerberosKeytabFilePath, kerberosPrincipal);
             LOG.error(message);

@@ -22,8 +22,7 @@ package com.wgzhao.addax.plugin.writer.elasticsearchwriter;
 /**
  * Created by xiongfeng.bxf on 17/3/2.
  */
-public class ESColumn
-{
+public class ESColumn {
 
     private String name;//: "app key",
 
@@ -35,53 +34,43 @@ public class ESColumn
 
     private Boolean array;
 
-    public void setTimeZone(String timezone)
-    {
+    public void setTimeZone(String timezone) {
         this.timezone = timezone;
     }
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
-    public void setName(String name)
-    {
+    public void setName(String name) {
         this.name = name;
     }
 
-    public String getType()
-    {
+    public String getType() {
         return type;
     }
 
-    public void setType(String type)
-    {
+    public void setType(String type) {
         this.type = type;
     }
 
-    public String getTimezone()
-    {
+    public String getTimezone() {
         return timezone;
     }
 
-    public String getFormat()
-    {
+    public String getFormat() {
         return format;
     }
 
-    public void setFormat(String format)
-    {
+    public void setFormat(String format) {
         this.format = format;
     }
 
-    public Boolean isArray()
-    {
+    public Boolean isArray() {
         return array;
     }
 
-    public void setArray(Boolean array)
-    {
+    public void setArray(Boolean array) {
         this.array = array;
     }
 }

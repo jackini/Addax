@@ -25,8 +25,7 @@ import java.util.Map;
  * Created by jingxing on 14-8-24.
  */
 
-public interface Record
-{
+public interface Record {
     void addColumn(Column column);
 
     void setColumn(int i, final Column column);

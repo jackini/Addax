@@ -26,32 +26,27 @@ import org.apache.commons.lang3.Validate;
 /**
  * 执行容器的抽象类，持有该容器全局的配置 configuration
  */
-public abstract class AbstractContainer
-{
+public abstract class AbstractContainer {
     protected Configuration configuration;
 
     protected AbstractContainerCommunicator containerCommunicator;
 
-    public AbstractContainer(Configuration configuration)
-    {
+    public AbstractContainer(Configuration configuration) {
 
         Validate.notNull(configuration, "The configuration cannot be null.");
 
         this.configuration = configuration;
     }
 
-    public Configuration getConfiguration()
-    {
+    public Configuration getConfiguration() {
         return configuration;
     }
 
-    public AbstractContainerCommunicator getContainerCommunicator()
-    {
+    public AbstractContainerCommunicator getContainerCommunicator() {
         return containerCommunicator;
     }
 
-    public void setContainerCommunicator(AbstractContainerCommunicator containerCommunicator)
-    {
+    public void setContainerCommunicator(AbstractContainerCommunicator containerCommunicator) {
         this.containerCommunicator = containerCommunicator;
     }
 

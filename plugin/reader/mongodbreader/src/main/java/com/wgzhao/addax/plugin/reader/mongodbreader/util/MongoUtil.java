@@ -37,33 +37,30 @@ import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
  * Created by jianying.wcj on 2015/3/17 0017.
  * Modified by mingyan.zc on 2016/6/13.
  */
-public class MongoUtil
-{
+public class MongoUtil {
 
-    private MongoUtil() {}
+    private MongoUtil() {
+    }
 
-    public static MongoClient initMongoClient(List<Object> addressList)
-    {
+    public static MongoClient initMongoClient(List<Object> addressList) {
         return initCredentialMongoClient(addressList, "", "", null);
     }
 
-    public static MongoClient initCredentialMongoClient(List<Object> addressList, String userName, String password, String database)
-    {
+    public static MongoClient initCredentialMongoClient(List<Object> addressList, String userName, String password, String database) {
 
         if (!isHostPortPattern(addressList)) {
             throw AddaxException.asAddaxException(ILLEGAL_VALUE, "不合法参数");
         }
         try {
             MongoCredential credential = null;
-            if (! userName.isEmpty() && ! password.isEmpty()) {
+            if (!userName.isEmpty() && !password.isEmpty()) {
                 credential = MongoCredential.createCredential(userName, database, password.toCharArray());
             }
             MongoClientSettings.Builder mongoBuilder = MongoClientSettings.builder()
                     .applyToClusterSettings(builder -> {
                         try {
                             builder.hosts(parseServerAddress(addressList));
-                        }
-                        catch (UnknownHostException e) {
+                        } catch (UnknownHostException e) {
                             throw AddaxException.asAddaxException(ILLEGAL_VALUE, "不合法的地址");
                         }
                     });
@@ -72,11 +69,9 @@ public class MongoUtil
             }
             return MongoClients.create(mongoBuilder.build());
 
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AddaxException.asAddaxException(ILLEGAL_VALUE, "不合法参数");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(RUNTIME_ERROR, "未知异常");
         }
     }
@@ -87,8 +82,7 @@ public class MongoUtil
      * @param addressList host list
      * @return boolean
      */
-    private static boolean isHostPortPattern(List<Object> addressList)
-    {
+    private static boolean isHostPortPattern(List<Object> addressList) {
         for (Object address : addressList) {
             String regex = "(\\S+):([0-9]+)";
             if (!((String) address).matches(regex)) {
@@ -106,16 +100,14 @@ public class MongoUtil
      * @throws UnknownHostException can not find host or ip address
      */
     private static List<ServerAddress> parseServerAddress(List<Object> rawAddressList)
-            throws UnknownHostException
-    {
+            throws UnknownHostException {
         List<ServerAddress> addressList = new ArrayList<>();
         for (Object address : rawAddressList) {
             String[] tempAddress = ((String) address).split(":");
             try {
                 ServerAddress sa = new ServerAddress(tempAddress[0], Integer.parseInt(tempAddress[1]));
                 addressList.add(sa);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new UnknownHostException();
             }
         }

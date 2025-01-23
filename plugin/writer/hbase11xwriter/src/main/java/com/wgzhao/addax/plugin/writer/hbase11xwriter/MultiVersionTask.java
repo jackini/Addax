@@ -27,17 +27,14 @@ import org.apache.hadoop.hbase.client.Put;
 import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 
 public class MultiVersionTask
-        extends HbaseAbstractTask
-{
+        extends HbaseAbstractTask {
 
-    public MultiVersionTask(Configuration configuration)
-    {
+    public MultiVersionTask(Configuration configuration) {
         super(configuration);
     }
 
     @Override
-    public Put convertRecordToPut(Record record)
-    {
+    public Put convertRecordToPut(Record record) {
         if (record.getColumnNumber() != 4) {
             // multi-version 模式下源头读取字段列数为4元组(rowkey,column,timestamp,value),目的端需告诉[]
             throw AddaxException

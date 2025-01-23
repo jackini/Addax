@@ -36,8 +36,7 @@ import static com.wgzhao.addax.common.spi.ErrorCode.EXECUTE_FAIL;
 import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
 
 public class OpentsdbDataHandler
-        implements DataHandler
-{
+        implements DataHandler {
     private static final Logger LOG = LoggerFactory.getLogger(OpentsdbDataHandler.class);
     private SchemalessWriter writer;
 
@@ -46,8 +45,7 @@ public class OpentsdbDataHandler
     private final String password;
     int batchSize;
 
-    public OpentsdbDataHandler(Configuration config)
-    {
+    public OpentsdbDataHandler(Configuration config) {
         // opentsdb json protocol use JNI and schemaless API to write
         this.jdbcUrl = config.getString(Key.JDBC_URL);
         this.user = config.getString(Key.USERNAME, "root");
@@ -56,15 +54,13 @@ public class OpentsdbDataHandler
     }
 
     @Override
-    public int handle(RecordReceiver lineReceiver, TaskPluginCollector collector)
-    {
+    public int handle(RecordReceiver lineReceiver, TaskPluginCollector collector) {
         int count;
         try (Connection conn = DriverManager.getConnection(jdbcUrl, user, password)) {
             LOG.info("connection[ jdbcUrl: " + jdbcUrl + ", username: " + user + "] established.");
             writer = new SchemalessWriter(conn);
             count = write(lineReceiver, batchSize);
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             throw AddaxException.asAddaxException(EXECUTE_FAIL, e);
         }
 
@@ -72,8 +68,7 @@ public class OpentsdbDataHandler
     }
 
     private int write(RecordReceiver lineReceiver, int batchSize)
-            throws AddaxException
-    {
+            throws AddaxException {
         int recordIndex = 1;
         try {
             Record record;
@@ -83,18 +78,15 @@ public class OpentsdbDataHandler
                     String jsonData = recordToString(record);
                     LOG.debug(">>> " + jsonData);
                     writer.write(jsonData, SchemalessProtocolType.JSON, SchemalessTimestampType.NOT_CONFIGURED);
-                }
-                else if (recordIndex % batchSize == 1) {
+                } else if (recordIndex % batchSize == 1) {
                     sb.append("[").append(recordToString(record)).append(",");
-                }
-                else if (recordIndex % batchSize == 0) {
+                } else if (recordIndex % batchSize == 0) {
                     sb.append(recordToString(record)).append("]");
                     String jsonData = sb.toString();
                     LOG.debug(">>> " + jsonData);
                     writer.write(jsonData, SchemalessProtocolType.JSON, SchemalessTimestampType.NOT_CONFIGURED);
                     sb.delete(0, sb.length());
-                }
-                else {
+                } else {
                     sb.append(recordToString(record)).append(",");
                 }
                 recordIndex++;
@@ -105,15 +97,13 @@ public class OpentsdbDataHandler
                 LOG.debug(">>> " + jsonData);
                 writer.write(jsonData, SchemalessProtocolType.JSON, SchemalessTimestampType.NOT_CONFIGURED);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(RUNTIME_ERROR, e);
         }
         return recordIndex - 1;
     }
 
-    private String recordToString(Record record)
-    {
+    private String recordToString(Record record) {
         int recordLength = record.getColumnNumber();
         if (0 == recordLength) {
             return "";

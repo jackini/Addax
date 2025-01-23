@@ -49,8 +49,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class DorisStreamLoadObserver
-{
+public class DorisStreamLoadObserver {
     private static final Logger LOG = LoggerFactory.getLogger(DorisStreamLoadObserver.class);
 
     private final DorisKey options;
@@ -62,28 +61,24 @@ public class DorisStreamLoadObserver
     private static final String RESULT_LABEL_ABORTED = "ABORTED";
     private static final String RESULT_LABEL_UNKNOWN = "UNKNOWN";
 
-    public DorisStreamLoadObserver(DorisKey options)
-    {
+    public DorisStreamLoadObserver(DorisKey options) {
         this.options = options;
     }
 
-    public String urlDecode(String outBuffer)
-    {
+    public String urlDecode(String outBuffer) {
         String data = outBuffer;
         try {
             data = data.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
             data = data.replaceAll("\\+", "%2B");
             data = URLDecoder.decode(data, "utf-8");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LOG.error("Failed to decode url {}: {}", outBuffer, e.getLocalizedMessage());
         }
         return data;
     }
 
     public void streamLoad(WriterTuple data)
-            throws Exception
-    {
+            throws Exception {
         String host = getLoadHost();
         if (host == null) {
             throw new IOException("load_url cannot be empty, or the host cannot connect.Please check your configuration.");
@@ -101,22 +96,19 @@ public class DorisStreamLoadObserver
             throw new IOException(
                     "Failed to flush data to Doris.\n" + JSON.toJSONString(loadResult)
             );
-        }
-        else if (RESULT_LABEL_EXISTED.equals(loadResult.get(keyStatus))) {
+        } else if (RESULT_LABEL_EXISTED.equals(loadResult.get(keyStatus))) {
             LOG.debug("StreamLoad response:{}", JSON.toJSONString(loadResult));
             checkStreamLoadState(host, data.getLabel());
         }
     }
 
     private void checkStreamLoadState(String host, String label)
-            throws IOException
-    {
+            throws IOException {
         int idx = 0;
         while (true) {
             try {
                 TimeUnit.SECONDS.sleep(Math.min(++idx, 5));
-            }
-            catch (InterruptedException ex) {
+            } catch (InterruptedException ex) {
                 break;
             }
             try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
@@ -156,8 +148,7 @@ public class DorisStreamLoadObserver
         }
     }
 
-    private byte[] addRows(List<byte[]> rows, int totalBytes)
-    {
+    private byte[] addRows(List<byte[]> rows, int totalBytes) {
         if (options.isCsvFormat()) {
             byte[] lineDelimiter = DelimiterParser.parse(options.getLineDelimiter(), "\n").getBytes(StandardCharsets.UTF_8);
 
@@ -188,15 +179,12 @@ public class DorisStreamLoadObserver
     }
 
     private Map<String, Object> put(String loadUrl, String label, byte[] data)
-            throws IOException
-    {
+            throws IOException {
         LOG.info("Executing stream load to: '{}', size: '{}'", loadUrl, data.length);
         final HttpClientBuilder httpClientBuilder = HttpClients.custom()
-                .setRedirectStrategy(new DefaultRedirectStrategy()
-                {
+                .setRedirectStrategy(new DefaultRedirectStrategy() {
                     @Override
-                    protected boolean isRedirectable(String method)
-                    {
+                    protected boolean isRedirectable(String method) {
                         return true;
                     }
                 });
@@ -227,15 +215,13 @@ public class DorisStreamLoadObserver
         }
     }
 
-    private String getBasicAuthHeader(String username, String password)
-    {
+    private String getBasicAuthHeader(String username, String password) {
         String auth = username + ":" + password;
         byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.UTF_8));
         return "Basic " + new String(encodedAuth);
     }
 
-    private HttpEntity getHttpEntity(CloseableHttpResponse resp)
-    {
+    private HttpEntity getHttpEntity(CloseableHttpResponse resp) {
         int code = resp.getStatusLine().getStatusCode();
         if (200 != code) {
             LOG.warn("Request failed with code:{}", code);
@@ -249,8 +235,7 @@ public class DorisStreamLoadObserver
         return respEntity;
     }
 
-    private String getLoadHost()
-    {
+    private String getLoadHost() {
         List<String> hostList = options.getLoadUrlList();
         Collections.shuffle(hostList);
         // get the first available host
@@ -263,8 +248,7 @@ public class DorisStreamLoadObserver
         return null;
     }
 
-    private boolean checkConnection(String host)
-    {
+    private boolean checkConnection(String host) {
         try {
             URL url = new URL(host);
             HttpURLConnection co = (HttpURLConnection) url.openConnection();
@@ -272,8 +256,7 @@ public class DorisStreamLoadObserver
             co.connect();
             co.disconnect();
             return true;
-        }
-        catch (Exception e1) {
+        } catch (Exception e1) {
             LOG.warn("Failed to connect to host:{}", host);
             return false;
         }

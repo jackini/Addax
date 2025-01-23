@@ -28,53 +28,46 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 public class AddaxException
-        extends RuntimeException
-{
+        extends RuntimeException {
     private static final Logger logger = LoggerFactory.getLogger(AddaxException.class);
     private static final long serialVersionUID = 1L;
 
     private final transient ErrorCode errorCode;
 
-    public AddaxException(ErrorCode errorCode, String errorMessage)
-    {
+    public AddaxException(ErrorCode errorCode, String errorMessage) {
         super(errorMessage);
         logger.error("Error Code: {}: {}", errorCode.getCode(), errorMessage);
         this.errorCode = errorCode;
     }
 
-    private AddaxException(ErrorCode errorCode, String errorMessage, Throwable cause)
-    {
+    private AddaxException(ErrorCode errorCode, String errorMessage, Throwable cause) {
         super(errorMessage, cause);
 
         this.errorCode = errorCode;
     }
 
-    public static AddaxException asAddaxException(ErrorCode errorCode, String message)
-    {
+    public static AddaxException asAddaxException(ErrorCode errorCode, String message) {
         if (StringUtils.isBlank(message)) {
             message = errorCode.getDescription();
         }
         throw new RuntimeException(message);
     }
 
-    public static AddaxException asAddaxException(ErrorCode errorCode, String message, Throwable cause)
-    {
+    public static AddaxException asAddaxException(ErrorCode errorCode, String message, Throwable cause) {
         if (cause instanceof AddaxException) {
             return (AddaxException) cause;
         }
         return new AddaxException(errorCode, message, cause);
     }
 
-    public static AddaxException asAddaxException(ErrorCode errorCode, Throwable cause)
-    {
+    public static AddaxException asAddaxException(ErrorCode errorCode, Throwable cause) {
         if (cause instanceof AddaxException) {
             return (AddaxException) cause;
         }
         return new AddaxException(errorCode, getMessage(cause), cause);
     }
 
-    private static String getMessage(Object obj)
-    {
+    private static String getMessage(Object obj) {
         if (obj == null) {
             return "";
         }
@@ -84,14 +77,12 @@ public class AddaxException
             PrintWriter pw = new PrintWriter(str);
             ((Throwable) obj).printStackTrace(pw);
             return str.toString();
-        }
-        else {
+        } else {
             return obj.toString();
         }
     }
 
-    public ErrorCode getErrorCode()
-    {
+    public ErrorCode getErrorCode() {
         return this.errorCode;
     }
 }

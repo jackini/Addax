@@ -39,14 +39,11 @@ import java.util.Map;
  * @since 2020-10-13 16:09
  */
 public class MapTypeAdapter
-        extends TypeAdapter<Object>
-{
-    public static final TypeAdapterFactory FACTORY = new TypeAdapterFactory()
-    {
+        extends TypeAdapter<Object> {
+    public static final TypeAdapterFactory FACTORY = new TypeAdapterFactory() {
         @SuppressWarnings("unchecked")
         @Override
-        public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type)
-        {
+        public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
             if (type.getRawType() == Map.class) {
                 return (TypeAdapter<T>) new MapTypeAdapter(gson);
             }
@@ -56,15 +53,13 @@ public class MapTypeAdapter
 
     private final Gson gson;
 
-    MapTypeAdapter(Gson gson)
-    {
+    MapTypeAdapter(Gson gson) {
         this.gson = gson;
     }
 
     @Override
     public Object read(JsonReader in)
-            throws IOException
-    {
+            throws IOException {
         JsonToken token = in.peek();
         switch (token) {
             case BEGIN_ARRAY:
@@ -115,8 +110,7 @@ public class MapTypeAdapter
 
     @Override
     public void write(JsonWriter out, Object value)
-            throws IOException
-    {
+            throws IOException {
         if (value == null) {
             out.nullValue();
             return;

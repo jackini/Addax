@@ -4,21 +4,18 @@ import com.wgzhao.addax.common.element.Record;
 
 public class StarRocksCsvSerializer
         extends StarRocksBaseSerializer
-        implements StarRocksISerializer
-{
+        implements StarRocksISerializer {
 
     private static final long serialVersionUID = 1L;
 
     private final String columnSeparator;
 
-    public StarRocksCsvSerializer(String sp)
-    {
+    public StarRocksCsvSerializer(String sp) {
         this.columnSeparator = StarRocksDelimiterParser.parse(sp, "\t");
     }
 
     @Override
-    public String serialize(Record row)
-    {
+    public String serialize(Record row) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < row.getColumnNumber(); i++) {
             String value = fieldConvertion(row.getColumn(i));

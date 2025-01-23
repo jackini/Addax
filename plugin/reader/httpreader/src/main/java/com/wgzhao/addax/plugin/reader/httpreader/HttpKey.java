@@ -21,8 +21,7 @@ package com.wgzhao.addax.plugin.reader.httpreader;
 
 import com.wgzhao.addax.common.base.Key;
 
-public final class HttpKey extends Key
-{
+public final class HttpKey extends Key {
     // 获取返回json的那个key值
     public static final String RESULT_KEY = "resultKey";
     // 连接信息

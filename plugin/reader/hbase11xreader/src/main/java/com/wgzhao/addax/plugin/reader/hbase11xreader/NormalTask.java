@@ -32,13 +32,11 @@ import java.util.List;
 import java.util.Map;
 
 public class NormalTask
-        extends HbaseAbstractTask
-{
+        extends HbaseAbstractTask {
     private final List<HbaseColumnCell> hbaseColumnCells;
     private final List<Map> column;
 
-    public NormalTask(Configuration configuration)
-    {
+    public NormalTask(Configuration configuration) {
         super(configuration);
         this.column = configuration.getList(HBaseKey.COLUMN, Map.class);
         this.hbaseColumnCells = Hbase11xHelper.parseColumnOfNormalMode(this.column);
@@ -48,8 +46,7 @@ public class NormalTask
      * normal模式下将用户配置的column 设置到scan中
      */
     @Override
-    public void initScan(Scan scan)
-    {
+    public void initScan(Scan scan) {
         boolean isConstant;
         boolean isRowkeyColumn;
         for (HbaseColumnCell cell : this.hbaseColumnCells) {
@@ -63,8 +60,7 @@ public class NormalTask
 
     @Override
     public boolean fetchLine(Record record)
-            throws Exception
-    {
+            throws Exception {
         Result result = super.getNextHbaseRow();
 
         if (null == result) {
@@ -88,14 +84,12 @@ public class NormalTask
 
                     Column constantColumn = super.convertValueToAssignType(columnType, constantValue, cell.getDateformat());
                     record.addColumn(constantColumn);
-                }
-                else {
+                } else {
                     // 根据列名称获取值
                     columnName = cell.getColumnName();
                     if (Hbase11xHelper.isRowkeyColumn(columnName)) {
                         hbaseColumnValue = result.getRow();
-                    }
-                    else {
+                    } else {
                         columnFamily = cell.getColumnFamily();
                         qualifier = cell.getQualifier();
                         hbaseColumnValue = result.getValue(columnFamily, qualifier);
@@ -105,8 +99,7 @@ public class NormalTask
                     record.addColumn(hbaseColumn);
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             // 注意，这里catch的异常，期望是byte数组转换失败的情况。而实际上，string的byte数组，转成整数类型是不容易报错的。但是转成double类型容易报错。
             record.setColumn(0, new StringColumn(Bytes.toStringBinary(result.getRow())));
             throw e;

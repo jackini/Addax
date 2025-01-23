@@ -37,8 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class MultiVersionTask
-        extends HbaseAbstractTask
-{
+        extends HbaseAbstractTask {
     private static final byte[] colonByte = ":".getBytes(StandardCharsets.UTF_8);
     public static List<Map> column;
     private final int maxVersion;
@@ -46,8 +45,7 @@ public abstract class MultiVersionTask
     private Cell[] cellArr = null;
     private int currentReadPosition = 0;
 
-    protected MultiVersionTask(Configuration configuration)
-    {
+    protected MultiVersionTask(Configuration configuration) {
         super(configuration);
 
         this.maxVersion = configuration.getInt(HBaseKey.MAX_VERSION);
@@ -57,8 +55,7 @@ public abstract class MultiVersionTask
 
     @Override
     public boolean fetchLine(Record record)
-            throws Exception
-    {
+            throws Exception {
         Result result;
         if (this.cellArr == null || this.cellArr.length == this.currentReadPosition) {
             result = super.getNextHbaseRow();
@@ -77,16 +74,14 @@ public abstract class MultiVersionTask
             Cell cell = this.cellArr[this.currentReadPosition];
 
             convertCellToLine(cell, record);
-        }
-        finally {
+        } finally {
             this.currentReadPosition++;
         }
         return true;
     }
 
     private void convertCellToLine(Cell cell, Record record)
-            throws Exception
-    {
+            throws Exception {
         byte[] rawRowkey = CellUtil.cloneRow(cell);
         long timestamp = cell.getTimestamp();
         byte[] cfAndQualifierName = Bytes.add(CellUtil.cloneFamily(cell), MultiVersionTask.colonByte, CellUtil.cloneQualifier(cell));
@@ -107,12 +102,10 @@ public abstract class MultiVersionTask
         record.addColumn(convertBytesToAssignType(columnValueType, columnValue, columnValueFormat));
     }
 
-    public void setMaxVersions(Scan scan)
-    {
+    public void setMaxVersions(Scan scan) {
         if (this.maxVersion == -1 || this.maxVersion == Integer.MAX_VALUE) {
             scan.readAllVersions();
-        }
-        else {
+        } else {
             scan.readVersions(this.maxVersion);
         }
     }

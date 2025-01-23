@@ -33,19 +33,16 @@ import java.util.concurrent.Executors;
 import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
 
 public abstract class ProcessInnerScheduler
-        extends AbstractScheduler
-{
+        extends AbstractScheduler {
 
     private ExecutorService taskGroupContainerExecutorService;
 
-    public ProcessInnerScheduler(AbstractContainerCommunicator containerCommunicator)
-    {
+    public ProcessInnerScheduler(AbstractContainerCommunicator containerCommunicator) {
         super(containerCommunicator);
     }
 
     @Override
-    public void startAllTaskGroup(List<Configuration> configurations)
-    {
+    public void startAllTaskGroup(List<Configuration> configurations) {
         this.taskGroupContainerExecutorService = Executors
                 .newFixedThreadPool(configurations.size());
 
@@ -58,24 +55,21 @@ public abstract class ProcessInnerScheduler
     }
 
     @Override
-    public void dealFailedStat(AbstractContainerCommunicator frameworkCollector, Throwable throwable)
-    {
+    public void dealFailedStat(AbstractContainerCommunicator frameworkCollector, Throwable throwable) {
         this.taskGroupContainerExecutorService.shutdownNow();
         throw AddaxException.asAddaxException(
                 RUNTIME_ERROR, throwable);
     }
 
     @Override
-    public void dealKillingStat(AbstractContainerCommunicator frameworkCollector, int totalTasks)
-    {
+    public void dealKillingStat(AbstractContainerCommunicator frameworkCollector, int totalTasks) {
         //通过进程退出返回码标示状态
         this.taskGroupContainerExecutorService.shutdownNow();
         throw AddaxException.asAddaxException(RUNTIME_ERROR, "The job was terminated");
     }
 
     private TaskGroupContainerRunner newTaskGroupContainerRunner(
-            Configuration configuration)
-    {
+            Configuration configuration) {
         TaskGroupContainer taskGroupContainer = new TaskGroupContainer(configuration);
 
         return new TaskGroupContainerRunner(taskGroupContainer);

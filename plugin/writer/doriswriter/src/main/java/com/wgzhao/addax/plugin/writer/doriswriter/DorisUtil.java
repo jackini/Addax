@@ -38,14 +38,13 @@ import java.util.List;
 /**
  * jdbc util
  */
-public class DorisUtil
-{
+public class DorisUtil {
     private static final Logger LOG = LoggerFactory.getLogger(DorisUtil.class);
 
-    private DorisUtil() {}
+    private DorisUtil() {
+    }
 
-    public static List<String> renderPreOrPostSqls(List<String> preOrPostSqls, String tableName)
-    {
+    public static List<String> renderPreOrPostSqls(List<String> preOrPostSqls, String tableName) {
         if (null == preOrPostSqls) {
             return Collections.emptyList();
         }
@@ -58,21 +57,18 @@ public class DorisUtil
         return renderedSqls;
     }
 
-    public static void executeSqls(Connection conn, List<String> sqls)
-    {
+    public static void executeSqls(Connection conn, List<String> sqls) {
         try {
             for (String sql : sqls) {
                 LOG.info("Executing sql:[{}].", sql);
                 DBUtil.query(conn, sql);
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static void preCheckPrePareSQL(DorisKey options)
-    {
+    public static void preCheckPrePareSQL(DorisKey options) {
         String table = options.getTable();
         List<String> preSqls = options.getPreSqlList();
         List<String> renderedPreSqls = DorisUtil.renderPreOrPostSqls(preSqls, table);
@@ -81,16 +77,14 @@ public class DorisUtil
             for (String sql : renderedPreSqls) {
                 try {
                     DBUtil.sqlValid(sql, DataBaseType.MySql);
-                }
-                catch (ParserException e) {
+                } catch (ParserException e) {
                     throw RdbmsException.asPreSQLParserException(e, sql);
                 }
             }
         }
     }
 
-    public static void preCheckPostSQL(DorisKey options)
-    {
+    public static void preCheckPostSQL(DorisKey options) {
         String table = options.getTable();
         List<String> postSqls = options.getPostSqlList();
         List<String> renderedPostSqls = DorisUtil.renderPreOrPostSqls(postSqls, table);
@@ -99,8 +93,7 @@ public class DorisUtil
             for (String sql : renderedPostSqls) {
                 try {
                     DBUtil.sqlValid(sql, DataBaseType.MySql);
-                }
-                catch (ParserException e) {
+                } catch (ParserException e) {
                     throw RdbmsException.asPostSQLParserException(e, sql);
                 }
             }

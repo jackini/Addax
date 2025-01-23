@@ -23,16 +23,13 @@ import com.wgzhao.addax.core.statistics.communication.Communication;
 import com.wgzhao.addax.core.statistics.communication.LocalTGCommunicationManager;
 
 public class ProcessInnerCollector
-        extends AbstractCollector
-{
+        extends AbstractCollector {
 
-    public ProcessInnerCollector()
-    {
+    public ProcessInnerCollector() {
     }
 
     @Override
-    public Communication collectFromTaskGroup()
-    {
+    public Communication collectFromTaskGroup() {
         return LocalTGCommunicationManager.getJobCommunication();
     }
 }

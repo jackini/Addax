@@ -35,18 +35,17 @@ import java.util.regex.Pattern;
 /**
  * Created by liuyi on 15/9/18.
  */
-public class HintUtil
-{
+public class HintUtil {
     private static final Logger LOG = LoggerFactory.getLogger(HintUtil.class);
 
     private static DataBaseType dataBaseType;
     private static Pattern tablePattern;
     private static String hintExpression;
 
-    private HintUtil() {}
+    private HintUtil() {
+    }
 
-    public static void initHintConf(DataBaseType type, Configuration configuration)
-    {
+    public static void initHintConf(DataBaseType type, Configuration configuration) {
         dataBaseType = type;
 
         String hint = configuration.getString(Key.HINT);
@@ -55,16 +54,14 @@ public class HintUtil
             if (tablePatternAndHint.length == 1) {
                 tablePattern = Pattern.compile(".*");
                 hintExpression = tablePatternAndHint[0];
-            }
-            else {
+            } else {
                 tablePattern = Pattern.compile(tablePatternAndHint[0]);
                 hintExpression = tablePatternAndHint[1];
             }
         }
     }
 
-    public static String buildQueryColumn(String table, String column)
-    {
+    public static String buildQueryColumn(String table, String column) {
         try {
             if (tablePattern != null && DataBaseType.Oracle == dataBaseType) {
                 Matcher m = tablePattern.matcher(table);
@@ -76,8 +73,7 @@ public class HintUtil
                     return finalHint + column;
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LOG.warn("match hint exception, will not use hint", e);
         }
         return column;

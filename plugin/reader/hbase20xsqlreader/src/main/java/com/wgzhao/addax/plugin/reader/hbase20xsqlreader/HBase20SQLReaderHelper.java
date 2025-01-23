@@ -41,8 +41,7 @@ import static com.wgzhao.addax.common.spi.ErrorCode.EXECUTE_FAIL;
 import static com.wgzhao.addax.common.spi.ErrorCode.ILLEGAL_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 
-public class HBase20SQLReaderHelper
-{
+public class HBase20SQLReaderHelper {
     private static final Logger LOG = LoggerFactory.getLogger(HBase20SQLReaderHelper.class);
 
     private final Configuration configuration;
@@ -51,16 +50,14 @@ public class HBase20SQLReaderHelper
     private List<String> columnNames;
     private String splitKey;
 
-    public HBase20SQLReaderHelper(Configuration configuration)
-    {
+    public HBase20SQLReaderHelper(Configuration configuration) {
         this.configuration = configuration;
     }
 
     /**
      * 校验配置参数是否正确
      */
-    public void validateParameter()
-    {
+    public void validateParameter() {
         // query server地址必须配置
         String queryServerAddress = configuration.getNecessaryValue(HBaseKey.QUERY_SERVER_ADDRESS,
                 REQUIRED_VALUE);
@@ -77,8 +74,7 @@ public class HBase20SQLReaderHelper
             String fullTableName;
             if (schema != null && !schema.isEmpty()) {
                 fullTableName = "\"" + schema + "\".\"" + tableName + "\"";
-            }
-            else {
+            } else {
                 fullTableName = "\"" + tableName + "\"";
             }
             configuration.set(HBaseKey.TABLE, fullTableName);
@@ -87,15 +83,13 @@ public class HBase20SQLReaderHelper
             splitKey = configuration.getString(HBaseKey.SPLIT_KEY, null);
             checkTable(schema, tableName);
             dealWhere();
-        }
-        else {
+        } else {
             // 用户指定querySql，切分不做处理，根据给定sql读取数据即可
             LOG.info("Split according to query sql.");
         }
     }
 
-    public Connection getConnection(String queryServerAddress, String serialization)
-    {
+    public Connection getConnection(String queryServerAddress, String serialization) {
         String url = String.format(HBaseConstant.CONNECT_STRING_TEMPLATE, queryServerAddress, serialization);
         LOG.debug("Connecting to QueryServer [{}] ...", url);
         Connection conn;
@@ -103,8 +97,7 @@ public class HBase20SQLReaderHelper
             Class.forName(HBaseConstant.CONNECT_DRIVER_STRING);
             conn = DriverManager.getConnection(url);
             conn.setAutoCommit(false);
-        }
-        catch (Throwable e) {
+        } catch (Throwable e) {
             throw AddaxException.asAddaxException(CONNECT_ERROR,
                     "无法连接QueryServer，配置不正确或服务未启动，请检查配置和服务状态或者联系HBase管理员.", e);
         }
@@ -115,11 +108,10 @@ public class HBase20SQLReaderHelper
     /**
      * 检查表名、列名和切分列是否存在
      *
-     * @param schema phoenix schema
+     * @param schema    phoenix schema
      * @param tableName phoenix table name
      */
-    public void checkTable(String schema, String tableName)
-    {
+    public void checkTable(String schema, String tableName) {
         Statement statement = null;
         ResultSet resultSet = null;
         try {
@@ -129,8 +121,7 @@ public class HBase20SQLReaderHelper
             // 处理schema不为空情况
             if (schema == null || schema.isEmpty()) {
                 selectSql = selectSql + " AND TABLE_SCHEM IS NULL";
-            }
-            else {
+            } else {
                 selectSql = selectSql + " AND TABLE_SCHEM = '" + schema + "'";
             }
             resultSet = statement.executeQuery(selectSql);
@@ -152,8 +143,7 @@ public class HBase20SQLReaderHelper
                                 "您配置的列" + columnName + "在表" + tableName + "的元数据中不存在，请检查您的配置或者联系HBase管理员.");
                     }
                 }
-            }
-            else {
+            } else {
                 columnNames = allColumnName;
                 configuration.set(HBaseKey.COLUMN, allColumnName);
             }
@@ -162,18 +152,15 @@ public class HBase20SQLReaderHelper
                 throw AddaxException.asAddaxException(ILLEGAL_VALUE,
                         "您配置的切分列" + splitKey + "不是表" + tableName + "的主键，请检查您的配置或者联系HBase管理员.");
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             throw AddaxException.asAddaxException(EXECUTE_FAIL,
                     "获取表" + tableName + "信息失败，请检查您的集群和表状态或者联系HBase管理员.", e);
-        }
-        finally {
+        } finally {
             closeJdbc(null, statement, resultSet);
         }
     }
 
-    public void closeJdbc(Connection connection, Statement statement, ResultSet resultSet)
-    {
+    public void closeJdbc(Connection connection, Statement statement, ResultSet resultSet) {
         try {
             if (resultSet != null) {
                 resultSet.close();
@@ -184,14 +171,12 @@ public class HBase20SQLReaderHelper
             if (connection != null) {
                 connection.close();
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             LOG.warn("数据库连接关闭异常. {}", CONNECT_ERROR, e);
         }
     }
 
-    public void dealWhere()
-    {
+    public void dealWhere() {
         String where = configuration.getString(HBaseKey.WHERE, null);
         if (StringUtils.isNotBlank(where)) {
             String whereImprove = where.trim();
@@ -208,8 +193,7 @@ public class HBase20SQLReaderHelper
      * @param adviceNumber the advice number of split
      * @return list of configuration
      */
-    public List<Configuration> doSplit(int adviceNumber)
-    {
+    public List<Configuration> doSplit(int adviceNumber) {
         return ReaderSplitUtil.doSplit(configuration, adviceNumber);
     }
 }

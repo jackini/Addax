@@ -43,8 +43,7 @@ import java.util.Iterator;
 
 import static com.wgzhao.addax.common.spi.ErrorCode.IO_ERROR;
 
-public class ExcelHelper
-{
+public class ExcelHelper {
     public boolean header;
     public int skipRows;
     FileInputStream file;
@@ -56,49 +55,44 @@ public class ExcelHelper
         this.header = header;
         this.skipRows = skipRows;
     }
-    public void open(String filePath)
-    {
+
+    public void open(String filePath) {
         try {
             this.file = new FileInputStream(filePath);
             workbook = WorkbookFactory.create(file);
             // ONLY read the first sheet
             Sheet sheet = workbook.getSheetAt(0);
-            this.evaluator =  workbook.getCreationHelper().createFormulaEvaluator();
+            this.evaluator = workbook.getCreationHelper().createFormulaEvaluator();
             this.rowIterator = sheet.iterator();
             if (this.header && this.rowIterator.hasNext()) {
                 // skip header
                 this.rowIterator.next();
             }
             if (this.skipRows > 0) {
-                int i =0;
+                int i = 0;
                 while (this.rowIterator.hasNext() && i < this.skipRows) {
                     this.rowIterator.next();
                     i++;
                 }
             }
-        }
-        catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             throw AddaxException.asAddaxException(IO_ERROR, e);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw AddaxException.asAddaxException(IO_ERROR,
                     "IOException occurred when open '" + filePath + "':" + e.getMessage());
         }
     }
 
-    public void close()
-    {
+    public void close() {
         try {
             this.workbook.close();
             this.file.close();
-        }
-        catch (IOException ignored) {
+        } catch (IOException ignored) {
 
         }
     }
 
-    public Record readLine(Record record)
-    {
+    public Record readLine(Record record) {
         if (rowIterator.hasNext()) {
             Row row = rowIterator.next();
             //For each row, iterate through all the columns
@@ -142,8 +136,7 @@ public class ExcelHelper
                 }
             }
             return record;
-        }
-        else {
+        } else {
             return null;
         }
     }

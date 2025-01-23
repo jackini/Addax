@@ -32,14 +32,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.sql.Date;
 
-public class TestDbf
-{
+public class TestDbf {
     private final static String filePath = "/tmp/test.dbf";
 
     @Test
     public void testBasicWriter()
-            throws FileNotFoundException
-    {
+            throws FileNotFoundException {
         // let us create field definitions first
         // we will go for 4 fields
 
@@ -99,8 +97,7 @@ public class TestDbf
     }
 
     @Test
-    public void testReadBasic()
-    {
+    public void testReadBasic() {
         DBFReader reader = null;
         try {
             reader = new DBFReader(new FileInputStream(filePath));
@@ -131,8 +128,7 @@ public class TestDbf
                 }
                 System.out.println();
             }
-        }
-        catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }

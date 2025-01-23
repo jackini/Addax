@@ -48,12 +48,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import static com.wgzhao.addax.common.base.Key.CONNECTION;
 
 public class RedisWriter
-        extends Writer
-{
+        extends Writer {
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
 
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
         private static final AtomicBoolean FLUSH_FLAG = new AtomicBoolean(false);
@@ -72,22 +70,19 @@ public class RedisWriter
         private long batchSize = 1000L;
 
         @Override
-        public void startWrite(RecordReceiver lineReceiver)
-        {
+        public void startWrite(RecordReceiver lineReceiver) {
             Configuration pluginJobConf = this.getPluginJobConf();
 
             boolean isCluster = pluginJobConf.getBool("redisCluster", false);
             if (isCluster) {
                 this.clusterWrite(lineReceiver);
-            }
-            else {
+            } else {
                 this.standaloneWrite(lineReceiver);
             }
         }
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration pluginJobConf = this.getPluginJobConf();
             Configuration connection = pluginJobConf.getConfiguration(CONNECTION);
             boolean isCluster = pluginJobConf.getBool("redisCluster", false);
@@ -131,8 +126,7 @@ public class RedisWriter
                             .append("\r\n");
                 }
                 LOG.info(sb.toString());
-            }
-            else {
+            } else {
                 String auth = (String) connection.get("auth");
                 if (StringUtils.isNotBlank(auth)) {
                     this.jedis.auth(auth);
@@ -146,16 +140,14 @@ public class RedisWriter
          * 判断是否携带格式化redis 数据库
          */
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             Boolean isFlushDB = getPluginJobConf().getBool("flushDB", false);
             if (isFlushDB) {
                 flushDB();
             }
         }
 
-        public void destroy()
-        {
+        public void destroy() {
             if (this.jedis != null) {
                 this.jedis.close();
             }
@@ -173,8 +165,7 @@ public class RedisWriter
          *
          * @param lineReceiver record
          */
-        private void standaloneWrite(RecordReceiver lineReceiver)
-        {
+        private void standaloneWrite(RecordReceiver lineReceiver) {
             AtomicLong counter = new AtomicLong(0L);
             Client client = this.jedis.getClient();
             Record fromReader;
@@ -198,8 +189,7 @@ public class RedisWriter
          *
          * @param lineReceiver record
          */
-        private void clusterWrite(RecordReceiver lineReceiver)
-        {
+        private void clusterWrite(RecordReceiver lineReceiver) {
 
             Record fromReader;
             while ((fromReader = lineReceiver.getFromReader()) != null) {
@@ -226,20 +216,17 @@ public class RedisWriter
             }
         }
 
-        private byte[] string2byte(String str)
-        {
+        private byte[] string2byte(String str) {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-         try {
-             byteArrayOutputStream.write(str.getBytes());
-             return byteArrayOutputStream.toByteArray();
-         }
-         catch (IOException e) {
-             return str.getBytes();
-         }
+            try {
+                byteArrayOutputStream.write(str.getBytes());
+                return byteArrayOutputStream.toByteArray();
+            } catch (IOException e) {
+                return str.getBytes();
+            }
         }
 
-        private void restore(Client client, byte[] key, byte[] value, long expire, AtomicLong currentCounter)
-        {
+        private void restore(Client client, byte[] key, byte[] value, long expire, AtomicLong currentCounter) {
 
             client.restore(key, 0L, value);
 
@@ -254,8 +241,7 @@ public class RedisWriter
             }
         }
 
-        private void flushDB()
-        {
+        private void flushDB() {
             synchronized (FLUSH_FLAG) {
                 if (FLUSH_FLAG.get()) {
                     return;
@@ -269,8 +255,7 @@ public class RedisWriter
                         LOG.info("格式化: {}: {}", client.getHost(), client.getPort());
                         jedis.flushAll();
                     }
-                }
-                else {
+                } else {
                     if (this.jedis != null) {
                         Client client = jedis.getClient();
                         LOG.info("格式化: {}:{}", client.getHost(), client.getPort());
@@ -287,8 +272,7 @@ public class RedisWriter
          *
          * @param client redis client
          */
-        private void flushAndCheckReply(Client client)
-        {
+        private void flushAndCheckReply(Client client) {
             List<Object> allReply = client.getObjectMultiBulkReply();
             for (Object o : allReply) {
                 if (o instanceof JedisDataException) {
@@ -299,24 +283,20 @@ public class RedisWriter
     }
 
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             return Collections.singletonList(getPluginJobConf());
         }
 
         @Override
-        public void init()
-        {
+        public void init() {
             //
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             //
         }
     }

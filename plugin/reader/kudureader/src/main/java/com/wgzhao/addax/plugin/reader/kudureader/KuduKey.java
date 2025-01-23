@@ -29,8 +29,7 @@ import java.util.Map;
  * Created by roy on 2019/12/12 1543.
  */
 public final class KuduKey
-        extends Key
-{
+        extends Key {
 
     public static final String KUDU_MASTER_ADDRESSES = "masterAddress";
 

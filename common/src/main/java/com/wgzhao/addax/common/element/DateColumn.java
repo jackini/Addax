@@ -32,8 +32,7 @@ import java.util.Date;
  * Created by jingxing on 14-8-24.
  */
 public class DateColumn
-        extends Column
-{
+        extends Column {
 
     private DateType subType = DateType.DATETIME;
 
@@ -45,10 +44,8 @@ public class DateColumn
 
     /**
      * 构建值为null的DateColumn，使用Date子类型为DATETIME
-     *
      */
-    public DateColumn()
-    {
+    public DateColumn() {
         this((Long) null);
     }
 
@@ -58,24 +55,21 @@ public class DateColumn
      *
      * @param stamp 时间戳
      */
-    public DateColumn( Long stamp)
-    {
+    public DateColumn(Long stamp) {
         super(stamp, Column.Type.DATE, (null == stamp ? 0 : 8));
     }
 
     /*
      * 构建值为date(java.util.Date)的DateColumn，使用Date子类型为DATETIME
      */
-    public DateColumn( Date date)
-    {
+    public DateColumn(Date date) {
         this(date == null ? null : date.getTime());
     }
 
     /*
      * 构建值为date(java.sql.Date)的DateColumn，使用Date子类型为DATE，只有日期，没有时间
      */
-    public DateColumn( java.sql.Date date)
-    {
+    public DateColumn(java.sql.Date date) {
         this(date == null ? null : date.getTime());
         this.setSubType(DateType.DATE);
     }
@@ -83,8 +77,7 @@ public class DateColumn
     /*
      * 构建值为time(java.sql.Time)的DateColumn，使用Date子类型为TIME，只有时间，没有日期
      */
-    public DateColumn( java.sql.Time time)
-    {
+    public DateColumn(java.sql.Time time) {
         this(time == null ? null : time.getTime());
         this.setSubType(DateType.TIME);
     }
@@ -92,8 +85,7 @@ public class DateColumn
     /*
      * 构建值为ts(java.sql.Timestamp)的DateColumn，使用Date子类型为DATETIME
      */
-    public DateColumn( java.sql.Timestamp ts)
-    {
+    public DateColumn(java.sql.Timestamp ts) {
         this(ts == null ? null : ts.getTime());
         this.setSubType(DateType.DATETIME);
     }
@@ -126,20 +118,18 @@ public class DateColumn
     public void setPrecision(int precision) {
         this.precision = precision;
     }
+
     @Override
-    public Long asLong()
-    {
+    public Long asLong() {
 
         return (Long) this.getRawData();
     }
 
     @Override
-    public String asString()
-    {
+    public String asString() {
         try {
             return ColumnCast.date2String(this);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw AddaxException.asAddaxException(
                     ErrorCode.CONVERT_NOT_SUPPORT,
                     String.format("Date[%s] type cannot be converted to String .", this));
@@ -147,8 +137,7 @@ public class DateColumn
     }
 
     @Override
-    public Date asDate()
-    {
+    public Date asDate() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -157,36 +146,31 @@ public class DateColumn
     }
 
     @Override
-    public byte[] asBytes()
-    {
+    public byte[] asBytes() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, String.format(errorTemplate, "Bytes"));
     }
 
     @Override
-    public Boolean asBoolean()
-    {
+    public Boolean asBoolean() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, String.format(errorTemplate, "Boolean"));
     }
 
     @Override
-    public Double asDouble()
-    {
+    public Double asDouble() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, String.format(errorTemplate, "Double"));
     }
 
     @Override
-    public BigInteger asBigInteger()
-    {
+    public BigInteger asBigInteger() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, String.format(errorTemplate, "BigInteger"));
     }
 
     @Override
-    public Timestamp asTimestamp()
-    {
+    public Timestamp asTimestamp() {
         if (null == this.getRawData()) {
             return null;
         }
@@ -194,24 +178,20 @@ public class DateColumn
     }
 
     @Override
-    public BigDecimal asBigDecimal()
-    {
+    public BigDecimal asBigDecimal() {
         throw AddaxException.asAddaxException(
                 ErrorCode.CONVERT_NOT_SUPPORT, String.format(errorTemplate, "BigDecimal"));
     }
 
-    public DateType getSubType()
-    {
+    public DateType getSubType() {
         return subType;
     }
 
-    public void setSubType(DateType subType)
-    {
+    public void setSubType(DateType subType) {
         this.subType = subType;
     }
 
-    public enum DateType
-    {
+    public enum DateType {
         DATE, TIME, DATETIME
     }
 }

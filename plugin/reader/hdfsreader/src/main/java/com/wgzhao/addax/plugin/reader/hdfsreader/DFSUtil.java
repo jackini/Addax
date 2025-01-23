@@ -65,8 +65,7 @@ import static com.wgzhao.addax.common.spi.ErrorCode.NOT_SUPPORT_TYPE;
 /**
  * Created by mingya.wmy on 2015/8/12.
  */
-public class DFSUtil
-{
+public class DFSUtil {
     private static final Logger LOG = LoggerFactory.getLogger(DFSUtil.class);
 
     private final org.apache.hadoop.conf.Configuration hadoopConf;
@@ -78,8 +77,7 @@ public class DFSUtil
     private final List<ColumnEntry> columns;
     private final String nullFormat;
 
-    public DFSUtil(Configuration taskConfig)
-    {
+    public DFSUtil(Configuration taskConfig) {
         hadoopConf = new org.apache.hadoop.conf.Configuration();
         this.columns = StorageReaderUtil.getListColumnEntry(taskConfig, COLUMN);
         this.nullFormat = taskConfig.getString(NULL_FORMAT);
@@ -114,14 +112,12 @@ public class DFSUtil
         LOG.debug("hadoopConfig details:{}", JSON.toJSONString(this.hadoopConf));
     }
 
-    private void kerberosAuthentication(String kerberosPrincipal, String kerberosKeytabFilePath)
-    {
+    private void kerberosAuthentication(String kerberosPrincipal, String kerberosKeytabFilePath) {
         if (haveKerberos && StringUtils.isNotBlank(kerberosPrincipal) && StringUtils.isNotBlank(kerberosKeytabFilePath)) {
             UserGroupInformation.setConfiguration(hadoopConf);
             try {
                 UserGroupInformation.loginUserFromKeytab(kerberosPrincipal, kerberosKeytabFilePath);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 String message = String.format("kerberos认证失败,请确定kerberosKeytabFilePath[%s]和kerberosPrincipal[%s]填写正确",
                         kerberosKeytabFilePath, kerberosPrincipal);
                 throw AddaxException.asAddaxException(LOGIN_ERROR, message, e);
@@ -132,12 +128,11 @@ public class DFSUtil
     /**
      * 获取指定路径列表下符合条件的所有文件的绝对路径
      *
-     * @param srcPaths 路径列表
+     * @param srcPaths          路径列表
      * @param specifiedFileType 指定文件类型
      * @return set of string
      */
-    public Set<String> getAllFiles(List<String> srcPaths, String specifiedFileType)
-    {
+    public Set<String> getAllFiles(List<String> srcPaths, String specifiedFileType) {
 
         this.specifiedFileType = specifiedFileType;
 
@@ -150,21 +145,18 @@ public class DFSUtil
         return sourceHDFSAllFilesList;
     }
 
-    private void addSourceFileIfNotEmpty(FileStatus f)
-    {
+    private void addSourceFileIfNotEmpty(FileStatus f) {
         if (f.isFile()) {
             String filePath = f.getPath().toString();
             if (f.getLen() > 0) {
                 addSourceFileByType(filePath);
-            }
-            else {
+            } else {
                 LOG.warn("It will ignore file [{}] because it is empty.", filePath);
             }
         }
     }
 
-    public void getHDFSAllFiles(String hdfsPath)
-    {
+    public void getHDFSAllFiles(String hdfsPath) {
         try {
             FileSystem hdfs = FileSystem.get(hadoopConf);
             //判断hdfsPath是否包含正则符号
@@ -174,25 +166,21 @@ public class DFSUtil
                 for (FileStatus f : stats) {
                     if (f.isFile()) {
                         addSourceFileIfNotEmpty(f);
-                    }
-                    else if (f.isDirectory()) {
+                    } else if (f.isDirectory()) {
                         getHDFSAllFilesNORegex(f.getPath().toString(), hdfs);
                     }
                 }
-            }
-            else {
+            } else {
                 getHDFSAllFilesNORegex(hdfsPath, hdfs);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOG.error("IO exception occurred while reading file(s) under [{}].", hdfsPath);
             throw AddaxException.asAddaxException(CONFIG_ERROR, e);
         }
     }
 
     private void getHDFSAllFilesNORegex(String path, FileSystem hdfs)
-            throws IOException
-    {
+            throws IOException {
         Path listFiles = new Path(path);
 
         // If the network disconnected, this method will retry 45 times
@@ -205,11 +193,9 @@ public class DFSUtil
             if (f.isDirectory()) {
                 LOG.info("The [{}] is directory, reading all files in the directory.", f.getPath());
                 getHDFSAllFilesNORegex(f.getPath().toString(), hdfs);
-            }
-            else if (f.isFile()) {
+            } else if (f.isFile()) {
                 addSourceFileIfNotEmpty(f);
-            }
-            else {
+            } else {
                 String message = String.format("The [%s] neither directory nor file,ignore it.", f.getPath());
                 LOG.info(message);
             }
@@ -217,24 +203,21 @@ public class DFSUtil
     }
 
     // 根据用户指定的文件类型，将指定的文件类型的路径加入sourceHDFSAllFilesList
-    private void addSourceFileByType(String filePath)
-    {
+    private void addSourceFileByType(String filePath) {
         // 检查file的类型和用户配置的fileType类型是否一致
         boolean isMatchedFileType = FileTypeUtils.checkHdfsFileType(hadoopConf, filePath, this.specifiedFileType);
 
         if (isMatchedFileType) {
             LOG.info("The file [{}] format is [{}], add it to source files list.", filePath, this.specifiedFileType);
             sourceHDFSAllFilesList.add(filePath);
-        }
-        else {
+        } else {
             String message = String.format("The file [%s] format is not the same of [%s] you configured.", filePath, specifiedFileType);
             LOG.error(message);
             throw AddaxException.asAddaxException(NOT_SUPPORT_TYPE, message);
         }
     }
 
-    public InputStream getInputStream(String filepath)
-    {
+    public InputStream getInputStream(String filepath) {
         InputStream inputStream;
         Path path = new Path(filepath);
         try {
@@ -243,16 +226,14 @@ public class DFSUtil
             //each time the retry interval for 20 seconds
             inputStream = fs.open(path);
             return inputStream;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             String message = String.format("IO exception occurred while reading the file [%s].", filepath);
             throw AddaxException.asAddaxException(IO_ERROR, message, e);
         }
     }
 
     public void sequenceFileStartRead(String sourceSequenceFilePath, Configuration readerSliceConfig,
-            RecordSender recordSender, TaskPluginCollector taskPluginCollector)
-    {
+                                      RecordSender recordSender, TaskPluginCollector taskPluginCollector) {
         LOG.info("Begin to read the sequence file [{}].", sourceSequenceFilePath);
 
         Path seqFilePath = new Path(sourceSequenceFilePath);
@@ -266,8 +247,7 @@ public class DFSUtil
                     StorageReaderUtil.transportOneRecord(recordSender, readerSliceConfig, taskPluginCollector, value.toString());
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             String message = String.format("Exception occurred while reading the file [%s].", sourceSequenceFilePath);
             LOG.error(message);
             throw AddaxException.asAddaxException(EXECUTE_FAIL, message, e);
@@ -275,8 +255,7 @@ public class DFSUtil
     }
 
     public void rcFileStartRead(String sourceRcFilePath, Configuration readerSliceConfig,
-            RecordSender recordSender, TaskPluginCollector taskPluginCollector)
-    {
+                                RecordSender recordSender, TaskPluginCollector taskPluginCollector) {
         LOG.info("Start Read rc-file [{}].", sourceRcFilePath);
         Path rcFilePath = new Path(sourceRcFilePath);
         RCFileRecordReader recordReader = null;
@@ -297,36 +276,31 @@ public class DFSUtil
                 }
                 StorageReaderUtil.transportOneRecord(recordSender, columns, sourceLine, nullFormat, taskPluginCollector);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             String message = String.format("IO exception occurred while reading the file [%s].", sourceRcFilePath);
             LOG.error(message);
             throw AddaxException.asAddaxException(IO_ERROR, message, e);
-        }
-        finally {
+        } finally {
             try {
                 if (recordReader != null) {
                     recordReader.close();
                     LOG.info("Finally, Close RCFileRecordReader.");
                 }
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 LOG.warn("Failed to close RCFileRecordReader: {}", e.getMessage());
             }
         }
     }
 
     public void orcFileStartRead(String sourceOrcFilePath, Configuration readerSliceConfig,
-            RecordSender recordSender, TaskPluginCollector taskPluginCollector)
-    {
+                                 RecordSender recordSender, TaskPluginCollector taskPluginCollector) {
         LOG.info("Being to read the orc-file [{}].", sourceOrcFilePath);
         MyOrcReader myOrcReader = new MyOrcReader(hadoopConf, new Path(sourceOrcFilePath), nullFormat, columns);
         myOrcReader.reader(recordSender, taskPluginCollector);
     }
 
     public void parquetFileStartRead(String sourceParquetFilePath, Configuration readerSliceConfig,
-            RecordSender recordSender, TaskPluginCollector taskPluginCollector)
-    {
+                                     RecordSender recordSender, TaskPluginCollector taskPluginCollector) {
         LOG.info("Begin to read the parquet-file [{}].", sourceParquetFilePath);
         Path parquetFilePath = new Path(sourceParquetFilePath);
         MyParquetReader myParquetReader = new MyParquetReader(hadoopConf, parquetFilePath, nullFormat, columns);

@@ -58,22 +58,18 @@ import java.sql.Types;
 import java.util.Calendar;
 import java.util.List;
 
-public class CommonRdbmsReader
-{
+public class CommonRdbmsReader {
 
-    public static class Job
-    {
+    public static class Job {
         private static final Logger LOG = LoggerFactory.getLogger(Job.class);
 
-        public Job(DataBaseType dataBaseType)
-        {
+        public Job(DataBaseType dataBaseType) {
             OriginalConfPretreatmentUtil.dataBaseType = dataBaseType;
             SingleTableSplitUtil.dataBaseType = dataBaseType;
             GetPrimaryKeyUtil.dataBaseType = dataBaseType;
         }
 
-        public Configuration init(Configuration originalConfig)
-        {
+        public Configuration init(Configuration originalConfig) {
 
             OriginalConfPretreatmentUtil.doPretreatment(originalConfig);
             if (originalConfig.getString(Key.SPLIT_PK) == null && originalConfig.getBool(Key.AUTO_PK, false)) {
@@ -94,8 +90,7 @@ public class CommonRdbmsReader
             return originalConfig;
         }
 
-        public void preCheck(Configuration originalConfig, DataBaseType dataBaseType)
-        {
+        public void preCheck(Configuration originalConfig, DataBaseType dataBaseType) {
             /* 检查每个表是否有读权限，以及querySql跟split Key是否正确 */
             Configuration queryConf = ReaderSplitUtil.doPreCheckSplit(originalConfig);
             String splitPK = queryConf.getString(Key.SPLIT_PK);
@@ -105,24 +100,20 @@ public class CommonRdbmsReader
             new PreCheckTask(username, password, connConf, dataBaseType, splitPK).call();
         }
 
-        public List<Configuration> split(Configuration originalConfig, int adviceNumber)
-        {
+        public List<Configuration> split(Configuration originalConfig, int adviceNumber) {
             return ReaderSplitUtil.doSplit(originalConfig, adviceNumber);
         }
 
-        public void post(Configuration originalConfig)
-        {
+        public void post(Configuration originalConfig) {
             // do nothing
         }
 
-        public void destroy(Configuration originalConfig)
-        {
+        public void destroy(Configuration originalConfig) {
             // do nothing
         }
     }
 
-    public static class Task
-    {
+    public static class Task {
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
         private static final boolean IS_DEBUG = LOG.isDebugEnabled();
         protected final byte[] EMPTY_CHAR_ARRAY = new byte[0];
@@ -139,20 +130,17 @@ public class CommonRdbmsReader
         // 作为日志显示信息时，需要附带的通用信息。比如信息所对应的数据库连接等信息，针对哪个表做的操作
         private String basicMsg;
 
-        public Task(DataBaseType dataBaseType)
-        {
+        public Task(DataBaseType dataBaseType) {
             this(dataBaseType, -1, -1);
         }
 
-        public Task(DataBaseType dataBaseType, int taskGroupId, int taskId)
-        {
+        public Task(DataBaseType dataBaseType, int taskGroupId, int taskId) {
             this.dataBaseType = dataBaseType;
             this.taskGroupId = taskGroupId;
             this.taskId = taskId;
         }
 
-        public void init(Configuration readerSliceConfig)
-        {
+        public void init(Configuration readerSliceConfig) {
 
             /* for database connection */
 
@@ -166,8 +154,7 @@ public class CommonRdbmsReader
         }
 
         public void startRead(Configuration readerSliceConfig, RecordSender recordSender,
-                TaskPluginCollector taskPluginCollector, int fetchSize)
-        {
+                              TaskPluginCollector taskPluginCollector, int fetchSize) {
             String querySql = readerSliceConfig.getString(Key.QUERY_SQL);
 
             LOG.info("Begin reading records by executing SQL query: [{}].", querySql);
@@ -203,35 +190,29 @@ public class CommonRdbmsReader
                 allResultPerfRecord.end(rsNextUsedTime);
                 // 目前大盘是依赖这个打印，而之前这个Finish read record是包含了sql查询和result next的全部时间
                 LOG.info("Finished reading records by executing SQL query: [{}].", querySql);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw RdbmsException.asQueryException(e, querySql);
-            }
-            finally {
+            } finally {
                 DBUtil.closeDBResources(null, conn);
             }
         }
 
-        public void post(Configuration originalConfig)
-        {
+        public void post(Configuration originalConfig) {
             // do nothing
         }
 
-        public void destroy(Configuration originalConfig)
-        {
+        public void destroy(Configuration originalConfig) {
             // do nothing
         }
 
         protected void transportOneRecord(RecordSender recordSender, ResultSet rs, ResultSetMetaData metaData,
-                int columnNumber, TaskPluginCollector taskPluginCollector)
-        {
+                                          int columnNumber, TaskPluginCollector taskPluginCollector) {
             Record record = buildRecord(recordSender, rs, metaData, columnNumber, taskPluginCollector);
             recordSender.sendToWriter(record);
         }
 
         protected Column createColumn(ResultSet rs, ResultSetMetaData metaData, int i)
-                throws SQLException, UnsupportedEncodingException
-        {
+                throws SQLException, UnsupportedEncodingException {
             switch (metaData.getColumnType(i)) {
                 case Types.CHAR:
                 case Types.NCHAR:
@@ -242,8 +223,7 @@ public class CommonRdbmsReader
                     String rawData;
                     if (StringUtils.isBlank(mandatoryEncoding)) {
                         rawData = rs.getString(i);
-                    }
-                    else {
+                    } else {
                         rawData = new String((rs.getBytes(i) == null ? EMPTY_CHAR_ARRAY : rs.getBytes(i)), mandatoryEncoding);
                     }
                     return new StringColumn(rawData);
@@ -288,8 +268,7 @@ public class CommonRdbmsReader
                     // bit(>1) -> Types.VARBINARY 可使用BytesColumn
                     if (metaData.getPrecision(i) == 1) {
                         return new BoolColumn(rs.getBoolean(i));
-                    }
-                    else {
+                    } else {
                         return new BytesColumn(rs.getBytes(i));
                     }
 
@@ -311,16 +290,14 @@ public class CommonRdbmsReader
         }
 
         protected Record buildRecord(RecordSender recordSender, ResultSet rs, ResultSetMetaData metaData, int columnNumber,
-                TaskPluginCollector taskPluginCollector)
-        {
+                                     TaskPluginCollector taskPluginCollector) {
             Record record = recordSender.createRecord();
 
             try {
                 for (int i = 1; i <= columnNumber; i++) {
                     record.addColumn(createColumn(rs, metaData, i));
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 if (IS_DEBUG) {
                     LOG.debug("Exception occurred while reading {} : {}", record, e.getMessage());
                 }

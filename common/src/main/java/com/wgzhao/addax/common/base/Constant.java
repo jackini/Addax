@@ -29,8 +29,7 @@ import java.util.Set;
  * The default value of the configuration item
  * If the plugin requires additional configuration items' value, you can create a new class to extend it
  */
-public class Constant
-{
+public class Constant {
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final String DEFAULT_ENCODING = "UTF-8";
     public static final String DEFAULT_FILE_FORMAT = "text";

@@ -24,59 +24,49 @@ import org.apache.commons.lang3.StringUtils;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-public class ColumnEntry
-{
+public class ColumnEntry {
     private Integer index;
     private String type;
     private String value;
     private String format;
     private DateFormat dateParse;
 
-    public Integer getIndex()
-    {
+    public Integer getIndex() {
         return index;
     }
 
-    public void setIndex(Integer index)
-    {
+    public void setIndex(Integer index) {
         this.index = index;
     }
 
-    public String getType()
-    {
+    public String getType() {
         return type;
     }
 
-    public void setType(String type)
-    {
+    public void setType(String type) {
         this.type = type;
     }
 
-    public String getValue()
-    {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(String value)
-    {
+    public void setValue(String value) {
         this.value = value;
     }
 
-    public String getFormat()
-    {
+    public String getFormat() {
         return format;
     }
 
-    public void setFormat(String format)
-    {
+    public void setFormat(String format) {
         this.format = format;
         if (StringUtils.isNotBlank(this.format)) {
             this.dateParse = new SimpleDateFormat(this.format);
         }
     }
 
-    public DateFormat getDateFormat()
-    {
+    public DateFormat getDateFormat() {
         return this.dateParse;
     }
 

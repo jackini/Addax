@@ -28,8 +28,7 @@ import java.util.List;
  * Created by mingya.wmy on 2015/8/14.
  */
 public class HdfsConstant
-        extends Constant
-{
+        extends Constant {
 
     public static final String SOURCE_FILES = "sourceFiles";
     public static final String TEXT = "TEXT";
@@ -43,5 +42,6 @@ public class HdfsConstant
     protected static final List<String> SUPPORT_FILE_TYPE =
             Arrays.asList(HdfsConstant.CSV, HdfsConstant.ORC, HdfsConstant.RC, HdfsConstant.SEQ, HdfsConstant.TEXT, HdfsConstant.PARQUET);
 
-    private HdfsConstant() {}
+    private HdfsConstant() {
+    }
 }

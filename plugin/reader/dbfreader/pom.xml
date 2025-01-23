@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.wgzhao.addax</groupId>
@@ -8,7 +9,8 @@
     </parent>
     <artifactId>dbfreader</artifactId>
     <name>dbf-reader</name>
-    <description>DBFReader提供了本地读取dbf功能，并可以根据用户配置的类型进行类型转换，建议开发、测试环境使用。</description>
+    <description>DBFReader提供了本地读取dbf功能，并可以根据用户配置的类型进行类型转换，建议开发、测试环境使用。
+    </description>
     <packaging>jar</packaging>
 
     <dependencies>

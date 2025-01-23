@@ -36,21 +36,18 @@ import static com.wgzhao.addax.common.spi.ErrorCode.OVER_LIMIT_ERROR;
  * 2. errorPercentage表示出错比例，在任务结束时校验。
  * 3. errorRecord优先级高于errorPercentage。
  */
-public final class ErrorRecordChecker
-{
+public final class ErrorRecordChecker {
     private static final Logger LOG = LoggerFactory.getLogger(ErrorRecordChecker.class);
 
     private final Long recordLimit;
     private Double percentageLimit;
 
-    public ErrorRecordChecker(Configuration configuration)
-    {
+    public ErrorRecordChecker(Configuration configuration) {
         this(configuration.getLong(CoreConstant.JOB_SETTING_ERROR_LIMIT_RECORD),
                 configuration.getDouble(CoreConstant.JOB_SETTING_ERROR_LIMIT_PERCENTAGE));
     }
 
-    public ErrorRecordChecker(Long rec, Double percentage)
-    {
+    public ErrorRecordChecker(Long rec, Double percentage) {
         recordLimit = rec;
         percentageLimit = percentage;
 
@@ -67,8 +64,7 @@ public final class ErrorRecordChecker
         }
     }
 
-    public void checkRecordLimit(Communication communication)
-    {
+    public void checkRecordLimit(Communication communication) {
         if (recordLimit == null) {
             return;
         }
@@ -84,8 +80,7 @@ public final class ErrorRecordChecker
         }
     }
 
-    public void checkPercentageLimit(Communication communication)
-    {
+    public void checkPercentageLimit(Communication communication) {
         if (percentageLimit == null) {
             return;
         }

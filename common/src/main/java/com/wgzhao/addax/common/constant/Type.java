@@ -24,7 +24,6 @@ package com.wgzhao.addax.common.constant;
 /**
  * Addax 内部类型
  */
-public enum Type
-{
+public enum Type {
     STRING, LONG, BOOLEAN, DOUBLE, DATE,
 }

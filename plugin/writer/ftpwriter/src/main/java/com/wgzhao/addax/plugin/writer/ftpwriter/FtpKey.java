@@ -21,8 +21,7 @@ package com.wgzhao.addax.plugin.writer.ftpwriter;
 
 import com.wgzhao.addax.common.base.Key;
 
-public final class FtpKey extends Key
-{
+public final class FtpKey extends Key {
     public static final String PROTOCOL = "protocol";
     public static final String HOST = "host";
     public static final String PORT = "port";

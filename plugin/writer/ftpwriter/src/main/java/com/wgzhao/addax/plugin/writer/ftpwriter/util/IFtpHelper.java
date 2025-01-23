@@ -22,17 +22,16 @@ package com.wgzhao.addax.plugin.writer.ftpwriter.util;
 import java.io.OutputStream;
 import java.util.Set;
 
-public interface IFtpHelper
-{
+public interface IFtpHelper {
 
     /**
-     * @param host the host to connect to
-     * @param port the port to connect
+     * @param host     the host to connect to
+     * @param port     the port to connect
      * @param username username to connect
      * @param password password for username
-     * @param keyPath private key, only for sftp protocol
-     * @param keyPass the passphrase of private key
-     * @param timeout to connect timeout microseconds
+     * @param keyPath  private key, only for sftp protocol
+     * @param keyPass  the passphrase of private key
+     * @param timeout  to connect timeout microseconds
      */
     void loginFtpServer(String host, int port, String username, String password, String keyPath, String keyPass, int timeout);
 

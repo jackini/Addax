@@ -43,8 +43,7 @@ import static com.wgzhao.addax.common.spi.ErrorCode.CONNECT_ERROR;
 import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
 
 public class SftpHelper
-        extends FtpHelper
-{
+        extends FtpHelper {
     private static final Logger LOG = LoggerFactory.getLogger(SftpHelper.class);
 
     Session session = null;
@@ -53,19 +52,16 @@ public class SftpHelper
 
     @Override
     public void loginFtpServer(String host, String username, String password, int port, String keyPath, String keyPass, int timeout,
-            String connectMode)
-    {
+                               String connectMode) {
         JSch jsch = new JSch(); // 创建JSch对象
         if (keyPath != null) {
             try {
                 if (keyPass != null) {
                     jsch.addIdentity(keyPath, keyPass);
-                }
-                else {
+                } else {
                     jsch.addIdentity(keyPath);
                 }
-            }
-            catch (JSchException e) {
+            } catch (JSchException e) {
                 throw AddaxException.asAddaxException(CONFIG_ERROR, "Failed to use private key", e);
             }
         }
@@ -93,8 +89,7 @@ public class SftpHelper
             //设置命令传输编码
             //String fileEncoding = System.getProperty("file.encoding")
             //channelSftp.setFilenameEncoding(fileEncoding)
-        }
-        catch (JSchException e) {
+        } catch (JSchException e) {
             throw AddaxException.asAddaxException(CONNECT_ERROR,
                     "Failed to connect server " + host + ":" + port + " with user " + username, e
             );
@@ -102,8 +97,7 @@ public class SftpHelper
     }
 
     @Override
-    public void logoutFtpServer()
-    {
+    public void logoutFtpServer() {
         if (channelSftp != null) {
             channelSftp.disconnect();
         }
@@ -112,20 +106,17 @@ public class SftpHelper
         }
     }
 
-    private boolean isDirectory(String directoryPath)
-    {
+    private boolean isDirectory(String directoryPath) {
         try {
             SftpATTRS sftpATTRS = channelSftp.lstat(directoryPath);
             return sftpATTRS.isDir();
-        }
-        catch (SftpException e) {
+        } catch (SftpException e) {
             return false;
         }
     }
 
     @Override
-    public HashSet<String> getListFiles(String directoryPath, int parentLevel, int maxTraversalLevel)
-    {
+    public HashSet<String> getListFiles(String directoryPath, int parentLevel, int maxTraversalLevel) {
         String parentDir;
         if (isDirectory(directoryPath)) {
             parentDir = directoryPath;
@@ -133,31 +124,28 @@ public class SftpHelper
             parentDir = Paths.get(directoryPath).getParent().toString();
         }
         try {
-                ArrayList<Object> vector = new ArrayList<>(channelSftp.ls(directoryPath));
-                for (Object o : vector) {
-                    LsEntry le = (LsEntry) o;
-                    // the long name format is like
-                    // drwxr-xr-x    2 root     root         4096 Mar  1  2010 bin
-                    String strName = le.getLongname();
-                    if (strName.startsWith("-")) {
-                        // 是文件
-                        sourceFiles.add(parentDir + IOUtils.DIR_SEPARATOR + le.getFilename());
-                    }
-                } // end for vector
-            }
-            catch (SftpException e) {
-                LOG.error("Failed to retrieve file(s) from {}", directoryPath, e);
-            }
-            return sourceFiles;
+            ArrayList<Object> vector = new ArrayList<>(channelSftp.ls(directoryPath));
+            for (Object o : vector) {
+                LsEntry le = (LsEntry) o;
+                // the long name format is like
+                // drwxr-xr-x    2 root     root         4096 Mar  1  2010 bin
+                String strName = le.getLongname();
+                if (strName.startsWith("-")) {
+                    // 是文件
+                    sourceFiles.add(parentDir + IOUtils.DIR_SEPARATOR + le.getFilename());
+                }
+            } // end for vector
+        } catch (SftpException e) {
+            LOG.error("Failed to retrieve file(s) from {}", directoryPath, e);
+        }
+        return sourceFiles;
     }
 
     @Override
-    public InputStream getInputStream(String filePath)
-    {
+    public InputStream getInputStream(String filePath) {
         try {
             return channelSftp.get(filePath);
-        }
-        catch (SftpException e) {
+        } catch (SftpException e) {
             throw AddaxException.asAddaxException(RUNTIME_ERROR,
                     "Failed to read file: " + filePath, e);
         }

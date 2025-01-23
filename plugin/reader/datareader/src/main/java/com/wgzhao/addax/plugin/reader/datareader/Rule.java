@@ -21,8 +21,7 @@
 
 package com.wgzhao.addax.plugin.reader.datareader;
 
-public enum Rule
-{
+public enum Rule {
     ADDRESS,
     BANK,
     COMPANY,

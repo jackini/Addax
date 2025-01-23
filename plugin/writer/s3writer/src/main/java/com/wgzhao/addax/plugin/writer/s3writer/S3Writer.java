@@ -44,34 +44,29 @@ import static com.wgzhao.addax.common.spi.ErrorCode.REQUIRED_VALUE;
 import static com.wgzhao.addax.common.spi.ErrorCode.RUNTIME_ERROR;
 
 public class S3Writer
-        extends Writer
-{
+        extends Writer {
     public static class Job
-            extends Writer.Job
-    {
+            extends Writer.Job {
         private static final Logger LOG = LoggerFactory.getLogger(Job.class);
 
         private Configuration writerSliceConfig = null;
         private S3Client s3Client = null;
 
         @Override
-        public void init()
-        {
+        public void init() {
             this.writerSliceConfig = this.getPluginJobConf();
             this.validateParameter();
             this.s3Client = S3Util.initS3Client(this.writerSliceConfig);
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             if (this.s3Client != null) {
                 this.s3Client.close();
             }
         }
 
-        private void validateParameter()
-        {
+        private void validateParameter() {
             this.writerSliceConfig.getNecessaryValue(S3Key.REGION, REQUIRED_VALUE);
             this.writerSliceConfig.getNecessaryValue(S3Key.ACCESS_ID, REQUIRED_VALUE);
             this.writerSliceConfig.getNecessaryValue(S3Key.ACCESS_KEY, REQUIRED_VALUE);
@@ -82,8 +77,7 @@ public class S3Writer
         }
 
         @Override
-        public void prepare()
-        {
+        public void prepare() {
             LOG.info("begin do prepare...");
             String bucket = this.writerSliceConfig.getString(S3Key.BUCKET);
             String object = this.writerSliceConfig.getString(S3Key.OBJECT);
@@ -93,8 +87,7 @@ public class S3Writer
             if ("truncate".equals(writeMode)) {
                 LOG.info("It will cleanup all objects which starts with [{}] in  [{}]", object, bucket);
                 deleteBucketObjects(bucket, object);
-            }
-            else if ("nonConflict".equals(writeMode)) {
+            } else if ("nonConflict".equals(writeMode)) {
                 LOG.info("Begin to check for existing objects that starts with [{}] in bucket [{}]", object, bucket);
                 List<S3Object> objs = listObjects(bucket, object);
                 if (!objs.isEmpty()) {
@@ -105,8 +98,7 @@ public class S3Writer
         }
 
         @Override
-        public List<Configuration> split(int mandatoryNumber)
-        {
+        public List<Configuration> split(int mandatoryNumber) {
             LOG.info("begin do split...");
             List<Configuration> writerSplitConfigs = new ArrayList<>();
             String object = this.writerSliceConfig.getString(S3Key.OBJECT);
@@ -147,12 +139,11 @@ public class S3Writer
         /**
          * find all objects which starts with objectName and return
          *
-         * @param bucket the S3 bucket name
+         * @param bucket     the S3 bucket name
          * @param objectName the object prefix will be found
          * @return {@link List}
          */
-        private List<S3Object> listObjects(String bucket, String objectName)
-        {
+        private List<S3Object> listObjects(String bucket, String objectName) {
             String suffix = null;
             if (objectName.contains(".")) {
                 suffix = "." + objectName.split("\\.", -1)[1];
@@ -171,8 +162,7 @@ public class S3Writer
             for (S3Object obj : objects) {
                 if (suffix == null) {
                     result.add(obj);
-                }
-                else if (obj.key().endsWith(suffix)) {
+                } else if (obj.key().endsWith(suffix)) {
                     result.add(obj);
                 }
             }
@@ -182,11 +172,10 @@ public class S3Writer
         /**
          * delete all objects which starts with objectName in bucket
          *
-         * @param bucket the S3 bucket name
+         * @param bucket     the S3 bucket name
          * @param objectName the object prefix will be deleted
          */
-        private void deleteBucketObjects(String bucket, String objectName)
-        {
+        private void deleteBucketObjects(String bucket, String objectName) {
             List<S3Object> objects = listObjects(bucket, objectName);
             ArrayList<ObjectIdentifier> toDelete = new ArrayList<>();
             if (!objects.isEmpty()) {
@@ -199,8 +188,7 @@ public class S3Writer
                             .delete(Delete.builder().objects(toDelete).build())
                             .build();
                     s3Client.deleteObjects(dor);
-                }
-                catch (S3Exception e) {
+                } catch (S3Exception e) {
                     throw AddaxException.asAddaxException(RUNTIME_ERROR, e.getMessage());
                 }
             }
@@ -208,8 +196,7 @@ public class S3Writer
     }
 
     public static class Task
-            extends Writer.Task
-    {
+            extends Writer.Task {
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
 
         private S3Client s3Client;
@@ -223,8 +210,7 @@ public class S3Writer
         private int maxFileSize;// MB
 
         @Override
-        public void init()
-        {
+        public void init() {
             Configuration writerSliceConfig = this.getPluginJobConf();
             this.s3Client = S3Util.initS3Client(writerSliceConfig);
             this.bucket = writerSliceConfig.getString(S3Key.BUCKET);
@@ -241,8 +227,7 @@ public class S3Writer
         }
 
         @Override
-        public void startWrite(RecordReceiver lineReceiver)
-        {
+        public void startWrite(RecordReceiver lineReceiver) {
             // 设置每块字符串长度
             final int partSize = 1024 * 1024 * 10;
             long numberCalc = (this.maxFileSize * 1024 * 1024L) / partSize;
@@ -295,8 +280,7 @@ public class S3Writer
                                 .partNumber(currPart).build();
                         needInit = true;
                     }
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     throw AddaxException.asAddaxException(IO_ERROR, e.getMessage());
                 }
             }
@@ -307,7 +291,7 @@ public class S3Writer
                 completedParts.add(completedPart);
                 outputStream.reset();
             }
-            if(!completedParts.isEmpty()) {
+            if (!completedParts.isEmpty()) {
                 // Finally, call completeMultipartUpload operation to tell S3 to merge all uploaded
                 // parts and finish the multipart operation.
                 CompletedMultipartUpload completedMultipartUpload = CompletedMultipartUpload.builder()
@@ -329,8 +313,7 @@ public class S3Writer
             }
         }
 
-        private String record2String(Record record)
-        {
+        private String record2String(Record record) {
             StringJoiner sj = new StringJoiner(this.fieldDelimiter + "");
             int columnNum = record.getColumnNumber();
             for (int i = 0; i < columnNum; i++) {
@@ -343,8 +326,7 @@ public class S3Writer
                 if (type == Column.Type.DATE) {
                     SimpleDateFormat sdf = new SimpleDateFormat(this.dateFormat);
                     sj.add(sdf.format(column.asDate()));
-                }
-                else {
+                } else {
                     sj.add(column.asString());
                 }
             }
@@ -352,8 +334,7 @@ public class S3Writer
         }
 
         @Override
-        public void destroy()
-        {
+        public void destroy() {
             if (this.s3Client != null) {
                 this.s3Client.close();
             }
