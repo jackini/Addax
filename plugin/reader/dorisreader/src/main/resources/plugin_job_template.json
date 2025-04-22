@@ -1,0 +1,19 @@
+{
+  "name": "dorisreader",
+  "parameter": {
+    "username": "doris",
+    "password": "password",
+    "column": [
+      "*"
+    ],
+    "connection": {
+      "jdbcUrl": "jdbc:arrow-flight-sql://{FE_HOST}:{fe.conf:arrow_flight_sql_port}?useServerPrepStmts=false&cachePrepStmts=true&useSSL=false&useEncryption=false",
+      "table": [
+        "addax_reader"
+      ],
+      "driver": "org.apache.arrow.driver.jdbc.ArrowFlightJdbcDriver",
+      "fetchSize": 2048
+    },
+    "where": ""
+  }
+}

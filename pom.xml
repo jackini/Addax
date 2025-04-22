@@ -135,6 +135,7 @@
         <module>plugin/reader/databendreader</module>
         <module>plugin/reader/datareader</module>
         <module>plugin/reader/dbfreader</module>
+        <module>plugin/reader/dorisreader</module>
         <module>plugin/reader/elasticsearchreader</module>
         <module>plugin/reader/excelreader</module>
         <module>plugin/reader/ftpreader</module>

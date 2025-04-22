@@ -1,0 +1,6 @@
+{
+  "name": "dorisreader",
+  "class": "com.wgzhao.addax.plugin.reader.dorisreader.DorisReader",
+  "description": "Trivial reader plugin for Doris with Arrow Flight SQL",
+  "developer": "wgzhao"
+}

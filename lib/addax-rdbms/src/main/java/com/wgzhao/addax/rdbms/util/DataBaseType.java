@@ -21,6 +21,8 @@
 
 package com.wgzhao.addax.rdbms.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,7 +50,8 @@ public enum DataBaseType
     Sybase("sybase", "com.sybase.jdbc4.jdbc.SybDriver"),
     Databend("databend", "com.databend.jdbc.DatabendDriver"),
     Access("access","net.ucanaccess.jdbc.UcanaccessDriver"),
-    HANA("hana", "com.sap.db.jdbc.Driver");
+    HANA("hana", "com.sap.db.jdbc.Driver"),
+    Doris("doris", "org.apache.arrow.driver.jdbc.ArrowFlightJdbcDriver");
 
     private static final Pattern jdbcUrlPattern = Pattern.compile("jdbc:\\w+:(?:thin:url=|//|thin:@|)([\\w\\d.,]+).*");
 
@@ -107,6 +110,28 @@ public enum DataBaseType
             }
             else {
                 return jdbc + "?" + suffix;
+            }
+        }
+        if (this == Doris) {
+            // useServerPrepStmts=false&cachePrepStmts=true&useSSL=false&useEncryption=false
+            List<String> suffix = new ArrayList<>();
+            if (!jdbc.contains("useServerPrepStmts")) {
+                suffix.add("useServerPrepStmts=false");
+            }
+            if (!jdbc.contains("cachePrepStmts")) {
+                suffix.add("cachePrepStmts=true");
+            }
+            if (!jdbc.contains("useSSL")) {
+                suffix.add("useSSL=false");
+            }
+            if (!jdbc.contains("useEncryption")) {
+                suffix.add("useEncryption=false");
+            }
+            if (jdbc.contains("?")) {
+                return jdbc + "&" + String.join("&", suffix);
+            }
+            else {
+                return jdbc + "?" + String.join("&", suffix);
             }
         }
         return jdbc;
